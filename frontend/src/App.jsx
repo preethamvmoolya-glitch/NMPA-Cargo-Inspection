@@ -4,6 +4,9 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import SystemAdmin from './pages/SystemAdmin';
 import PortAuthority from './pages/PortAuthority';
+import VerifyClearance from './pages/VerifyClearance';
+import GrievancePortal from './pages/GrievancePortal';
+import { LanguageProvider } from './LanguageContext';
 import Navbar from './components/Navbar';
 
 // GitHub Pages subpath basename
@@ -20,7 +23,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   return (
     <>
       <Navbar />
-      <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+      <div className="inner-page-wrapper">
         {children}
       </div>
     </>
@@ -29,37 +32,41 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 function App() {
   return (
-    <Router basename={BASENAME}>
-      <div className="app-container">
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute allowedRoles={['inspector']}>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/port-authority"
-            element={
-              <ProtectedRoute allowedRoles={['port_authority']}>
-                <PortAuthority />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute allowedRoles={['system_admin']}>
-                <SystemAdmin />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </div>
-    </Router>
+    <LanguageProvider>
+      <Router basename={BASENAME}>
+        <div className="app-container">
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/verify-clearance" element={<VerifyClearance />} />
+            <Route path="/grievance" element={<GrievancePortal />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['inspector']}>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/port-authority"
+              element={
+                <ProtectedRoute allowedRoles={['port_authority']}>
+                  <PortAuthority />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute allowedRoles={['system_admin']}>
+                  <SystemAdmin />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </Router>
+    </LanguageProvider>
   );
 }
 

@@ -1,0 +1,570 @@
+// standalone localStorage database wrapper and mock fetch interceptor
+// This allows the entire project to run serverless in the browser, storing IGM data, complaints, and user accounts.
+
+const DEFAULT_USERS = [
+  {
+    id: 1,
+    username: "Admin99",
+    password: "Admin@123",
+    email: "admin99@nmpa.gov",
+    role: "system_admin",
+    is_approved: true,
+    two_fa_enabled: true,
+    last_login: null
+  },
+  {
+    id: 2,
+    username: "Auth99",
+    password: "Auth@123",
+    email: "auth99@nmpa.gov",
+    role: "port_authority",
+    is_approved: true,
+    two_fa_enabled: true,
+    last_login: null
+  },
+  {
+    id: 3,
+    username: "Inspector99",
+    password: "Insp@123",
+    email: "inspector99@nmpa.gov",
+    role: "inspector",
+    is_approved: true,
+    two_fa_enabled: true,
+    last_login: null
+  }
+];
+
+const DEFAULT_INSPECTIONS = [
+  {
+    id: 1,
+    bill_of_lading: "BL-NMPA-2026-908",
+    origin_port: "Singapore",
+    cargo_type: "Containerized Timber and Raw Cashew Logistics",
+    weight: 25000,
+    image_url: "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=400&q=80",
+    risk_level: "ELEVATED RISK",
+    status: "Port Clearance Granted",
+    inspector_email: "inspector99@nmpa.gov",
+    assigned_risk_level: "ELEVATED RISK",
+    inspection_summary: "ELEVATED RISK: Identified perishable agricultural commodity or high-tariff cargo (Containerized Timber and Raw Cashew Logistics). Requires standard phytosanitary clearances, pest certifications, and customs tariff validation.",
+    vessel_imo: "9497268",
+    vessel_name: "MV Mangalore Express",
+    country_of_origin: "Singapore",
+    gross_tonnage: 25000,
+    rms_risk_level: "ELEVATED RISK",
+    rms_analysis_memo: "ELEVATED RISK: Identified perishable agricultural commodity or high-tariff cargo (Containerized Timber and Raw Cashew Logistics). Requires standard phytosanitary clearances, pest certifications, and customs tariff validation.",
+    actual_weight: 25000,
+    seal_intact: true,
+    structural_damage: false,
+    qr_token: "NMPA-PCC-908-123456",
+    date: new Date(Date.now() - 3600000 * 2).toISOString()
+  }
+];
+
+const DEFAULT_LOGS = [
+  {
+    id: 1,
+    action: "Database Initialized",
+    role: "System",
+    details: "Seeded local storage mock tables.",
+    date: new Date(Date.now() - 3600000 * 5).toISOString()
+  },
+  {
+    id: 2,
+    action: "Create User",
+    role: "System",
+    details: "Created system operators: Admin99, Auth99, Inspector99",
+    date: new Date(Date.now() - 3600000 * 4).toISOString()
+  }
+];
+
+const DEFAULT_COMPLAINTS = [
+  {
+    id: 1,
+    email: "inspector99@nmpa.gov",
+    subject: "Weighbridge Calibration",
+    message: "Requested calibration check on Lane 3 weighbridge due to repeat offset readings.",
+    date: new Date(Date.now() - 3600000 * 3).toISOString(),
+    is_escalated_to_chairman: false,
+    severity_level: "Medium"
+  }
+];
+
+const DEFAULT_CHAIRMAN_COMPLAINTS = [
+  {
+    id: 1,
+    email: "auth99@nmpa.gov",
+    category: "Security Protocol Violation",
+    description: "Confidential report on security clearance bypass on south gate lane.",
+    severity_level: "Critical",
+    date: new Date(Date.now() - 3600000 * 2).toISOString(),
+    is_escalated_to_chairman: true
+  }
+];
+
+// AI RMS Assess logic in JS
+function aiRmsAssess(commodityDesc) {
+  const ctLower = (commodityDesc || "").toLowerCase();
+  const criticalKeywords = ['oil', 'petroleum', 'chemical', 'lng', 'liquefied natural gas', 'iron ore', 'coal', 'hazardous'];
+  const elevatedKeywords = ['cashew', 'coffee', 'cocoa', 'almond', 'electronic', 'textile', 'pharmaceutical'];
+
+  if (criticalKeywords.some(k => ctLower.includes(k))) {
+    return {
+      risk: "CRITICAL RISK",
+      memo: `CRITICAL RISK: Identified volatile, hazardous, or high-logistical-impact bulk cargo (${commodityDesc}). Requires strict regulatory adjudication, temperature logs, and pressure certification verification.`
+    };
+  } else if (elevatedKeywords.some(k => ctLower.includes(k))) {
+    return {
+      risk: "ELEVATED RISK",
+      memo: `ELEVATED RISK: Identified perishable agricultural commodity or high-tariff cargo (${commodityDesc}). Requires standard phytosanitary clearances, pest certifications, and customs tariff validation.`
+    };
+  } else {
+    return {
+      risk: "ROUTINE RISK",
+      memo: `ROUTINE RISK: Stable, non-hazardous dry cargo (${commodityDesc}). Recommended for routine customs clearance with standard administrative verification.`
+    };
+  }
+}
+
+// Helpers
+function getStore(key, defaults) {
+  const data = localStorage.getItem(key);
+  if (!data) {
+    setStore(key, defaults);
+    return defaults;
+  }
+  try {
+    return JSON.parse(data);
+  } catch {
+    return defaults;
+  }
+}
+
+function setStore(key, val) {
+  try {
+    localStorage.setItem(key, JSON.stringify(val));
+  } catch (e) {
+    const isQuotaError = e.name === 'QuotaExceededError' || 
+                         e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || 
+                         e.code === 22 || 
+                         e.code === 1014;
+    if (isQuotaError) {
+      console.warn("[localDb] LocalStorage quota exceeded. Attempting to prune image data to save space.");
+      if (Array.isArray(val)) {
+        const pruned = val.map(item => {
+          const updated = { ...item };
+          if (typeof updated.image_url === 'string' && updated.image_url.startsWith('data:image')) {
+            updated.image_url = 'https://images.unsplash.com/photo-1586528116311-ad8ed7c80a30?w=400';
+          }
+          if (typeof updated.imagePath === 'string' && updated.imagePath.startsWith('data:image')) {
+            updated.imagePath = 'https://images.unsplash.com/photo-1586528116311-ad8ed7c80a30?w=400';
+          }
+          return updated;
+        });
+        try {
+          localStorage.setItem(key, JSON.stringify(pruned));
+          console.log("[localDb] Successfully saved pruned data to LocalStorage.");
+          return;
+        } catch (innerErr) {
+          console.error("[localDb] Pruning failed to resolve QuotaExceededError:", innerErr);
+        }
+      }
+      
+      // If still failing or not an array, clear logs and retry
+      try {
+        localStorage.removeItem("nmpa_logs");
+        localStorage.setItem(key, JSON.stringify(val));
+        console.log("[localDb] Saved successfully after clearing logs.");
+      } catch (innerErr2) {
+        console.error("[localDb] Clearing logs did not resolve QuotaExceededError:", innerErr2);
+        // Force save by throwing away the image in the current payload
+        if (typeof val === 'object' && val !== null) {
+          console.warn("[localDb] Attempting extreme prune of images to force write...");
+          const extremePruned = JSON.parse(JSON.stringify(val));
+          const cleanItem = (item) => {
+            if (item && typeof item === 'object') {
+              if (typeof item.image_url === 'string' && item.image_url.startsWith('data:image')) {
+                item.image_url = '';
+              }
+              if (typeof item.imagePath === 'string' && item.imagePath.startsWith('data:image')) {
+                item.imagePath = '';
+              }
+            }
+          };
+          if (Array.isArray(extremePruned)) {
+            extremePruned.forEach(cleanItem);
+          } else {
+            cleanItem(extremePruned);
+          }
+          try {
+            localStorage.setItem(key, JSON.stringify(extremePruned));
+            console.log("[localDb] Extreme prune successful, data saved.");
+          } catch (innerErr3) {
+            console.error("[localDb] Extreme prune failed, could not save:", innerErr3);
+          }
+        }
+      }
+    } else {
+      throw e;
+    }
+  }
+}
+
+function logAction(action, role, details = "") {
+  const logs = getStore("nmpa_logs", DEFAULT_LOGS);
+  const newLog = {
+    id: Date.now(),
+    action,
+    role,
+    details,
+    date: new Date().toISOString()
+  };
+  logs.unshift(newLog);
+  setStore("nmpa_logs", logs);
+}
+
+// Initialize tables in localStorage
+export function initLocalDb() {
+  getStore("nmpa_users", DEFAULT_USERS);
+  let inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
+  if (inspections.some(i => i.bill_of_lading === 'BL-NMPA-2026-704' || i.cargo_type === 'Iron Ore')) {
+    inspections = inspections.filter(i => i.bill_of_lading !== 'BL-NMPA-2026-704' && i.cargo_type !== 'Iron Ore');
+    setStore("nmpa_inspections", inspections);
+  }
+  getStore("nmpa_logs", DEFAULT_LOGS);
+  getStore("nmpa_complaints", DEFAULT_COMPLAINTS);
+  getStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
+}
+
+// Mock Fetch Wrapper
+export function setupLocalDbFetch() {
+  initLocalDb();
+
+  const originalFetch = window.fetch;
+
+  window.fetch = async function (url, options = {}) {
+    const urlStr = typeof url === "string" ? url : url.url;
+    
+    // Intercept only API endpoints
+    if (!urlStr.includes("/api/")) {
+      return originalFetch.apply(this, arguments);
+    }
+
+    console.log(`[localDb Mock Fetch] Intercepted request: ${options.method || "GET"} ${urlStr}`);
+
+    try {
+      const method = (options.method || "GET").toUpperCase();
+      const body = options.body ? JSON.parse(options.body) : {};
+      
+      const parsedUrl = new URL(urlStr, window.location.origin);
+      const pathname = parsedUrl.pathname.replace(/\/port_cargo_web/, ""); // remove base prefix if present
+      const searchParams = parsedUrl.searchParams;
+
+      // Helper to return JSON response
+      const jsonResponse = (data, status = 200) => {
+        return new Response(JSON.stringify(data), {
+          status,
+          headers: { "Content-Type": "application/json" }
+        });
+      };
+
+      // 1. POST /api/login
+      if (pathname.endsWith("/api/login") && method === "POST") {
+        const { username, password } = body;
+        const users = getStore("nmpa_users", DEFAULT_USERS);
+        const user = users.find(u => u.username === username && u.password === password);
+
+        if (user) {
+          if (!user.is_approved) {
+            return jsonResponse({ status: "error", message: "Account pending approval from System Admin." }, 403);
+          }
+          user.last_login = new Date().toISOString();
+          setStore("nmpa_users", users);
+          logAction("Login", user.role, `User ${username} logged in`);
+          
+          return jsonResponse({
+            status: "success",
+            user: {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              role: user.role,
+              two_fa_enabled: user.two_fa_enabled
+            }
+          });
+        }
+        return jsonResponse({ status: "error", message: "Invalid credentials." }, 401);
+      }
+
+      // 2. /api/users
+      if (pathname.endsWith("/api/users")) {
+        const users = getStore("nmpa_users", DEFAULT_USERS);
+
+        if (method === "GET") {
+          return jsonResponse(users);
+        }
+
+        if (method === "POST") {
+          const { username, password, email, role } = body;
+          if (users.some(u => u.username === username)) {
+            return jsonResponse({ status: "error", message: "Username already exists." }, 400);
+          }
+          const newUser = {
+            id: Date.now(),
+            username,
+            password: password || "password123",
+            email,
+            role: role || "inspector",
+            is_approved: true,
+            two_fa_enabled: true,
+            last_login: null
+          };
+          users.push(newUser);
+          setStore("nmpa_users", users);
+          logAction("Create User", "system_admin", `Created user ${username}`);
+          return jsonResponse({ status: "success", user: newUser }, 201);
+        }
+
+        if (method === "PUT") {
+          const { id, username, email, role, action } = body;
+          const userIdx = users.findIndex(u => u.id === id);
+
+          if (userIdx !== -1) {
+            if (action === "approve") {
+              users[userIdx].is_approved = true;
+              logAction("Approve User", "system_admin", `Approved user ID ${id}`);
+            } else if (action === "toggle_2fa") {
+              users[userIdx].two_fa_enabled = !users[userIdx].two_fa_enabled;
+              logAction("Toggle 2FA", "system_admin", `Toggled 2FA for user ID ${id}`);
+            } else {
+              users[userIdx].username = username || users[userIdx].username;
+              users[userIdx].email = email || users[userIdx].email;
+              users[userIdx].role = role || users[userIdx].role;
+              logAction("Edit User Details", "system_admin", `Updated user ID ${id} details`);
+            }
+            setStore("nmpa_users", users);
+            return jsonResponse({ status: "success", user: users[userIdx] });
+          }
+          return jsonResponse({ status: "error", message: "User not found." }, 404);
+        }
+
+        if (method === "DELETE") {
+          const id = parseInt(searchParams.get("id"));
+          const userIdx = users.findIndex(u => u.id === id);
+          if (userIdx !== -1) {
+            const deleted = users.splice(userIdx, 1)[0];
+            setStore("nmpa_users", users);
+            logAction("Delete User", "system_admin", `Deleted user ID ${id}`);
+            return jsonResponse({ status: "success", user: deleted });
+          }
+          return jsonResponse({ status: "error", message: "User not found." }, 404);
+        }
+      }
+
+      // 3. GET /api/inspections
+      if (pathname.endsWith("/api/inspections") && method === "GET") {
+        const inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
+        return jsonResponse(inspections);
+      }
+
+      // 4. POST /api/evaluate
+      if (pathname.endsWith("/api/evaluate") && method === "POST") {
+        const { vesselImo, vesselName, countryOfOrigin, billOfLading, commodityDescription, grossTonnage, inspectorEmail } = body;
+        const inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
+        
+        const { risk, memo } = aiRmsAssess(commodityDescription);
+
+        const newInspection = {
+          id: Date.now(),
+          bill_of_lading: billOfLading,
+          origin_port: countryOfOrigin,
+          cargo_type: commodityDescription,
+          weight: parseFloat(grossTonnage) || 0,
+          image_url: "",
+          risk_level: risk,
+          status: "Awaiting Physical Inspection",
+          inspector_email: inspectorEmail || "unknown@nmpa.gov",
+          assigned_risk_level: risk,
+          inspection_summary: memo,
+          vessel_imo: vesselImo,
+          vessel_name: vesselName,
+          country_of_origin: countryOfOrigin,
+          gross_tonnage: parseFloat(grossTonnage) || 0,
+          rms_risk_level: risk,
+          rms_analysis_memo: memo,
+          actual_weight: null,
+          seal_intact: null,
+          structural_damage: null,
+          qr_token: null,
+          date: new Date().toISOString()
+        };
+
+        inspections.unshift(newInspection);
+        setStore("nmpa_inspections", inspections);
+        logAction("Register Manifest", "inspector", `B/L ${billOfLading} submitted for Vessel ${vesselName}`);
+
+        return jsonResponse({
+          id: newInspection.id,
+          rms_risk_level: risk,
+          rms_analysis_memo: memo,
+          status: "Awaiting Physical Inspection"
+        });
+      }
+
+      // 5. POST /api/inspections/inspect
+      if (pathname.endsWith("/api/inspections/inspect") && method === "POST") {
+        const { id, manifestId, actual_weight, seal_intact, structural_damage, image_url } = body;
+        const inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
+        
+        let idx = -1;
+        if (id) {
+          idx = inspections.findIndex(i => i.id === id);
+        } else if (manifestId) {
+          idx = inspections.findIndex(i => i.bill_of_lading === manifestId);
+        }
+
+        if (idx !== -1) {
+          inspections[idx].actual_weight = parseFloat(actual_weight) || 0;
+          inspections[idx].seal_intact = seal_intact;
+          inspections[idx].structural_damage = structural_damage;
+          inspections[idx].image_url = image_url || inspections[idx].image_url;
+          inspections[idx].status = "Inspected - Awaiting Authority Adjudication";
+          
+          setStore("nmpa_inspections", inspections);
+          logAction("Inspect Cargo", "inspector", `Physical parameters logged for inspection ID ${inspections[idx].id}`);
+          return jsonResponse({ status: "success" });
+        }
+        return jsonResponse({ status: "error", message: "Inspection record not found." }, 404);
+      }
+
+      // 6. POST /api/inspections/review
+      if (pathname.endsWith("/api/inspections/review") && method === "POST") {
+        const { id, status, notes } = body;
+        const inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
+        const idx = inspections.findIndex(i => i.id === id);
+
+        if (idx !== -1) {
+          inspections[idx].status = status;
+          inspections[idx].notes = notes;
+          
+          let qrToken = null;
+          if (status === "Port Clearance Granted" || status === "Approved") {
+            qrToken = `NMPA-PCC-${id}-${Math.floor(100000 + Math.random() * 900000)}`;
+            inspections[idx].qr_token = qrToken;
+          }
+          
+          setStore("nmpa_inspections", inspections);
+          logAction("Review Adjudication", "port_authority", `Manifest ${inspections[idx].bill_of_lading} marked as ${status}`);
+          return jsonResponse({ status: "success", qrToken: qrToken });
+        }
+        return jsonResponse({ status: "error", message: "Inspection record not found." }, 404);
+      }
+
+      // 7. GET /api/clearance/verify
+      if (pathname.endsWith("/api/clearance/verify") && method === "GET") {
+        const token = searchParams.get("token");
+        const inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
+        const record = inspections.find(i => i.qr_token === token);
+
+        if (record) {
+          // Format payload as expected by VerifyClearance page
+          const verifyPayload = {
+            status: "success",
+            certificate: {
+              qr_token: record.qr_token,
+              bill_of_lading: record.bill_of_lading,
+              vessel_name: record.vessel_name,
+              vessel_imo: record.vessel_imo,
+              gross_tonnage: record.gross_tonnage,
+              cargo_type: record.cargo_type,
+              country_of_origin: record.country_of_origin,
+              rms_risk_level: record.rms_risk_level,
+              adjudication_status: record.status,
+              timestamp: record.date
+            }
+          };
+          return jsonResponse(verifyPayload);
+        }
+        return jsonResponse({ status: "error", message: "Verification failed. Clearance certificate token invalid." }, 404);
+      }
+
+      // 8. GET /api/logs
+      if (pathname.endsWith("/api/logs") && method === "GET") {
+        const logs = getStore("nmpa_logs", DEFAULT_LOGS);
+        return jsonResponse(logs);
+      }
+
+      // 9. /api/complaints
+      if (pathname.endsWith("/api/complaints")) {
+        if (method === "GET") {
+          const complaints = getStore("nmpa_complaints", DEFAULT_COMPLAINTS);
+          return jsonResponse(complaints);
+        }
+
+        if (method === "POST") {
+          const { email, subject, category, message, description, isEscalatedToChairman, is_escalated_to_chairman, severityLevel, severity_level } = body;
+          
+          const finalSubj = subject || category;
+          const finalMsg = message || description;
+          const isEscalated = isEscalatedToChairman || is_escalated_to_chairman || false;
+          const finalSev = severityLevel || severity_level || "Medium";
+
+          if (isEscalated) {
+            const chairComp = getStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
+            const newComp = {
+              id: Date.now(),
+              email,
+              category: finalSubj,
+              description: finalMsg,
+              severity_level: finalSev,
+              date: new Date().toISOString(),
+              is_escalated_to_chairman: true
+            };
+            chairComp.unshift(newComp);
+            setStore("nmpa_chairman_complaints", chairComp);
+            logAction("Escalate Complaint", "System", `Escalated complaint by ${email} to Chairman`);
+            return jsonResponse({
+              status: "success",
+              message: "Grievance escalated directly to Chairman.",
+              routed_to: "CHAIRMAN_OFFICE_INBOX",
+              id: newComp.id
+            }, 201);
+          } else {
+            const comp = getStore("nmpa_complaints", DEFAULT_COMPLAINTS);
+            const newComp = {
+              id: Date.now(),
+              email,
+              subject: finalSubj,
+              message: finalMsg,
+              date: new Date().toISOString(),
+              is_escalated_to_chairman: false,
+              severity_level: finalSev
+            };
+            comp.unshift(newComp);
+            setStore("nmpa_complaints", comp);
+            logAction("Submit Complaint", "System", `Complaint submitted by ${email}`);
+            return jsonResponse({
+              status: "success",
+              message: "Complaint submitted to standard queue.",
+              routed_to: "STANDARD_GRIEVANCE_QUEUE",
+              id: newComp.id
+            }, 201);
+          }
+        }
+      }
+
+      // 10. GET /api/chairman/complaints
+      if (pathname.endsWith("/api/chairman/complaints") && method === "GET") {
+        const chair = getStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
+        return jsonResponse(chair);
+      }
+
+      // Fallback
+      return originalFetch.apply(this, arguments);
+
+    } catch (err) {
+      console.error("[localDb Mock Fetch Error]", err);
+      return originalFetch.apply(this, arguments);
+    }
+  };
+}

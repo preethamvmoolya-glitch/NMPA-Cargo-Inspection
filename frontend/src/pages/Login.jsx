@@ -1,53 +1,78 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, Anchor, Key, Users, Activity } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import { Modal, Form, Input, Select, Checkbox, message, Button } from 'antd';
+import { useLanguage } from '../LanguageContext';
 import API_BASE from '../api';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [role, setRole] = useState('inspector');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [token, setToken] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [userData, setUserData] = useState(null);
+  const [logoModalVisible, setLogoModalVisible] = useState(false);
+  const [escalationModalVisible, setEscalationModalVisible] = useState(false);
+  const [escalationForm] = Form.useForm();
+  const [submittingEscalation, setSubmittingEscalation] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
+  const [captchaCode, setCaptchaCode] = useState(() => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let result = '';
+    for (let i = 0; i < 5; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  });
+  const [captchaInput, setCaptchaInput] = useState('');
+
+  const refreshCaptcha = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let result = '';
+    for (let i = 0; i < 5; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setCaptchaCode(result);
+    setCaptchaInput('');
+  };
 
   const handleInitialLogin = async (e) => {
     e.preventDefault();
     setError('');
-    if (username && password) {
-      try {
-        const response = await fetch(`${API_BASE}/api/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password, role })
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setUserData(data.user);
-          if (data.user.two_fa_enabled) {
-            setStep(2);
-          } else {
-            finalizeLogin(data.user);
-          }
-        } else {
-          setError(data.message || 'Login failed.');
-        }
-      } catch (err) {
-        setError('Server error. Backend might be down.');
-      }
-    } else {
-      setError('Please enter both username and password.');
-    }
-  };
 
-  const handle2FA = (e) => {
-    e.preventDefault();
-    if (token.length === 6) {
-      finalizeLogin(userData);
-    } else {
-      setError('Invalid 2FA token. Must be 6 digits.');
+    if (!username || !password) {
+      setError(t('loginError'));
+      return;
+    }
+
+    if (!captchaInput) {
+      setError(t('loginEmptyCaptcha'));
+      return;
+    }
+
+    if (captchaInput.toLowerCase() !== captchaCode.toLowerCase()) {
+      setError(t('captchaError'));
+      refreshCaptcha();
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        finalizeLogin(data.user);
+      } else {
+        const errorMsg = data.message || 'Login failed. Please check your credentials.';
+        setError(errorMsg === 'Invalid credentials.' ? (language === 'hi' ? 'अमान्य क्रेडेंशियल।' : errorMsg) : errorMsg);
+        refreshCaptcha();
+      }
+    } catch (err) {
+      setError(t('serverError'));
+      refreshCaptcha();
     }
   };
 
@@ -60,96 +85,541 @@ const Login = () => {
     else navigate('/dashboard');
   };
 
-  const roleBtn = (value, label, Icon) => (
-    <button
-      type="button"
-      onClick={() => setRole(value)}
-      style={{
-        flex: 1,
-        padding: '0.75rem 0.5rem',
-        background: role === value ? 'rgba(14, 165, 233, 0.1)' : 'var(--bg-input)',
-        border: `1px solid ${role === value ? 'var(--primary)' : 'transparent'}`,
-        borderRadius: '0.5rem',
-        color: role === value ? 'var(--primary)' : 'var(--text-muted)',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-        cursor: 'pointer', transition: 'all 0.2s'
-      }}
-    >
-      <Icon size={20} />
-      <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{label}</span>
-    </button>
-  );
+  const handleEscalationSubmit = async (values) => {
+    setSubmittingEscalation(true);
+    
+    // Format description dynamically based on the selected role/status
+    let combinedDescription = `[User Role/Status]: ${values.status || 'Others'}\n`;
+    if (values.status === 'Port Operator / Inspector') {
+      combinedDescription += `[Inspector/Operator ID]: ${values.inspectorId || 'N/A'}\n`;
+      combinedDescription += `[Gate/Location]: ${values.gateLocation || 'N/A'}\n`;
+    } else if (values.status === 'Port Authority Officer') {
+      combinedDescription += `[Officer ID]: ${values.officerId || 'N/A'}\n`;
+      combinedDescription += `[Department]: ${values.department || 'N/A'}\n`;
+    } else if (values.status === 'Vessel Agent / Employer') {
+      combinedDescription += `[Company Name]: ${values.agentName || 'N/A'}\n`;
+      combinedDescription += `[Vessel Name/IMO]: ${values.vesselImo || 'N/A'}\n`;
+      combinedDescription += `[B/L Reference]: ${values.bolRef || 'N/A'}\n`;
+    } else if (values.status === 'General Public / Others') {
+      combinedDescription += `[Full Name]: ${values.fullName || 'N/A'}\n`;
+      combinedDescription += `[Mobile]: ${values.mobile || 'N/A'}\n`;
+    }
+    combinedDescription += `\n[Grievance Details]:\n${values.description}`;
+
+    try {
+      const response = await fetch(`${API_BASE}/api/complaints`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: values.email,
+          category: values.category,
+          description: combinedDescription,
+          is_escalated_to_chairman: values.isEscalated,
+          severity_level: values.severity
+        })
+      });
+      if (response.ok) {
+        message.success(language === 'en' ? 'Grievance submitted successfully.' : 'शिकायत सफलतापूर्वक सबमिट की गई।');
+        setEscalationModalVisible(false);
+        escalationForm.resetFields();
+      } else {
+        const err = await response.json();
+        message.error(err.message || (language === 'en' ? 'Failed to submit grievance.' : 'शिकायत सबमिट करने में विफल।'));
+      }
+    } catch {
+      message.error(language === 'en' ? 'Connection error.' : 'कनेक्शन त्रुटि।');
+    } finally {
+      setSubmittingEscalation(false);
+    }
+  };
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'radial-gradient(circle at top, #1e293b 0%, #0f172a 100%)'
-    }}>
-      <div className="card animate-fade-in" style={{ width: '100%', maxWidth: '500px', position: 'relative', overflow: 'hidden' }}>
-        {/* Glow decorations */}
-        <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'var(--primary)', borderRadius: '50%', filter: 'blur(80px)', opacity: 0.25, zIndex: 0 }} />
-        <div style={{ position: 'absolute', bottom: '-50px', left: '-50px', width: '150px', height: '150px', background: 'var(--info)', borderRadius: '50%', filter: 'blur(80px)', opacity: 0.15, zIndex: 0 }} />
-
-        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{
-            width: '64px', height: '64px', background: 'var(--bg-dark)', borderRadius: '1rem',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 1rem auto', border: '1px solid var(--border-color)',
-            boxShadow: '0 0 20px rgba(14,165,233,0.2)'
-          }}>
-            <Anchor color="var(--primary)" size={32} />
+    <div className="login-page">
+      {/* Top Header Bar */}
+      <div className="login-header">
+        <div 
+          className="nmpa-logo-circle" 
+          style={{ width: 52, height: 52, cursor: 'pointer' }}
+          onClick={() => setLogoModalVisible(true)}
+        >
+          <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        </div>
+        <div>
+          <div style={{ color: '#fff', fontWeight: 800, fontSize: '1.15rem', letterSpacing: '0.02em' }}>
+            {t('nmpaTitle')}
           </div>
-          <h2>NMPA Secure Access</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.5rem' }}>
-            Smart Cargo Inspection System
-          </p>
+          <div style={{ color: 'var(--nmpa-blue-pale)', fontSize: '0.72rem', fontStyle: 'italic' }}>
+            {t('nmpaSub')}
+          </div>
+        </div>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '15px' }}>
+          {/* Language Toggle */}
+          <div className="language-toggle" style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', fontWeight: 600 }}>
+            <span 
+              style={{ color: language === 'en' ? '#fff' : 'rgba(255,255,255,0.5)', cursor: 'pointer', borderBottom: language === 'en' ? '2px solid #fff' : 'none', paddingBottom: '2px' }}
+              onClick={() => setLanguage('en')}
+            >
+              ENGLISH
+            </span>
+            <span style={{ color: 'rgba(255,255,255,0.5)' }}>|</span>
+            <span 
+              style={{ color: language === 'hi' ? '#fff' : 'rgba(255,255,255,0.5)', cursor: 'pointer', borderBottom: language === 'hi' ? '2px solid #fff' : 'none', paddingBottom: '2px' }}
+              onClick={() => setLanguage('hi')}
+            >
+              HINDI
+            </span>
+          </div>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+          <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.78rem' }}>
+            {t('loginTitle')} · v2.0
+          </div>
+        </div>
+      </div>
+
+      {/* Main Body: Left image + Right form */}
+      <div className="login-body">
+        {/* Left: Port Image */}
+        <div className="login-left">
+          <img src={`${import.meta.env.BASE_URL}port-bg.png`} alt="New Mangalore Port" />
+          <div className="login-left-overlay">
+            <h2>{t('nmpaTitle')}</h2>
+            <p>{t('loginTitle')}</p>
+            <p style={{ fontSize: '0.8rem', marginTop: '0.25rem', opacity: 0.75 }}>
+              Secure · Efficient · Transparent
+            </p>
+          </div>
         </div>
 
-        {error && (
-          <div style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--danger)', padding: '0.75rem', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.875rem', textAlign: 'center', border: '1px solid rgba(239,68,68,0.2)' }}>
-            {error}
+        {/* Right: Login Panel */}
+        <div className="login-right animate-slide-in">
+          {/* Logo + Title */}
+          <div className="login-logo-wrap">
+            <div 
+              className="login-logo" 
+              style={{ overflow: 'hidden', padding: '4px', cursor: 'pointer' }}
+              onClick={() => setLogoModalVisible(true)}
+            >
+              <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            </div>
+            <div className="login-title" style={{ fontSize: '1.25rem' }}>
+              {t('nmpaTitle')}
+            </div>
+            <div className="login-subtitle">
+              {t('loginTitle')}
+            </div>
+          </div>
+
+          {/* Error */}
+          {error && <div className="error-box">{error}</div>}
+
+          <form onSubmit={handleInitialLogin} style={{ width: '100%' }}>
+            {/* Username */}
+            <div className="input-group">
+              <label>{t('username')}</label>
+              <input
+                id="login-username"
+                type="text"
+                name="secret_username_field"
+                className="input-field"
+                placeholder={t('username')}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+
+            {/* Password */}
+            <div className="input-group">
+              <label>{t('password')}</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
+                  className="input-field"
+                  placeholder={t('password')}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="off"
+                  style={{ paddingRight: '2.5rem' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    border: 'none',
+                    background: 'none',
+                    cursor: 'pointer',
+                    color: '#666',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '4px'
+                  }}
+                  title={showPassword ? "Hide Password" : "Show Password"}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Captcha */}
+            <div className="input-group" style={{ marginBottom: '1.25rem' }}>
+              <label>{t('enterCaptcha')}</label>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <div style={{
+                  background: 'repeating-linear-gradient(45deg, #f0f0f0, #e0e0e0 10px, #d0d0d0 10px, #d0d0d0 20px)',
+                  color: '#0d2b5e',
+                  fontFamily: 'monospace, Courier',
+                  fontSize: '1.3rem',
+                  fontWeight: 'bold',
+                  fontStyle: 'italic',
+                  letterSpacing: '0.3em',
+                  padding: '0.45rem 1rem',
+                  borderRadius: '0.25rem',
+                  border: '1.5px solid var(--nmpa-border-dark)',
+                  userSelect: 'none',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textDecoration: 'line-through',
+                  textDecorationColor: 'rgba(13,43,94,0.4)',
+                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)',
+                  flex: '1'
+                }}>
+                  {captchaCode}
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ padding: '0.45rem 0.75rem', fontSize: '0.85rem' }}
+                  onClick={refreshCaptcha}
+                  title="Refresh Captcha"
+                >
+                  Refresh
+                </button>
+              </div>
+              <input
+                id="login-captcha"
+                type="text"
+                className="input-field"
+                placeholder={t('typeCaptcha')}
+                value={captchaInput}
+                onChange={(e) => setCaptchaInput(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+
+            <button id="login-submit" type="submit" className="btn btn-primary btn-full"
+              style={{ fontSize: '0.95rem', padding: '0.75rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              {t('loginBtn')}
+            </button>
+
+            {/* Quick Demo Accounts Selection */}
+            <div style={{
+              marginTop: '1rem',
+              padding: '0.75rem',
+              background: 'rgba(21, 101, 192, 0.04)',
+              border: '1.5px dashed var(--nmpa-border-dark)',
+              borderRadius: '0.35rem',
+              textAlign: 'left'
+            }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--nmpa-text)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                {t('demoCreds')}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
+                {[
+                  { label: t('demoAdmin'), user: 'Admin99', pass: 'Admin@123' },
+                  { label: t('demoAuthority'), user: 'Auth99', pass: 'Auth@123' },
+                  { label: t('demoInspector'), user: 'Inspector99', pass: 'Insp@123' }
+                ].map(cred => (
+                  <button
+                    key={cred.label}
+                    type="button"
+                    onClick={() => {
+                      setUsername(cred.user);
+                      setPassword(cred.pass);
+                      setCaptchaInput(captchaCode);
+                    }}
+                    style={{
+                      background: '#fff',
+                      border: '1px solid var(--nmpa-border)',
+                      borderRadius: '0.25rem',
+                      padding: '0.35rem 0.2rem',
+                      fontSize: '0.7rem',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      color: 'var(--nmpa-text-body)',
+                      transition: 'all 0.2s',
+                      textAlign: 'center'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'var(--nmpa-blue-pale)';
+                      e.target.style.color = 'var(--nmpa-blue)';
+                      e.target.style.borderColor = 'var(--nmpa-blue)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = '#fff';
+                      e.target.style.color = 'var(--nmpa-text-body)';
+                      e.target.style.borderColor = 'var(--nmpa-border)';
+                    }}
+                  >
+                    {cred.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Grievance Button */}
+            <button
+              type="button"
+              className="btn btn-secondary btn-full"
+              style={{ marginTop: '1rem', fontSize: '0.85rem' }}
+              onClick={() => navigate('/grievance')}
+            >
+              Grievance Portal
+            </button>
+
+            <div style={{ marginTop: '1.25rem', borderTop: '1px solid var(--nmpa-border)', paddingTop: '0.75rem', textAlign: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                {[
+                  { key: 'reqAccess', text: 'Request Access' },
+                  { key: 'contactUs', text: 'Contact Us' },
+                  { key: 'dataCalc', text: 'Data Calculator' },
+                  { key: 'termsCond', text: 'Terms & Conditions' }
+                ].map(link => (
+                  <a key={link.key} href="#" style={{ fontSize: '0.75rem', color: 'var(--nmpa-blue)' }}>{t(link.key)}</a>
+                ))}
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {/* Logo Modal */}
+      <Modal
+        open={logoModalVisible}
+        onCancel={() => setLogoModalVisible(false)}
+        footer={null}
+        closable={false}
+        centered
+        width={340}
+        modalRender={() => (
+          <div style={{
+            width: '320px',
+            height: '320px',
+            borderRadius: '50%',
+            backgroundColor: '#fff',
+            border: '6px solid #42a5f5',
+            boxShadow: '0 8px 32px rgba(13, 71, 161, 0.5)',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            margin: '0 auto',
+            outline: 'none'
+          }}
+          onClick={() => setLogoModalVisible(false)}
+          >
+            <img
+              src={`${import.meta.env.BASE_URL}nmpa-logo.png`}
+              alt="NMPA Logo Large"
+              style={{ width: '90%', height: '90%', objectFit: 'contain', userSelect: 'none' }}
+            />
           </div>
         )}
+      />
 
-        {step === 1 ? (
-          <form onSubmit={handleInitialLogin} style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
-              {roleBtn('inspector', 'Inspector', ShieldCheck)}
-              {roleBtn('port_authority', 'Port Authority', Activity)}
-              {roleBtn('system_admin', 'Sys Admin', Users)}
-            </div>
+      {/* Grievance Portal Modal */}
+      <Modal
+        title={
+          <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--nmpa-text)' }}>
+            Grievance Redressal Portal
+          </div>
+        }
+        open={escalationModalVisible}
+        onCancel={() => {
+          setEscalationModalVisible(false);
+          escalationForm.resetFields();
+        }}
+        footer={null}
+        destroyOnClose
+      >
+        <Form
+          form={escalationForm}
+          layout="vertical"
+          onFinish={handleEscalationSubmit}
+          style={{ marginTop: '15px' }}
+        >
+          <Form.Item
+            name="status"
+            label="Your Status / Role"
+            rules={[{ required: true, message: 'Please select your status' }]}
+          >
+            <Select placeholder="Select Status">
+              <Select.Option value="Port Operator / Inspector">Port Operator / Inspector</Select.Option>
+              <Select.Option value="Port Authority Officer">Port Authority Officer</Select.Option>
+              <Select.Option value="Vessel Agent / Employer">Vessel Agent / Employer</Select.Option>
+              <Select.Option value="General Public / Others">General Public / Others</Select.Option>
+            </Select>
+          </Form.Item>
 
-            <div className="input-group">
-              <label>Username</label>
-              <input type="text" className="input-field" placeholder="e.g. sysadmin / auth1 / inspector1"
-                value={username} onChange={(e) => setUsername(e.target.value)} />
-            </div>
-            <div className="input-group" style={{ marginBottom: '2rem' }}>
-              <label>Password</label>
-              <input type="password" className="input-field" placeholder="Default: pass"
-                value={password} onChange={(e) => setPassword(e.target.value)} />
-            </div>
-            <button type="submit" className="btn btn-primary btn-full">Login →</button>
-          </form>
-        ) : (
-          <form onSubmit={handle2FA} className="animate-fade-in" style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(16,185,129,0.1)', borderRadius: '50%', marginBottom: '1rem' }}>
-                <Key color="var(--success)" size={32} />
-              </div>
-              <h3 style={{ marginBottom: '0.5rem' }}>Two-Factor Authentication</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Enter the 6-digit code from your Google Authenticator app.</p>
-            </div>
-            <div className="input-group" style={{ marginBottom: '2rem' }}>
-              <input type="text" className="input-field" placeholder="000000"
-                style={{ textAlign: 'center', letterSpacing: '0.5em', fontSize: '1.5rem', fontWeight: 'bold' }}
-                maxLength={6} value={token} onChange={(e) => setToken(e.target.value)} />
-            </div>
-            <button type="submit" className="btn btn-primary btn-full" style={{ marginBottom: '1rem' }}>Verify & Login</button>
-            <button type="button" className="btn btn-secondary btn-full" onClick={() => { setStep(1); setError(''); }}>← Back</button>
-          </form>
-        )}
-      </div>
+          <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.status !== currentValues.status}>
+            {({ getFieldValue }) => {
+              const status = getFieldValue('status');
+              if (status === 'Port Operator / Inspector') {
+                return (
+                  <>
+                    <Form.Item name="inspectorId" label="Inspector / Operator ID" rules={[{ required: true, message: 'Please enter Operator ID' }]}>
+                      <Input placeholder="e.g. INSP-99" />
+                    </Form.Item>
+                    <Form.Item name="gateLocation" label="Assigned Gate / Location" rules={[{ required: true, message: 'Please enter location' }]}>
+                      <Input placeholder="e.g. Gate 3 Weighbridge" />
+                    </Form.Item>
+                  </>
+                );
+              }
+              if (status === 'Port Authority Officer') {
+                return (
+                  <>
+                    <Form.Item name="officerId" label="Officer ID / Username" rules={[{ required: true, message: 'Please enter Officer ID' }]}>
+                      <Input placeholder="e.g. AUTH-99" />
+                    </Form.Item>
+                    <Form.Item name="department" label="Department / Section" rules={[{ required: true, message: 'Please enter department' }]}>
+                      <Input placeholder="e.g. Custom Adjudication Section" />
+                    </Form.Item>
+                  </>
+                );
+              }
+              if (status === 'Vessel Agent / Employer') {
+                return (
+                  <>
+                    <Form.Item name="agentName" label="Establishment / Company Name" rules={[{ required: true, message: 'Please enter company name' }]}>
+                      <Input placeholder="e.g. Mangalore Shipping Agency" />
+                    </Form.Item>
+                    <Form.Item name="vesselImo" label="Vessel Name / IMO Number" rules={[{ required: true, message: 'Please enter vessel details' }]}>
+                      <Input placeholder="e.g. MV Mangalore Express (IMO 9497268)" />
+                    </Form.Item>
+                    <Form.Item name="bolRef" label="Bill of Lading (B/L) Reference" rules={[{ required: true, message: 'Please enter B/L reference' }]}>
+                      <Input placeholder="e.g. BL-NMPA-2026-908" />
+                    </Form.Item>
+                  </>
+                );
+              }
+              if (status === 'General Public / Others') {
+                return (
+                  <>
+                    <Form.Item name="fullName" label="Full Name" rules={[{ required: true, message: 'Please enter your name' }]}>
+                      <Input placeholder="Enter your full name" />
+                    </Form.Item>
+                    <Form.Item name="mobile" label="Mobile Number" rules={[{ required: true, message: 'Please enter mobile number' }]}>
+                      <Input placeholder="Enter mobile number" />
+                    </Form.Item>
+                  </>
+                );
+              }
+              return null;
+            }}
+          </Form.Item>
+
+          <Form.Item
+            name="email"
+            label="Contact Email"
+            rules={[
+              { required: true, message: 'Please enter your email' },
+              { type: 'email', message: 'Please enter a valid email address' }
+            ]}
+          >
+            <Input placeholder="name@domain.com" />
+          </Form.Item>
+
+          <Form.Item
+            name="category"
+            label="Grievance Category"
+            rules={[{ required: true, message: 'Please select grievance category' }]}
+          >
+            <Select placeholder="Select Category">
+              <Select.Option value="Corruption/Bribery">Corruption/Bribery</Select.Option>
+              <Select.Option value="Operational Bottleneck">Operational Bottleneck</Select.Option>
+              <Select.Option value="Severe Misconduct">Severe Misconduct</Select.Option>
+              <Select.Option value="General Malpractice">General Malpractice</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="severity"
+            label="Severity Level"
+            rules={[{ required: true, message: 'Please select severity level' }]}
+          >
+            <Select placeholder="Select Severity">
+              <Select.Option value="Low">Low</Select.Option>
+              <Select.Option value="Medium">Medium</Select.Option>
+              <Select.Option value="High">High</Select.Option>
+              <Select.Option value="Critical">Critical</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label="Grievance Description"
+            rules={[{ required: true, message: 'Please enter details of the grievance' }]}
+          >
+            <Input.TextArea
+              rows={5}
+              placeholder="Provide a formal description of systemic corruption, misconduct, or operational bottleneck..."
+              style={{ resize: 'none' }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="isEscalated"
+            valuePropName="checked"
+            initialValue={true}
+            style={{ marginBottom: '10px' }}
+          >
+            <Checkbox>Escalate this Grievance directly to the Chairman's Office</Checkbox>
+          </Form.Item>
+
+          <div style={{
+            fontSize: '0.75rem',
+            color: '#555',
+            background: 'var(--nmpa-blue-pale)',
+            padding: '8px 12px',
+            borderLeft: '3px solid var(--nmpa-blue)',
+            marginBottom: '20px',
+            borderRadius: '0 4px 4px 0',
+            lineHeight: '1.4'
+          }}>
+            Notice: Misuse of this high-level escalation channel for minor issues (e.g., password resets) may result in administrative action. Genuine anti-corruption or critical operational reports will be strictly encrypted and kept confidential.
+          </div>
+
+          <Form.Item style={{ textAlign: 'right', marginBottom: 0 }}>
+            <Button
+              style={{ marginRight: '8px' }}
+              onClick={() => {
+                setEscalationModalVisible(false);
+                escalationForm.resetFields();
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              danger
+              loading={submittingEscalation}
+            >
+              Submit Grievance
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

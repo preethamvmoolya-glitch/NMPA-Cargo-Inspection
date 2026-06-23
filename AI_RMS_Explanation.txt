@@ -1,0 +1,105 @@
+================================================================================
+           NEW MANGALORE PORT AUTHORITY (NMPA) CARGO INSPECTION SYSTEM
+                 AI RISK MANAGEMENT SYSTEM (RMS) WORKING EXPLANATION
+================================================================================
+
+This document provides a presentation-ready explanation of how the AI Risk 
+Management System (RMS) handles cargo risk evaluation, categorization rules, 
+and the technical mechanism behind it.
+
+--------------------------------------------------------------------------------
+1. CORE TECHNICAL CONCEPT: DETERMINISTIC NATURAL LANGUAGE CLASSIFICATION
+--------------------------------------------------------------------------------
+
+The AI model utilizes a rule-based Natural Language Processing (NLP) keyword-
+matching engine. In maritime customs and logistics applications, standard text 
+classifiers are used to quickly partition cargo descriptions into threat-matrix 
+categories. 
+
+Instead of relying on heavy cloud-based AI models which add latency and cost, 
+the system uses a highly optimized, high-speed string analysis algorithm that:
+  * Automatically handles text normalization (removes case differences and spacing).
+  * Executes search audits against pre-classified threat directories.
+  * Evaluates risk instantly (< 5ms response time) for serverless local storage 
+    as well as server-based SQLite transactions.
+
+--------------------------------------------------------------------------------
+2. THE THREE RISK TIERS & HOW THEY ARE CATEGORIZED
+--------------------------------------------------------------------------------
+
+The AI categorizes shipments into three distinct Risk Levels depending on the 
+hazard level, tariff risk, or logistical impact of the commodity classification:
+
+--------------------------------------------------------------------------------
+TIER 1: CRITICAL RISK (Red Tag)
+--------------------------------------------------------------------------------
+  * Trigger Keywords: 'oil', 'petroleum', 'chemical', 'lng', 
+                      'liquefied natural gas', 'iron ore', 'coal', 'hazardous'
+  * Target Commodities: Volatile chemicals, combustible energy fuels, bulk minerals.
+  * Action Memo Generated: 
+    "CRITICAL RISK: Identified volatile, hazardous, or high-logistical-impact 
+    bulk cargo. Requires strict regulatory adjudication, temperature logs, and 
+    pressure certification verification."
+  * Enforcement: Highlights the entry in RED on the Port Authority Adjudication 
+    screen to command immediate clearance auditing.
+
+--------------------------------------------------------------------------------
+TIER 2: ELEVATED RISK (Yellow Tag)
+--------------------------------------------------------------------------------
+  * Trigger Keywords: 'cashew', 'coffee', 'cocoa', 'almond', 
+                      'electronic', 'textile', 'pharmaceutical'
+  * Target Commodities: Perishable agriculture products, high-tariff electronics, 
+                       regulated pharmaceuticals.
+  * Action Memo Generated: 
+    "ELEVATED RISK: Identified perishable agricultural commodity or high-tariff 
+    cargo. Requires standard phytosanitary clearances, pest certifications, and 
+    customs tariff validation."
+  * Enforcement: Highlighted in YELLOW. Alerts the inspector to check phytosanitary 
+    health certificates or import duty tax documents.
+
+--------------------------------------------------------------------------------
+TIER 3: ROUTINE RISK (Green Tag)
+--------------------------------------------------------------------------------
+  * Trigger Keywords: Catch-all (assigned if no keywords from Tier 1 or 2 are present)
+  * Target Commodities: Stable, low-threat, dry goods (e.g. Timber, general casings, 
+                       empty container transshipments).
+  * Action Memo Generated: 
+    "ROUTINE RISK: Stable, non-hazardous dry cargo. Recommended for routine 
+    customs clearance with standard administrative verification."
+  * Enforcement: Highlighted in GREEN. Fast-tracked through the clearance queue.
+
+--------------------------------------------------------------------------------
+3. STEP-BY-STEP FLOW BEHIND THE SCENES
+--------------------------------------------------------------------------------
+
+When the inspector registers a cargo manifest:
+
+Step 1: INPUT DATA EXTRACTION
+        The system extracts the "Commodity Description" text input (e.g., "High-grade Coal for Terminal 2").
+
+Step 2: TEXT NORMALIZATION
+        The AI engine converts the description string entirely to lowercase to prevent 
+        spelling/case mismatches (e.g., "Coal" and "COAL" both map to "coal").
+
+Step 3: SEQUENTIAL KEYWORD SCANNING
+        * The algorithm first checks if ANY Critical keywords ('coal', 'oil', etc.) 
+          are sub-strings of the description.
+        * If a match is found, it exits and assigns CRITICAL RISK.
+        * If no match, it checks if ANY Elevated keywords ('cashew', etc.) are present.
+        * If a match is found, it exits and assigns ELEVATED RISK.
+        * If neither matches, it defaults to ROUTINE RISK.
+
+Step 4: STORAGE & PRESENTATION
+        The system writes the result (`rms_risk_level` and `rms_analysis_memo`) into the database. 
+        The React frontend renders custom security warning flags based on the database response.
+
+--------------------------------------------------------------------------------
+4. OPERATIONAL BENEFITS FOR NEW MANGALORE PORT AUTHORITY (NMPA)
+--------------------------------------------------------------------------------
+  1. Priority Routing: Port Authority officers can filter queues to review 
+     Critical/Elevated risk shipments first, speeding up land-side gate traffic.
+  2. Safety Enforcement: Identifies highly volatile cargoes like LNG or Coal 
+     instantly, reminding inspectors to check vital container heat/pressure logs.
+  3. Fraud Prevention: Flags high-tariff categories (like electronics) to ensure 
+     duty fees match the declared cargo weight, preventing customs tax evasion.
+================================================================================

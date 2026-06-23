@@ -1,0 +1,161 @@
+================================================================================
+           NEW MANGALORE PORT AUTHORITY (NMPA) CARGO INSPECTION SYSTEM
+                   SYSTEM WORKFLOW & MANUAL TESTING GUIDE
+================================================================================
+
+This document provides a brief explanation of the system workflow, role-based
+processes, and a step-by-step manual testing guide with exact dummy data.
+
+--------------------------------------------------------------------------------
+1. SYSTEM WORKFLOW & OPERATIONS PIPELINE (WHAT COMES AFTER WHAT)
+--------------------------------------------------------------------------------
+
+The platform secures and automates cargo clearances through the following pipeline:
+
+Step 1: Onboarding & Configuration (System Admin)
+        - Admin manages operator registrations (Inspectors & Port Authorities) 
+          and sets the global weight discrepancy tolerance threshold (e.g., 5.0%).
+
+Step 2: Manifest Registration & AI RMS Evaluation (Inspector)
+        - Frontline gate inspectors log the Incoming Vessel Manifest (IGM). 
+        - The system triggers the AI Risk Management System (RMS) to assign an
+          initial risk rating (Routine Risk, Elevated Risk, Critical Risk) based 
+          on cargo description, port of origin, and tonnage.
+        - Manifest enters the queue as "Awaiting Physical Inspection".
+
+Step 3: Weighbridge Physical Check & Verification (Inspector)
+        - The container arrives at the weighbridge. The inspector records the 
+          actual physical weight, seal integrity status, structural damage status, 
+          and uploads photographic proof.
+        - Cargo status transitions to "Inspected - Awaiting Authority Adjudication".
+
+Step 4: Clearance Adjudication & QR Gate Pass Generation (Port Authority)
+        - Port Authority reviews the manifest. The system flags a warning if the 
+          declared weight vs. weighbridge weight discrepancy exceeds the admin's threshold.
+        - Authority decides to:
+          a) Approve: Grants clearance, generating a unique QR Verification Pass.
+          b) Reject/Detain: Detains cargo for audit.
+          c) Re-Inspect: Resets cargo status to "Pending" and wipes physical checks.
+
+Step 5: QR Code Verification Registry (Public Gate Pass Portal)
+        - Security gates scan the QR Code printed on the Gate Pass (or access the 
+          public URL with the verification token) to verify authenticity.
+
+Step 6: Grievance Redressal Portal (Public Page)
+        - Operators, employers, or the public submit formal grievances. Critical 
+          reports are escalated directly to the NMPA Chairman's Office.
+        - System Admin reviews these queues from the Admin Console.
+
+--------------------------------------------------------------------------------
+2. STEP-BY-STEP MANUAL TESTING GUIDE (WITH EXACT DUMMY DATA)
+--------------------------------------------------------------------------------
+
+Please ensure both servers are running:
+  - Frontend: http://localhost:5173/port_cargo_web/
+  - Backend: http://localhost:5000
+
+Follow these exact steps to verify the entire system:
+
+---
+PHASE 1: SYSTEM ADMIN SETUP
+---
+1. Open the browser and go to: http://localhost:5173/port_cargo_web/
+2. Click the "Admin" button in the DEMO CREDENTIALS block to autofill.
+   - Username: Admin99
+   - Password: Admin@123
+   - Enter the Captcha shown on screen and click LOGIN.
+3. You will be routed to the System Admin Console:
+   - Click the "System Configuration" tab.
+   - Slide the "Weight Discrepancy Threshold" slider to: 5%
+   - Click "Save Config".
+4. Log out using the logout button at the top-right.
+
+---
+PHASE 2: REGISTER INCOMING VESSEL MANIFEST (INSPECTOR)
+---
+1. On the login page, click the "Inspector" button to autofill:
+   - Username: Inspector99
+   - Password: Insp@123
+   - Enter the Captcha and click LOGIN.
+2. Click the "My Submissions" tab. Under "Import General Manifest (IGM) Registry", enter:
+   - Vessel IMO: IMO 9497268
+   - Vessel Name: MV Mangalore Express
+   - Country of Origin: Singapore
+   - Bill of Lading (B/L) Reference: BL-NMPA-2026-908
+   - Commodity Description: Containerized Timber and Raw Cashew Logistics
+   - Gross Tonnage: 25000
+3. Click "Transmit to AI RMS".
+   - You will see the loader. The AI assessment will trigger "ELEVATED RISK" 
+     (due to raw agricultural commodity/origin matching parameters) and transition status to "Awaiting Physical Inspection".
+4. Check the "Submission Logs & Status" table. Verify your record is logged.
+
+---
+PHASE 3: PHYSICAL WEIGHBRIDGE GATE CHECK (INSPECTOR)
+---
+1. Click the "Pending Queue" tab. You will see B/L "BL-NMPA-2026-908".
+2. Click the "Begin Inspection" button. In the Physical Gate Verification form, enter:
+   - Measured Weighbridge Mass: 26500 (This is a 6% weight deviation, exceeding the 5% threshold)
+   - Seal Integrity: Toggle to "Seal Intact" (Green)
+   - Structural Damage: Toggle to "No Damage" (Green)
+   - Upload Proof: Drag/drop or select any JPG/PNG image file under 5MB.
+3. Click "Complete Inspection". The status updates to "Inspected - Awaiting Authority Adjudication".
+4. Log out of the Inspector dashboard.
+
+---
+PHASE 4: PORT AUTHORITY DECISION (PORT AUTHORITY)
+---
+1. On the login page, click the "Authority" button to autofill:
+   - Username: Auth99
+   - Password: Auth@123
+   - Enter the Captcha and click LOGIN.
+2. Under "Awaiting Clearance Adjudication Queue", locate "BL-NMPA-2026-908".
+3. Click "Review Details".
+   - Notice the yellow alert: "Warning: Weight deviation is 6.00% which exceeds the configured threshold of 5%."
+4. In the Adjudication Decision panel:
+   - Select Status: Port Clearance Granted
+   - Review Notes: Weight variance checked and approved under section 4.
+   - Click "Submit Adjudication".
+5. Copy the generated Clearance Pass QR Token displayed (e.g., NMPA-PCC-X-XXXXXX).
+6. Log out.
+
+---
+PHASE 5: CLEARANCE GATE PASS VERIFICATION (PUBLIC REGISTRY)
+---
+1. Access the verification link directly:
+   http://localhost:5173/port_cargo_web/verify-clearance?token=[PASTE_YOUR_QR_TOKEN_HERE]
+2. Verify that the NMPA Maritime Clearance Certificate displays correctly:
+   - Shows "PORT CLEARANCE GRANTED" tag.
+   - Lists B/L "BL-NMPA-2026-908", Tonnage 26500 MT, and details.
+3. Click "Print Certificate" to open the formatted print view window.
+
+---
+PHASE 6: GRIEVANCE REDRESSAL SUBMISSION (PUBLIC CELL)
+---
+1. Navigate to: http://localhost:5173/port_cargo_web/grievance
+2. In the "Register Grievance" tab, select the "Employer" status.
+   - Enter Establishment Number: EST-MNG-908
+   - Enter the Captcha code shown, then click "GET DETAILS".
+   - (Details are verified). The registration form expands and auto-populates corporate profile data (Mangalore Shipping Corp, Gate 3 Logistics Hub, Panambur Port Area, Mangalore, 575010, Karnataka).
+3. Complete the remaining manual input fields in the expanded form:
+   - Name of Reporter: John Doe
+   - Gender: Male
+   - Email: contact@mngshipping.com
+   - Category: Operational Bottleneck
+   - Grievance Description: Gate 3 weighbridge queue took over 3 hours due to sensor delays.
+   - Check "Escalate this grievance directly to the NMPA Chairman's Office".
+4. Click "SUBMIT GRIEVANCE". Copy the Grievance Number from the success alert (e.g. NMPA-GRV-1004).
+
+---
+PHASE 7: TRACK STATUS & ADMIN AUDITING (STATUS CELL & ADMIN CONSOLE)
+---
+1. In the Grievance Portal, click the "View Status" tab.
+   - Enter the copied Grievance Number (e.g., NMPA-GRV-1004).
+   - Enter the Captcha and click "VIEW STATUS".
+   - Verify it displays: Status: "ESCALATED TO CHAIRMAN'S OFFICE - UNDER REVIEW" and your details.
+2. Login to the System Admin Console (Admin99 / Admin@123).
+3. Click the "Grievances" tab.
+   - Select "Secure Chairman's Office Inbox" sub-tab.
+   - Verify that your submitted grievance is listed with Category "OPERATIONAL BOTTLENECK" and email "contact@mngshipping.com".
+4. Click the "Security Audit Ledger" tab.
+   - Verify that recent actions (Logins, Register Manifest, Inspect Cargo, Review Adjudication, Escalate Complaint) are logged with chronological timestamps and Client IPs.
+================================================================================

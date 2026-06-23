@@ -1,61 +1,133 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Anchor, LogOut, User } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { LogOut, User, Shield } from 'lucide-react';
+import { Image, Modal } from 'antd';
+import { useLanguage } from '../LanguageContext';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const role = localStorage.getItem('userRole');
+  const userName = localStorage.getItem('userName') || 'User';
+  const { language, setLanguage, t } = useLanguage();
+
+  const [logoModalVisible, setLogoModalVisible] = useState(false);
+
+  const queryParams = new URLSearchParams(location.search);
+  const activeTab = queryParams.get('tab') || '0';
 
   const handleLogout = () => {
     localStorage.removeItem('userRole');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
     navigate('/');
   };
 
+  const roleLabel = {
+    inspector:      t('inspector'),
+    port_authority: t('port_authority'),
+    system_admin:   t('system_admin'),
+  }[role] || t('user');
+
+  const navTabsKeys = {
+    inspector:      ['tab_registry', 'tab_ledgers', 'tab_support'],
+    port_authority: ['tab_igm_queue', 'tab_pcc', 'tab_qdo', 'tab_analytics_ledger'],
+    system_admin:   ['tab_users', 'tab_audit_logs', 'tab_sys_config', 'tab_analytics', 'tab_complaints'],
+  }[role] || [];
+
+  const handleTabClick = (index) => {
+    navigate(`${location.pathname}?tab=${index}`);
+  };
+
   return (
-    <nav style={{
-      background: 'var(--bg-panel)',
-      borderBottom: '1px solid var(--border-color)',
-      padding: '1rem 2rem',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      position: 'sticky',
-      top: 0,
-      zIndex: 100
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        <div style={{
-          background: 'rgba(14, 165, 233, 0.1)',
-          padding: '0.5rem',
-          borderRadius: '0.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <Anchor color="var(--primary)" size={24} />
+    <nav className="nmpa-navbar">
+      {/* Top bar */}
+      <div className="nmpa-navbar-inner">
+        <div className="nmpa-brand">
+          <div 
+            className="nmpa-logo-circle" 
+            style={{ cursor: 'pointer' }}
+            onClick={() => setLogoModalVisible(true)}
+          >
+            <img
+              src={`${import.meta.env.BASE_URL}nmpa-logo.png`}
+              alt="NMPA Logo"
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            />
+          </div>
+          <div className="nmpa-brand-text">
+            <h1>{t('nmpaTitle')}</h1>
+            <p>{t('nmpaSub')}</p>
+          </div>
         </div>
-        <div>
-          <h2 style={{ fontSize: '1.25rem', margin: 0 }}>NMPA Port Authority</h2>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Smart Cargo Inspection</span>
+
+        <div className="nmpa-nav-right">
+          {/* Language Toggle */}
+          <div className="language-toggle" style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', fontWeight: 600, marginRight: '15px' }}>
+            <span 
+              style={{ color: language === 'en' ? '#fff' : 'rgba(255,255,255,0.5)', cursor: 'pointer', borderBottom: language === 'en' ? '2px solid #fff' : 'none', paddingBottom: '2px' }}
+              onClick={() => setLanguage('en')}
+            >
+              ENGLISH
+            </span>
+            <span style={{ color: 'rgba(255,255,255,0.5)' }}>|</span>
+            <span 
+              style={{ color: language === 'hi' ? '#fff' : 'rgba(255,255,255,0.5)', cursor: 'pointer', borderBottom: language === 'hi' ? '2px solid #fff' : 'none', paddingBottom: '2px' }}
+              onClick={() => setLanguage('hi')}
+            >
+              HINDI
+            </span>
+          </div>
+
+          <div className="nmpa-user-chip">
+            <User size={15} />
+            <span>{userName}</span>
+            <span style={{ opacity: 0.5, margin: '0 0.25rem' }}>|</span>
+            <Shield size={13} />
+            <span style={{ opacity: 0.8 }}>{roleLabel}</span>
+          </div>
+          <button id="navbar-logout" className="nmpa-logout-btn" onClick={handleLogout}>
+            <LogOut size={15} />
+            {t('logout')}
+          </button>
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <User size={18} color="var(--text-muted)" />
-          <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
-            {role} Access
-          </span>
-        </div>
-        <button 
-          onClick={handleLogout}
-          className="btn btn-secondary"
-          style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
-        >
-          <LogOut size={16} />
-          Sign Out
-        </button>
-      </div>
+
+      {/* Logo Modal */}
+      <Modal
+        open={logoModalVisible}
+        onCancel={() => setLogoModalVisible(false)}
+        footer={null}
+        closable={false}
+        centered
+        width={340}
+        modalRender={() => (
+          <div style={{
+            width: '320px',
+            height: '320px',
+            borderRadius: '50%',
+            backgroundColor: '#fff',
+            border: '6px solid #42a5f5',
+            boxShadow: '0 8px 32px rgba(13, 71, 161, 0.5)',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            margin: '0 auto',
+            outline: 'none'
+          }}
+          onClick={() => setLogoModalVisible(false)}
+          >
+            <img
+              src={`${import.meta.env.BASE_URL}nmpa-logo.png`}
+              alt="NMPA Logo Large"
+              style={{ width: '90%', height: '90%', objectFit: 'contain', userSelect: 'none' }}
+            />
+          </div>
+        )}
+      />
     </nav>
   );
 };
