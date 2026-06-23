@@ -164,24 +164,60 @@ def ai_risk_assessment(cargo_data):
     else: return 'Low'
 
 def ai_rms_assess(commodity_desc):
+    import json
+    
     ct_lower = commodity_desc.lower()
     
-    # Check for Critical Risk
-    critical_keywords = ['oil', 'petroleum', 'chemical', 'lng', 'liquefied natural gas', 'iron ore', 'coal', 'hazardous']
-    # Check for Elevated Risk
-    elevated_keywords = ['cashew', 'coffee', 'cocoa', 'almond', 'electronic', 'textile', 'pharmaceutical']
+    # 1. Critical keywords
+    critical_keywords = [
+        "petroleum", "crude", "oil", "chemical", "acid", "gas", 
+        "flammable", "explosive", "fertilizer", "sulfur", "methanol"
+    ]
+    # 2. Elevated keywords
+    elevated_keywords = [
+        "timber", "cashew", "coffee", "cocoa", "electronics", 
+        "machinery", "copper", "scrap metal", "silk", "spice", "tobacco"
+    ]
+    # 3. Routine keywords
+    routine_keywords = [
+        "textiles", "garments", "toys", "ceramics", "glassware", 
+        "paper", "plastic goods", "furniture", "footwear", "tiles"
+    ]
     
-    if any(k in ct_lower for k in critical_keywords):
-        risk = "CRITICAL RISK"
-        memo = f"CRITICAL RISK: Identified volatile, hazardous, or high-logistical-impact bulk cargo ({commodity_desc}). Requires strict regulatory adjudication, temperature logs, and pressure certification verification."
-    elif any(k in ct_lower for k in elevated_keywords):
-        risk = "ELEVATED RISK"
-        memo = f"ELEVATED RISK: Identified perishable agricultural commodity or high-tariff cargo ({commodity_desc}). Requires standard phytosanitary clearances, pest certifications, and customs tariff validation."
+    # Priority Rule: Always check for CRITICAL first, then ELEVATED, then ROUTINE
+    found_critical = [k for k in critical_keywords if k in ct_lower]
+    found_elevated = [k for k in elevated_keywords if k in ct_lower]
+    found_routine = [k for k in routine_keywords if k in ct_lower]
+    
+    if found_critical:
+        risk_rating = "CRITICAL RISK"
+        primary_trigger = found_critical[0].upper()
+        confidence_score = 0.95
+        inspection_focus = f"Verify pressure safety ratings, temperature logs, hazard decals, and containment seals for {found_critical[0].upper()}."
+    elif found_elevated:
+        risk_rating = "ELEVATED RISK"
+        primary_trigger = found_elevated[0].upper()
+        confidence_score = 0.85
+        inspection_focus = f"Verify phytosanitary clearances, high-value tariff registration, origin certificate validity, and seal integrity checks for {found_elevated[0].upper()}."
+    elif found_routine:
+        risk_rating = "ROUTINE RISK"
+        primary_trigger = found_routine[0].upper()
+        confidence_score = 0.90
+        inspection_focus = f"Perform standard visual check, weighbridge mass matching, and general barcode scan audits for {found_routine[0].upper()}."
     else:
-        risk = "ROUTINE RISK"
-        memo = f"ROUTINE RISK: Stable, non-hazardous dry cargo ({commodity_desc}). Recommended for routine customs clearance with standard administrative verification."
+        risk_rating = "ROUTINE RISK"
+        primary_trigger = "DEFAULT INDICATOR"
+        confidence_score = 0.80
+        inspection_focus = "Perform standard weighbridge tonnage calibration verify and basic container gate visual check."
         
-    return risk, memo
+    result = {
+        "risk_rating": risk_rating,
+        "confidence_score": confidence_score,
+        "primary_trigger": primary_trigger,
+        "inspection_focus": inspection_focus
+    }
+    
+    return risk_rating, json.dumps(result)
 
 # ---- USER AUTH & MANAGEMENT ENDPOINTS ----
 

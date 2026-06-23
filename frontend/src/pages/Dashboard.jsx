@@ -407,13 +407,34 @@ const Dashboard = () => {
         else if (riskLabel === 'ELEVATED RISK') translatedRisk = t('riskElevated');
         else if (riskLabel === 'ROUTINE RISK') translatedRisk = t('riskRoutine');
 
+        let memoContent = memo || record.notes || '—';
+        if (memo && memo.trim().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(memo);
+            memoContent = (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
+                <div>
+                  <span style={{ fontWeight: 'bold', fontSize: '0.75rem', color: '#096dd9' }}>TRIGGER: </span>
+                  <Tag color="cyan" style={{ fontSize: '0.7rem', padding: '0 4px', height: 'auto', lineHeight: '1.4' }}>{parsed.primary_trigger}</Tag>
+                  <Text type="secondary" style={{ fontSize: '0.75rem' }}> ({Math.round((parsed.confidence_score || 0) * 100)}% conf)</Text>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#666', lineHeight: '1.3' }}>
+                  <span style={{ fontWeight: 'bold' }}>Focus:</span> {parsed.inspection_focus}
+                </div>
+              </div>
+            );
+          } catch (e) {
+            // fallback
+          }
+        }
+
         return (
           <div style={{ lineHeight: 1.25 }}>
             <div style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '0.2rem', color: record.rmsRiskLevel === 'CRITICAL RISK' ? '#ff4d4f' : record.rmsRiskLevel === 'ELEVATED RISK' ? '#faad14' : '#52c41a' }}>
               {translatedRisk}
             </div>
             <div style={{ fontSize: '0.8rem', color: '#555', whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.25 }}>
-              {memo || record.notes || '—'}
+              {memoContent}
             </div>
           </div>
         );

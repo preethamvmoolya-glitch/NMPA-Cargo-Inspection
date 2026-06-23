@@ -604,7 +604,29 @@ const PortAuthority = () => {
       title: t('tblRmsMemo') + ' (' + (language === 'en' ? 'Details' : 'विवरण') + ')',
       dataIndex: 'rmsAnalysisMemo',
       key: 'rmsAnalysisMemo',
-      render: (text) => <Text style={{ fontSize: '0.82rem' }}>{text || 'No RMS memo available'}</Text>
+      render: (memo) => {
+        let memoContent = memo || 'No RMS memo available';
+        if (memo && memo.trim().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(memo);
+            memoContent = (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div>
+                  <span style={{ fontWeight: 'bold', color: '#096dd9' }}>TRIGGER: </span>
+                  <Tag color="cyan" style={{ fontSize: '0.7rem', padding: '0 4px', height: 'auto', lineHeight: '1.4' }}>{parsed.primary_trigger}</Tag>
+                  <span style={{ color: '#888', fontSize: '0.75rem' }}> ({Math.round((parsed.confidence_score || 0) * 100)}% conf)</span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#666', lineHeight: '1.3' }}>
+                  <span style={{ fontWeight: 'bold' }}>Focus:</span> {parsed.inspection_focus}
+                </div>
+              </div>
+            );
+          } catch (e) {
+            // fallback
+          }
+        }
+        return typeof memoContent === 'string' ? <Text style={{ fontSize: '0.82rem' }}>{memoContent}</Text> : memoContent;
+      }
     },
     {
       title: t('tblAction'),
@@ -997,6 +1019,40 @@ const PortAuthority = () => {
                   <Descriptions.Item label={t('tblCargoType')}>{activeDossier.cargoType?.toUpperCase()}</Descriptions.Item>
                   <Descriptions.Item label={t('tblContainerNo')}>{activeDossier.containerNo}</Descriptions.Item>
                   <Descriptions.Item label={t('tblGrossTonnage')}>{activeDossier.declaredWeight} MT</Descriptions.Item>
+                  <Descriptions.Item label={language === 'en' ? 'AI RMS Risk Level' : 'एआई आरएमएस जोखिम स्तर'}>
+                    {(() => {
+                      const level = activeDossier.rmsRiskLevel || 'ROUTINE RISK';
+                      let color = 'green';
+                      if (level === 'CRITICAL RISK') color = 'red';
+                      else if (level === 'ELEVATED RISK') color = 'orange';
+                      return <Tag color={color} style={{ fontWeight: 'bold' }}>{level}</Tag>;
+                    })()}
+                  </Descriptions.Item>
+                  <Descriptions.Item label={language === 'en' ? 'AI RMS Analysis' : 'एआई आरएमएस विश्लेषण'}>
+                    {(() => {
+                      const memo = activeDossier.rmsAnalysisMemo;
+                      if (memo && memo.trim().startsWith('{')) {
+                        try {
+                          const parsed = JSON.parse(memo);
+                          return (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              <div>
+                                <span style={{ fontWeight: 'bold', color: '#096dd9' }}>TRIGGER: </span>
+                                <Tag color="cyan" style={{ fontSize: '0.7rem', padding: '0 4px', height: 'auto', lineHeight: '1.4' }}>{parsed.primary_trigger}</Tag>
+                                <span style={{ color: '#888', fontSize: '0.75rem' }}> ({Math.round(parsed.confidence_score * 100)}% conf)</span>
+                              </div>
+                              <div style={{ fontSize: '0.78rem', color: '#555', lineHeight: 1.3 }}>
+                                <span style={{ fontWeight: 'bold' }}>Focus:</span> {parsed.inspection_focus}
+                              </div>
+                            </div>
+                          );
+                        } catch (e) {
+                          // fallback
+                        }
+                      }
+                      return memo || 'No details available';
+                    })()}
+                  </Descriptions.Item>
                 </Descriptions>
               </Col>
 
