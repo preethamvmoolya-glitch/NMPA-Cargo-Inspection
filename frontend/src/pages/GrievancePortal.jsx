@@ -693,7 +693,7 @@ const GrievancePortal = () => {
                       {/* Email */}
                       <Form.Item
                         name="email"
-                        label={<span style={{ fontWeight: 700 }}>{t('emailLabel')}</span>}
+                        label={<span style={{ fontWeight: 700 }}>{t('contactEmailLabel')}</span>}
                         rules={[
                           { required: true, message: t('emailReq') },
                           { type: 'email', message: t('emailInvalid') }
