@@ -46,13 +46,23 @@ const DEFAULT_INSPECTIONS = [
     status: "Port Clearance Granted",
     inspector_email: "inspector99@nmpa.gov",
     assigned_risk_level: "ELEVATED RISK",
-    inspection_summary: "ELEVATED RISK: Identified perishable agricultural commodity or high-tariff cargo (Containerized Timber and Raw Cashew Logistics). Requires standard phytosanitary clearances, pest certifications, and customs tariff validation.",
+    inspection_summary: JSON.stringify({
+      risk_rating: "ELEVATED RISK",
+      confidence_score: 0.85,
+      primary_trigger: "TIMBER [1x3=3]",
+      inspection_focus: "TARGETED AUDIT: verify phytosanitary papers, tariff registration, and scan seal integrity. | Origin: Low (Origin is verified pre-approved safe partner) | Impact: Level 3 - Standard/perishable commodity (TIMBER) (High weight: 25,000 MT)"
+    }),
     vessel_imo: "9497268",
     vessel_name: "MV Mangalore Express",
     country_of_origin: "Singapore",
     gross_tonnage: 25000,
     rms_risk_level: "ELEVATED RISK",
-    rms_analysis_memo: "ELEVATED RISK: Identified perishable agricultural commodity or high-tariff cargo (Containerized Timber and Raw Cashew Logistics). Requires standard phytosanitary clearances, pest certifications, and customs tariff validation.",
+    rms_analysis_memo: JSON.stringify({
+      risk_rating: "ELEVATED RISK",
+      confidence_score: 0.85,
+      primary_trigger: "TIMBER [1x3=3]",
+      inspection_focus: "TARGETED AUDIT: verify phytosanitary papers, tariff registration, and scan seal integrity. | Origin: Low (Origin is verified pre-approved safe partner) | Impact: Level 3 - Standard/perishable commodity (TIMBER) (High weight: 25,000 MT)"
+    }),
     actual_weight: 25000,
     seal_intact: true,
     structural_damage: false,
@@ -103,27 +113,124 @@ const DEFAULT_CHAIRMAN_COMPLAINTS = [
 ];
 
 // AI RMS Assess logic in JS
-function aiRmsAssess(commodityDesc) {
+function aiRmsAssess(commodityDesc, countryOfOrigin, grossTonnage) {
   const ctLower = (commodityDesc || "").toLowerCase();
-  const criticalKeywords = ['oil', 'petroleum', 'chemical', 'lng', 'liquefied natural gas', 'iron ore', 'coal', 'hazardous'];
-  const elevatedKeywords = ['cashew', 'coffee', 'cocoa', 'almond', 'electronic', 'textile', 'pharmaceutical'];
+  const coLower = (countryOfOrigin || "").toLowerCase();
+  const weight = parseFloat(grossTonnage) || 0;
 
-  if (criticalKeywords.some(k => ctLower.includes(k))) {
-    return {
-      risk: "CRITICAL RISK",
-      memo: `CRITICAL RISK: Identified volatile, hazardous, or high-logistical-impact bulk cargo (${commodityDesc}). Requires strict regulatory adjudication, temperature logs, and pressure certification verification.`
-    };
-  } else if (elevatedKeywords.some(k => ctLower.includes(k))) {
-    return {
-      risk: "ELEVATED RISK",
-      memo: `ELEVATED RISK: Identified perishable agricultural commodity or high-tariff cargo (${commodityDesc}). Requires standard phytosanitary clearances, pest certifications, and customs tariff validation.`
-    };
-  } else {
-    return {
-      risk: "ROUTINE RISK",
-      memo: `ROUTINE RISK: Stable, non-hazardous dry cargo (${commodityDesc}). Recommended for routine customs clearance with standard administrative verification.`
-    };
+  // 1. Determine Likelihood based on Country of Origin
+  const safeCountries = [
+    "singapore", "japan", "germany", "united kingdom", "uk", "united states", "usa", 
+    "canada", "australia", "united arab emirates", "uae", "france", "netherlands"
+  ];
+  const highRiskCountries = [
+    "sanctioned", "unknown", "high-risk", "north korea", "iran", "syria", 
+    "somalia", "yemen", "venezuela", "libya"
+  ];
+
+  const isSafe = safeCountries.some(sc => coLower.includes(sc));
+  const isHigh = highRiskCountries.some(hc => coLower.includes(hc));
+
+  let likelihood = 2;
+  let likelihoodDesc = "Medium (Standard maritime security profile)";
+
+  if (isHigh || !coLower.strip?.() && !coLower.trim?.()) {
+    likelihood = 3;
+    likelihoodDesc = "High (Origin matches high-risk/sanctioned database)";
+  } else if (isSafe) {
+    likelihood = 1;
+    likelihoodDesc = "Low (Origin is verified pre-approved safe partner)";
   }
+
+  // 2. Determine Consequence/Severity based on Cargo Commodity Type & Tonnage
+  const criticalKeywords = [
+    "petroleum", "crude", "oil", "chemical", "acid", "gas", 
+    "flammable", "explosive", "fertilizer", "sulfur", "methanol", "coal", "iron ore", "hazardous",
+    "lng", "liquefied natural gas"
+  ];
+  const elevatedKeywords = [
+    "timber", "cashew", "coffee", "cocoa", "electronics", "almond", "pharmaceutical",
+    "machinery", "copper", "scrap metal", "silk", "spice", "tobacco"
+  ];
+  const routineKeywords = [
+    "textiles", "garments", "toys", "ceramics", "glassware", 
+    "paper", "plastic goods", "furniture", "footwear", "tiles"
+  ];
+
+  const foundCritical = criticalKeywords.find(k => ctLower.includes(k));
+  const foundElevated = elevatedKeywords.find(k => ctLower.includes(k));
+  const foundRoutine = routineKeywords.find(k => ctLower.includes(k));
+
+  let baseConsequence = 1;
+  let consequenceReason = "Default routine cargo classification";
+  let commodityTrigger = "GENERAL CARGO";
+
+  if (foundCritical) {
+    baseConsequence = 3;
+    consequenceReason = `High-hazard commodity (${foundCritical.toUpperCase()})`;
+    commodityTrigger = foundCritical.toUpperCase();
+  } else if (foundElevated) {
+    baseConsequence = 2;
+    consequenceReason = `Standard/perishable commodity (${foundElevated.toUpperCase()})`;
+    commodityTrigger = foundElevated.toUpperCase();
+  } else if (foundRoutine) {
+    baseConsequence = 1;
+    consequenceReason = `Routine dry commodity (${foundRoutine.toUpperCase()})`;
+    commodityTrigger = foundRoutine.toUpperCase();
+  }
+
+  // Consequence upgrades based on weight
+  let consequence = baseConsequence;
+  let weightTrigger = "";
+  if (weight > 15000) {
+    if (consequence < 3) {
+      consequence = 3;
+      weightTrigger = ` (Escalated to High: ${weight.toLocaleString()} MT > 15k MT)`;
+    } else {
+      weightTrigger = ` (High weight: ${weight.toLocaleString()} MT)`;
+    }
+  } else if (weight > 5000) {
+    if (consequence < 2) {
+      consequence = 2;
+      weightTrigger = ` (Escalated to Med: ${weight.toLocaleString()} MT > 5k MT)`;
+    } else {
+      weightTrigger = ` (Med weight: ${weight.toLocaleString()} MT)`;
+    }
+  }
+
+  const consequenceDesc = `Level ${consequence} - ${consequenceReason}${weightTrigger}`;
+
+  // 3. Calculate Risk Score using 3x3 Matrix
+  const riskScore = likelihood * consequence;
+
+  // 4. Map Risk Score to Risk Level Tier
+  let riskRating = "ROUTINE RISK";
+  let focusAction = "ROUTINE INSPECTION: calibrate weighbridge tonnage and run barcode visual scanning.";
+
+  if (riskScore >= 6) {
+    riskRating = "CRITICAL RISK";
+    focusAction = "MANDATORY PHYSICAL AUDIT: immediate cargo sampling, MSDS review, and flag registry verification.";
+  } else if (riskScore >= 3) {
+    riskRating = "ELEVATED RISK";
+    focusAction = "TARGETED AUDIT: verify phytosanitary papers, tariff registration, and scan seal integrity.";
+  }
+
+  const primaryTrigger = `${commodityTrigger} [${likelihood}x${consequence}=${riskScore}]`;
+  const inspectionFocus = `${focusAction} | Origin: ${likelihoodDesc} | Impact: ${consequenceDesc}`;
+
+  const confidenceScore = riskScore >= 6 ? 0.95 : (riskScore >= 3 ? 0.85 : 0.90);
+
+  const result = {
+    risk_rating: riskRating,
+    confidence_score: confidenceScore,
+    primary_trigger: primaryTrigger,
+    inspection_focus: inspectionFocus
+  };
+
+  return {
+    risk: riskRating,
+    memo: JSON.stringify(result)
+  };
 }
 
 // Helpers
@@ -227,10 +334,28 @@ function logAction(action, role, details = "") {
 export function initLocalDb() {
   getStore("nmpa_users", DEFAULT_USERS);
   let inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
-  if (inspections.some(i => i.bill_of_lading === 'BL-NMPA-2026-704' || i.cargo_type === 'Iron Ore')) {
-    inspections = inspections.filter(i => i.bill_of_lading !== 'BL-NMPA-2026-704' && i.cargo_type !== 'Iron Ore');
-    setStore("nmpa_inspections", inspections);
+  
+  // Recalculate/migrate all inspections in the mock localStorage DB to match the new 3x3 matrix logic
+  let migrated = false;
+  const updatedInspections = inspections.map(item => {
+    // If the memo is missing or not a JSON string, or doesn't have the new matrix score trigger format:
+    if (!item.rms_analysis_memo || !item.rms_analysis_memo.trim().startsWith('{') || !item.rms_analysis_memo.includes("[")) {
+      const { risk, memo } = aiRmsAssess(item.cargo_type || item.commodity_desc || "", item.country_of_origin || item.origin_port || "", item.weight || item.gross_tonnage || 0);
+      item.risk_level = risk;
+      item.assigned_risk_level = risk;
+      item.rms_risk_level = risk;
+      item.inspection_summary = memo;
+      item.rms_analysis_memo = memo;
+      migrated = true;
+    }
+    return item;
+  });
+  
+  if (migrated) {
+    setStore("nmpa_inspections", updatedInspections);
+    console.log("[localDb] Successfully migrated legacy mock inspections to 3x3 Risk Matrix.");
   }
+
   getStore("nmpa_logs", DEFAULT_LOGS);
   getStore("nmpa_complaints", DEFAULT_COMPLAINTS);
   getStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
@@ -257,7 +382,7 @@ export function setupLocalDbFetch() {
       const body = options.body ? JSON.parse(options.body) : {};
       
       const parsedUrl = new URL(urlStr, window.location.origin);
-      const pathname = parsedUrl.pathname.replace(/\/port_cargo_web/, ""); // remove base prefix if present
+      const pathname = parsedUrl.pathname.replace(/\/(port_cargo_web|NMPA-Cargo-Inspection)/, ""); // remove base prefix if present
       const searchParams = parsedUrl.searchParams;
 
       // Helper to return JSON response
@@ -372,7 +497,7 @@ export function setupLocalDbFetch() {
         const { vesselImo, vesselName, countryOfOrigin, billOfLading, commodityDescription, grossTonnage, inspectorEmail } = body;
         const inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
         
-        const { risk, memo } = aiRmsAssess(commodityDescription);
+        const { risk, memo } = aiRmsAssess(commodityDescription, countryOfOrigin, grossTonnage);
 
         const newInspection = {
           id: Date.now(),

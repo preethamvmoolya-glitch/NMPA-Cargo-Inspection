@@ -123,6 +123,18 @@ def init_db():
             cursor.execute("INSERT INTO users (username, password, email, role, is_approved, two_fa_enabled) VALUES (?, ?, ?, ?, 1, 1)", 
                            (username, password, email, role))
         
+    # Recalculate/migrate all existing database rows to use the new 3x3 risk matrix
+    cursor.execute("SELECT id, cargo_type, country_of_origin, weight FROM inspections")
+    rows = cursor.fetchall()
+    for r_id, cargo_type, country_of_origin, weight in rows:
+        risk_level, risk_memo = ai_rms_assess(cargo_type, country_of_origin, weight)
+        cursor.execute('''
+            UPDATE inspections
+            SET risk_level = ?, assigned_risk_level = ?, rms_risk_level = ?, 
+                inspection_summary = ?, rms_analysis_memo = ?
+            WHERE id = ?
+        ''', (risk_level, risk_level, risk_level, risk_memo, risk_memo, r_id))
+        
     conn.commit()
     conn.close()
 
@@ -163,53 +175,109 @@ def ai_risk_assessment(cargo_data):
     elif risk_score >= 30: return 'Medium'
     else: return 'Low'
 
-def ai_rms_assess(commodity_desc):
+def ai_rms_assess(commodity_desc, country_of_origin, gross_tonnage):
     import json
     
-    ct_lower = commodity_desc.lower()
+    ct_lower = (commodity_desc or "").lower()
+    co_lower = (country_of_origin or "").lower()
+    weight = float(gross_tonnage or 0)
     
-    # 1. Critical keywords
+    # 1. Determine Likelihood based on Country of Origin
+    safe_countries = [
+        "singapore", "japan", "germany", "united kingdom", "uk", "united states", "usa", 
+        "canada", "australia", "united arab emirates", "uae", "france", "netherlands"
+    ]
+    high_risk_countries = [
+        "sanctioned", "unknown", "high-risk", "north korea", "iran", "syria", 
+        "somalia", "yemen", "venezuela", "libya"
+    ]
+    
+    is_safe = any(sc in co_lower for sc in safe_countries)
+    is_high = any(hc in co_lower for hc in high_risk_countries)
+    
+    if is_high or not co_lower.strip():
+        likelihood = 3
+        likelihood_desc = "High (Origin matches high-risk/sanctioned database)"
+    elif is_safe:
+        likelihood = 1
+        likelihood_desc = "Low (Origin is verified pre-approved safe partner)"
+    else:
+        likelihood = 2
+        likelihood_desc = "Medium (Standard maritime security profile)"
+        
+    # 2. Determine Consequence/Severity based on Cargo Commodity Type & Tonnage
     critical_keywords = [
         "petroleum", "crude", "oil", "chemical", "acid", "gas", 
-        "flammable", "explosive", "fertilizer", "sulfur", "methanol"
+        "flammable", "explosive", "fertilizer", "sulfur", "methanol", "coal", "iron ore", "hazardous",
+        "lng", "liquefied natural gas"
     ]
-    # 2. Elevated keywords
     elevated_keywords = [
-        "timber", "cashew", "coffee", "cocoa", "electronics", 
+        "timber", "cashew", "coffee", "cocoa", "electronics", "almond", "pharmaceutical",
         "machinery", "copper", "scrap metal", "silk", "spice", "tobacco"
     ]
-    # 3. Routine keywords
     routine_keywords = [
         "textiles", "garments", "toys", "ceramics", "glassware", 
         "paper", "plastic goods", "furniture", "footwear", "tiles"
     ]
     
-    # Priority Rule: Always check for CRITICAL first, then ELEVATED, then ROUTINE
     found_critical = [k for k in critical_keywords if k in ct_lower]
     found_elevated = [k for k in elevated_keywords if k in ct_lower]
     found_routine = [k for k in routine_keywords if k in ct_lower]
     
     if found_critical:
-        risk_rating = "CRITICAL RISK"
-        primary_trigger = found_critical[0].upper()
-        confidence_score = 0.95
-        inspection_focus = f"Verify pressure safety ratings, temperature logs, hazard decals, and containment seals for {found_critical[0].upper()}."
+        base_consequence = 3
+        consequence_reason = f"High-hazard commodity ({found_critical[0].upper()})"
+        commodity_trigger = found_critical[0].upper()
     elif found_elevated:
-        risk_rating = "ELEVATED RISK"
-        primary_trigger = found_elevated[0].upper()
-        confidence_score = 0.85
-        inspection_focus = f"Verify phytosanitary clearances, high-value tariff registration, origin certificate validity, and seal integrity checks for {found_elevated[0].upper()}."
+        base_consequence = 2
+        consequence_reason = f"Standard/perishable commodity ({found_elevated[0].upper()})"
+        commodity_trigger = found_elevated[0].upper()
     elif found_routine:
-        risk_rating = "ROUTINE RISK"
-        primary_trigger = found_routine[0].upper()
-        confidence_score = 0.90
-        inspection_focus = f"Perform standard visual check, weighbridge mass matching, and general barcode scan audits for {found_routine[0].upper()}."
+        base_consequence = 1
+        consequence_reason = f"Routine dry commodity ({found_routine[0].upper()})"
+        commodity_trigger = found_routine[0].upper()
+    else:
+        base_consequence = 1
+        consequence_reason = "Default routine cargo classification"
+        commodity_trigger = "GENERAL CARGO"
+        
+    # Consequence upgrades based on weight
+    consequence = base_consequence
+    weight_trigger = ""
+    if weight > 15000:
+        if consequence < 3:
+            consequence = 3
+            weight_trigger = f" (Escalated to High: {weight:,.0f} MT > 15k MT)"
+        else:
+            weight_trigger = f" (High weight: {weight:,.0f} MT)"
+    elif weight > 5000:
+        if consequence < 2:
+            consequence = 2
+            weight_trigger = f" (Escalated to Med: {weight:,.0f} MT > 5k MT)"
+        else:
+            weight_trigger = f" (Med weight: {weight:,.0f} MT)"
+            
+    consequence_desc = f"Level {consequence} - {consequence_reason}{weight_trigger}"
+    
+    # 3. Calculate Risk Score using 3x3 Matrix
+    risk_score = likelihood * consequence
+    
+    # 4. Map Risk Score to Risk Level Tier
+    if risk_score >= 6:
+        risk_rating = "CRITICAL RISK"
+        focus_action = "MANDATORY PHYSICAL AUDIT: immediate cargo sampling, MSDS review, and flag registry verification."
+    elif risk_score >= 3:
+        risk_rating = "ELEVATED RISK"
+        focus_action = "TARGETED AUDIT: verify phytosanitary papers, tariff registration, and scan seal integrity."
     else:
         risk_rating = "ROUTINE RISK"
-        primary_trigger = "DEFAULT INDICATOR"
-        confidence_score = 0.80
-        inspection_focus = "Perform standard weighbridge tonnage calibration verify and basic container gate visual check."
+        focus_action = "ROUTINE INSPECTION: calibrate weighbridge tonnage and run barcode visual scanning."
         
+    primary_trigger = f"{commodity_trigger} [{likelihood}x{consequence}={risk_score}]"
+    inspection_focus = f"{focus_action} | Origin: {likelihood_desc} | Impact: {consequence_desc}"
+    
+    confidence_score = 0.95 if risk_score >= 6 else (0.85 if risk_score >= 3 else 0.90)
+    
     result = {
         "risk_rating": risk_rating,
         "confidence_score": confidence_score,
@@ -350,7 +418,7 @@ def evaluate_cargo():
     gross_tonnage = float(data.get('grossTonnage', 0))
     inspector_email = data.get('inspectorEmail', 'unknown@nmpa.gov')
     
-    risk_level, risk_memo = ai_rms_assess(commodity_desc)
+    risk_level, risk_memo = ai_rms_assess(commodity_desc, country_of_origin, gross_tonnage)
     
     conn = get_db()
     cursor = conn.cursor()

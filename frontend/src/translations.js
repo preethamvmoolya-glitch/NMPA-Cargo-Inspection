@@ -266,6 +266,7 @@ export const translations = {
     certSealClearance: "SEAL OF CLEARANCE",
     certSealPort: "PORT OF MANGALORE",
     certNotVerified: "Not Verified",
+    viewCertificate: "View Certificate",
     
     // Grievance Portal specific translations
     nmpaGrmsTitle: "NMPA Grievance System",
@@ -620,6 +621,7 @@ export const translations = {
     certSealClearance: "निकासी की मुहर",
     certSealPort: "मंगलूर पत्तन",
     certNotVerified: "सत्यापित नहीं",
+    viewCertificate: "प्रमाणपत्र देखें",
     
     // Grievance Portal specific translations (Hindi)
     nmpaGrmsTitle: "एनएमपीए शिकायत प्रणाली",
