@@ -1,153 +1,88 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import sqlite3
+import pymongo
+from bson import ObjectId
+import os
+from dotenv import load_dotenv
 import datetime
 import random
+
+# Load environment configuration
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-DB_NAME = "cargo.db"
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/nmpa_cargo")
 
-def get_db():
-    conn = sqlite3.connect(DB_NAME, timeout=10)
-    conn.execute("PRAGMA journal_mode=WAL;")
-    return conn
+# Setup MongoDB Connection
+client = pymongo.MongoClient(MONGO_URI)
+# Use default database from URI, fallback to 'nmpa_cargo'
+db = client.get_default_database()
+if db is None:
+    db = client["nmpa_cargo"]
+
+# MongoDB Collections
+users_col = db["users"]
+inspections_col = db["inspections"]
+audit_logs_col = db["audit_logs"]
+complaints_col = db["complaints"]
+chairman_office_inbox_col = db["chairman_office_inbox"]
 
 def init_db():
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    # Users table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE,
-            password TEXT NOT NULL,
-            email TEXT NOT NULL,
-            role TEXT NOT NULL,
-            is_approved BOOLEAN DEFAULT 0,
-            two_fa_enabled BOOLEAN DEFAULT 1,
-            last_login TEXT
-        )
-    ''')
-    try:
-        cursor.execute("ALTER TABLE users ADD COLUMN last_login TEXT")
-    except sqlite3.OperationalError:
-        # column already exists
-        pass
-    
-    # Inspections table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS inspections (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            bill_of_lading TEXT NOT NULL,
-            origin_port TEXT NOT NULL,
-            cargo_type TEXT NOT NULL,
-            weight REAL NOT NULL,
-            image_url TEXT,
-            risk_level TEXT NOT NULL,
-            status TEXT DEFAULT 'Pending',
-            notes TEXT,
-            inspector_email TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            actual_weight REAL,
-            seal_intact BOOLEAN,
-            structural_damage BOOLEAN,
-            qr_token TEXT
-        )
-    ''')
-    for col, col_type in [("actual_weight", "REAL"), ("seal_intact", "BOOLEAN"), ("structural_damage", "BOOLEAN"), ("qr_token", "TEXT"), ("assigned_risk_level", "TEXT"), ("inspection_summary", "TEXT"), ("vessel_imo", "TEXT"), ("vessel_name", "TEXT"), ("country_of_origin", "TEXT"), ("gross_tonnage", "REAL"), ("rms_risk_level", "TEXT"), ("rms_analysis_memo", "TEXT")]:
-        try:
-            cursor.execute(f"ALTER TABLE inspections ADD COLUMN {col} {col_type}")
-        except sqlite3.OperationalError:
-            pass
-    
-    # Audit Logs table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS audit_logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            action TEXT NOT NULL,
-            user_role TEXT NOT NULL,
-            details TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
-    # Complaints table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS complaints (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            inspector_email TEXT NOT NULL,
-            subject TEXT NOT NULL,
-            message TEXT NOT NULL,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            is_escalated_to_chairman BOOLEAN DEFAULT 0,
-            severity_level TEXT
-        )
-    ''')
-    for col, col_type in [("is_escalated_to_chairman", "BOOLEAN DEFAULT 0"), ("severity_level", "TEXT")]:
-        try:
-            cursor.execute(f"ALTER TABLE complaints ADD COLUMN {col} {col_type}")
-        except sqlite3.OperationalError:
-            pass
-
-    # Chairman Office Inbox table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS chairman_office_inbox (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT NOT NULL,
-            category TEXT NOT NULL,
-            description TEXT NOT NULL,
-            is_escalated_to_chairman BOOLEAN DEFAULT 1,
-            severity_level TEXT NOT NULL,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-
-
-    # Clean up legacy default users
-    cursor.execute("DELETE FROM users WHERE username IN ('sysadmin', 'auth1', 'inspector1')")
-    
     # Seed/Reset default users to match requested credentials
     for username, password, email, role in [
         ("Admin99", "Admin@123", "admin99@nmpa.gov", "system_admin"),
         ("Auth99", "Auth@123", "auth99@nmpa.gov", "port_authority"),
         ("Inspector99", "Insp@123", "inspector99@nmpa.gov", "inspector")
     ]:
-        cursor.execute("SELECT id FROM users WHERE username=?", (username,))
-        row = cursor.fetchone()
-        if row:
-            cursor.execute("UPDATE users SET password=?, email=?, role=?, is_approved=1 WHERE id=?", (password, email, role, row[0]))
+        user = users_col.find_one({"username": username})
+        if user:
+            users_col.update_one(
+                {"_id": user["_id"]},
+                {"$set": {"password": password, "email": email, "role": role, "is_approved": True}}
+            )
         else:
-            cursor.execute("INSERT INTO users (username, password, email, role, is_approved, two_fa_enabled) VALUES (?, ?, ?, ?, 1, 1)", 
-                           (username, password, email, role))
-        
-    # Recalculate/migrate all existing database rows to use the new 3x3 risk matrix
-    cursor.execute("SELECT id, cargo_type, country_of_origin, weight FROM inspections")
-    rows = cursor.fetchall()
-    for r_id, cargo_type, country_of_origin, weight in rows:
-        risk_level, risk_memo = ai_rms_assess(cargo_type, country_of_origin, weight)
-        cursor.execute('''
-            UPDATE inspections
-            SET risk_level = ?, assigned_risk_level = ?, rms_risk_level = ?, 
-                inspection_summary = ?, rms_analysis_memo = ?
-            WHERE id = ?
-        ''', (risk_level, risk_level, risk_level, risk_memo, risk_memo, r_id))
-        
-    conn.commit()
-    conn.close()
+            users_col.insert_one({
+                "username": username,
+                "password": password,
+                "email": email,
+                "role": role,
+                "is_approved": True,
+                "two_fa_enabled": True,
+                "last_login": None
+            })
+            
+    # Clean up legacy default users
+    users_col.delete_many({"username": {"$in": ["sysadmin", "auth1", "inspector1"]}})
+    
+    # Recalculate/migrate all existing inspections to use the new 3x3 risk matrix
+    for doc in inspections_col.find():
+        if "rms_risk_level" not in doc or not doc.get("rms_analysis_memo"):
+            risk_level, risk_memo = ai_rms_assess(
+                doc.get("cargo_type"), doc.get("country_of_origin"), doc.get("weight") or doc.get("gross_tonnage") or 0
+            )
+            inspections_col.update_one(
+                {"_id": doc["_id"]},
+                {"$set": {
+                    "risk_level": risk_level,
+                    "assigned_risk_level": risk_level,
+                    "rms_risk_level": risk_level,
+                    "inspection_summary": risk_memo,
+                    "rms_analysis_memo": risk_memo
+                }}
+            )
 
 def log_action(action, role, details=""):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO audit_logs (action, user_role, details) VALUES (?, ?, ?)", (action, role, details))
-    conn.commit()
-    conn.close()
+    audit_logs_col.insert_one({
+        "action": action,
+        "user_role": role,
+        "details": details,
+        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    })
 
 # Simulated Email Sending
 def send_email_notification(to_email, subject, body):
-    # In a real app, use SMTP or an email API like SendGrid
     print(f"--- MOCK EMAIL SENT ---")
     print(f"To: {to_email}")
     print(f"Subject: {subject}")
@@ -295,43 +230,45 @@ def login():
     username = data.get('username')
     password = data.get('password')
     
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, username, email, role, is_approved, two_fa_enabled FROM users WHERE username=? AND password=?", (username, password))
-    user = cursor.fetchone()
-    
+    user = users_col.find_one({"username": username, "password": password})
     if user:
-        if not user[4]: # is_approved
-            conn.close()
+        if not user.get("is_approved", False):
             return jsonify({"status": "error", "message": "Account pending approval from System Admin."}), 403
         
         # Record real-time login date/time
         now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        cursor.execute("UPDATE users SET last_login=? WHERE id=?", (now_str, user[0]))
-        conn.commit()
-        conn.close()
+        users_col.update_one({"_id": user["_id"]}, {"$set": {"last_login": now_str}})
         
-        log_action("Login", user[3], f"User {username} logged in")
+        log_action("Login", user["role"], f"User {username} logged in")
         return jsonify({
             "status": "success", 
-            "user": {"id": user[0], "username": user[1], "email": user[2], "role": user[3], "two_fa_enabled": user[5]}
+            "user": {
+                "id": str(user["_id"]), 
+                "username": user["username"], 
+                "email": user["email"], 
+                "role": user["role"], 
+                "two_fa_enabled": user.get("two_fa_enabled", True)
+            }
         }), 200
-    conn.close()
     return jsonify({"status": "error", "message": "Invalid credentials."}), 401
 
 @app.route('/api/users', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def manage_users():
-    conn = get_db()
-    cursor = conn.cursor()
-    
     if request.method == 'GET':
-        cursor.execute("SELECT id, username, email, role, is_approved, two_fa_enabled, last_login FROM users")
-        users = [{"id": r[0], "username": r[1], "email": r[2], "role": r[3], "is_approved": bool(r[4]), "two_fa_enabled": bool(r[5]), "last_login": r[6]} for r in cursor.fetchall()]
-        conn.close()
+        users = []
+        for u in users_col.find():
+            users.append({
+                "id": str(u["_id"]),
+                "username": u["username"],
+                "email": u["email"],
+                "role": u["role"],
+                "is_approved": bool(u.get("is_approved", False)),
+                "two_fa_enabled": bool(u.get("two_fa_enabled", True)),
+                "last_login": u.get("last_login")
+            })
         return jsonify(users), 200
         
     elif request.method == 'POST':
-        # Create user (used by sysadmin or registration)
         data = request.json
         username = data.get('username')
         password = data.get('password')
@@ -343,67 +280,78 @@ def manage_users():
         # 2. At least one uppercase, one lowercase, one number, one special character
         import re
         if len(password) < 8 or not re.search("[a-z]", password) or not re.search("[A-Z]", password) or not re.search("[0-9]", password) or not re.search("[@$!%*?&]", password):
-            conn.close()
             return jsonify({"status": "error", "message": "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)."}), 400
             
         # Enforce username security rule:
         # 1. At least 4 characters
         # 2. Only alphanumeric and underscores
         if len(username) < 4 or not re.match("^[a-zA-Z0-9_]+$", username):
-            conn.close()
             return jsonify({"status": "error", "message": "Username must be at least 4 characters long and contain only letters, numbers, and underscores."}), 400
             
         # Enforce unique passwords constraint across all users
-        cursor.execute("SELECT id FROM users WHERE password=?", (password,))
-        if cursor.fetchone():
-            conn.close()
+        if users_col.find_one({"password": password}):
             return jsonify({"status": "error", "message": "This password is already in use by another account. Please use a unique password."}), 400
             
-        try:
-            cursor.execute("INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)", 
-                           (username, password, email, role))
-            conn.commit()
-            log_action("Create User", "system_admin", f"Created user {username}")
-            conn.close()
-            return jsonify({"status": "success"}), 201
-        except sqlite3.IntegrityError:
-            conn.close()
+        if users_col.find_one({"username": username}):
             return jsonify({"status": "error", "message": "Username already exists"}), 400
+            
+        new_user = {
+            "username": username,
+            "password": password,
+            "email": email,
+            "role": role,
+            "is_approved": False,
+            "two_fa_enabled": True,
+            "last_login": None
+        }
+        users_col.insert_one(new_user)
+        log_action("Create User", "system_admin", f"Created user {username}")
+        return jsonify({"status": "success"}), 201
             
     elif request.method == 'PUT':
         data = request.json
         user_id = data.get('id')
         action = data.get('action') # 'approve', 'toggle_2fa', or None for edit
         
+        try:
+            obj_id = ObjectId(user_id)
+        except:
+            return jsonify({"status": "error", "message": "Invalid user ID format."}), 400
+        
         if action == 'approve':
-            cursor.execute("UPDATE users SET is_approved=1 WHERE id=?", (user_id,))
-            cursor.execute("SELECT email, username FROM users WHERE id=?", (user_id,))
-            user_data = cursor.fetchone()
+            users_col.update_one({"_id": obj_id}, {"$set": {"is_approved": True}})
+            user_data = users_col.find_one({"_id": obj_id})
             log_action("Approve User", "system_admin", f"Approved user ID {user_id}")
             if user_data:
-                send_email_notification(user_data[0], "Account Approved", f"Hello {user_data[1]}, your NMPA account has been approved by the System Admin.")
+                send_email_notification(user_data["email"], "Account Approved", f"Hello {user_data['username']}, your NMPA account has been approved by the System Admin.")
         elif action == 'toggle_2fa':
-            cursor.execute("UPDATE users SET two_fa_enabled = NOT two_fa_enabled WHERE id=?", (user_id,))
-            log_action("Toggle 2FA", "system_admin", f"Toggled 2FA for user ID {user_id}")
+            user_data = users_col.find_one({"_id": obj_id})
+            if user_data:
+                new_val = not user_data.get("two_fa_enabled", True)
+                users_col.update_one({"_id": obj_id}, {"$set": {"two_fa_enabled": new_val}})
+                log_action("Toggle 2FA", "system_admin", f"Toggled 2FA for user ID {user_id}")
         else:
             # Inline edit user details
             username = data.get('username')
             email = data.get('email')
             role = data.get('role')
-            cursor.execute("UPDATE users SET username=?, email=?, role=? WHERE id=?", (username, email, role, user_id))
+            users_col.update_one({"_id": obj_id}, {"$set": {
+                "username": username,
+                "email": email,
+                "role": role
+            }})
             log_action("Edit User Details", "system_admin", f"Updated user ID {user_id} details")
             
-        conn.commit()
-        conn.close()
         return jsonify({"status": "success"}), 200
         
     elif request.method == 'DELETE':
         user_id = request.args.get('id')
-        cursor.execute("DELETE FROM users WHERE id=?", (user_id,))
-        log_action("Delete User", "system_admin", f"Deleted user ID {user_id}")
-        conn.commit()
-        conn.close()
-        return jsonify({"status": "success"}), 200
+        try:
+            users_col.delete_one({"_id": ObjectId(user_id)})
+            log_action("Delete User", "system_admin", f"Deleted user ID {user_id}")
+            return jsonify({"status": "success"}), 200
+        except:
+            return jsonify({"status": "error", "message": "Invalid user ID."}), 400
 
 # ---- INSPECTION ENDPOINTS ----
 
@@ -420,28 +368,35 @@ def evaluate_cargo():
     
     risk_level, risk_memo = ai_rms_assess(commodity_desc, country_of_origin, gross_tonnage)
     
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO inspections (
-            bill_of_lading, origin_port, cargo_type, weight, image_url, 
-            risk_level, status, inspector_email, assigned_risk_level, inspection_summary,
-            vessel_imo, vessel_name, country_of_origin, gross_tonnage, rms_risk_level, rms_analysis_memo
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (
-        bill_of_lading, country_of_origin, commodity_desc, gross_tonnage, '', 
-        risk_level, 'Awaiting Physical Inspection', inspector_email, risk_level, risk_memo,
-        vessel_imo, vessel_name, country_of_origin, gross_tonnage, risk_level, risk_memo
-    ))
+    new_inspection = {
+        "bill_of_lading": bill_of_lading,
+        "origin_port": country_of_origin,
+        "cargo_type": commodity_desc,
+        "weight": gross_tonnage,
+        "image_url": "",
+        "risk_level": risk_level,
+        "status": "Awaiting Physical Inspection",
+        "inspector_email": inspector_email,
+        "assigned_risk_level": risk_level,
+        "inspection_summary": risk_memo,
+        "vessel_imo": vessel_imo,
+        "vessel_name": vessel_name,
+        "country_of_origin": country_of_origin,
+        "gross_tonnage": gross_tonnage,
+        "rms_risk_level": risk_level,
+        "rms_analysis_memo": risk_memo,
+        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "actual_weight": None,
+        "seal_intact": None,
+        "structural_damage": None,
+        "qr_token": None
+    }
     
-    inspection_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
+    res = inspections_col.insert_one(new_inspection)
     
     log_action("Register Manifest", "inspector", f"B/L {bill_of_lading} submitted for Vessel {vessel_name}")
     return jsonify({
-        "id": inspection_id, 
+        "id": str(res.inserted_id), 
         "rms_risk_level": risk_level, 
         "rms_analysis_memo": risk_memo, 
         "status": "Awaiting Physical Inspection"
@@ -453,81 +408,69 @@ def verify_clearance_api():
     if not token:
         return jsonify({"status": "error", "message": "Missing verification token."}), 400
         
-    conn = get_db()
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM inspections WHERE qr_token=?", (token,))
-    r = cursor.fetchone()
-    conn.close()
-    
+    r = inspections_col.find_one({"qr_token": token})
     if not r:
         return jsonify({"status": "error", "message": "Clearance certificate not found or invalid."}), 404
         
     return jsonify({
-        "id": r["id"], 
-        "bill_of_lading": r["bill_of_lading"], 
-        "origin_port": r["origin_port"], 
-        "cargo_type": r["cargo_type"], 
-        "weight": r["weight"], 
-        "risk_level": r["risk_level"], 
-        "status": r["status"], 
-        "notes": r["notes"],
-        "date": r["timestamp"],
-        "actual_weight": r["actual_weight"],
-        "seal_intact": bool(r["seal_intact"]) if r["seal_intact"] is not None else None,
-        "structural_damage": bool(r["structural_damage"]) if r["structural_damage"] is not None else None,
-        "qr_token": r["qr_token"],
-        "assigned_risk_level": r["assigned_risk_level"],
-        "inspection_summary": r["inspection_summary"],
-        "vessel_imo": r["vessel_imo"],
-        "vessel_name": r["vessel_name"],
-        "country_of_origin": r["country_of_origin"],
-        "gross_tonnage": r["gross_tonnage"] if r["gross_tonnage"] is not None else r["weight"],
-        "rms_risk_level": r["rms_risk_level"] if r["rms_risk_level"] is not None else r["assigned_risk_level"],
-        "rms_analysis_memo": r["rms_analysis_memo"] if r["rms_analysis_memo"] is not None else r["inspection_summary"]
+        "id": str(r["_id"]), 
+        "bill_of_lading": r.get("bill_of_lading"), 
+        "origin_port": r.get("origin_port"), 
+        "cargo_type": r.get("cargo_type"), 
+        "weight": r.get("weight"), 
+        "risk_level": r.get("risk_level"), 
+        "status": r.get("status"), 
+        "notes": r.get("notes"),
+        "date": r.get("timestamp"),
+        "actual_weight": r.get("actual_weight"),
+        "seal_intact": bool(r["seal_intact"]) if r.get("seal_intact") is not None else None,
+        "structural_damage": bool(r["structural_damage"]) if r.get("structural_damage") is not None else None,
+        "qr_token": r.get("qr_token"),
+        "assigned_risk_level": r.get("assigned_risk_level"),
+        "inspection_summary": r.get("inspection_summary"),
+        "vessel_imo": r.get("vessel_imo"),
+        "vessel_name": r.get("vessel_name"),
+        "country_of_origin": r.get("country_of_origin"),
+        "gross_tonnage": r.get("gross_tonnage") if r.get("gross_tonnage") is not None else r.get("weight"),
+        "rms_risk_level": r.get("rms_risk_level") if r.get("rms_risk_level") is not None else r.get("assigned_risk_level"),
+        "rms_analysis_memo": r.get("rms_analysis_memo") if r.get("rms_analysis_memo") is not None else r.get("inspection_summary")
     }), 200
 
 @app.route('/api/inspections', methods=['GET'])
 def get_inspections():
     inspector_email = request.args.get('inspectorEmail')
-    conn = get_db()
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
     
     if inspector_email:
-        cursor.execute('SELECT * FROM inspections WHERE inspector_email=? ORDER BY id DESC', (inspector_email,))
+        cursor = inspections_col.find({"inspector_email": inspector_email}).sort("_id", pymongo.DESCENDING)
     else:
-        cursor.execute('SELECT * FROM inspections ORDER BY id DESC')
+        cursor = inspections_col.find().sort("_id", pymongo.DESCENDING)
         
-    rows = cursor.fetchall()
-    conn.close()
-    
     result = []
-    for r in rows:
+    for r in cursor:
         result.append({
-            "id": r["id"], 
-            "bill_of_lading": r["bill_of_lading"], 
-            "origin_port": r["origin_port"], 
-            "cargo_type": r["cargo_type"], 
-            "weight": r["weight"], 
-            "image_url": r["image_url"], 
-            "risk_level": r["risk_level"], 
-            "status": r["status"], 
-            "notes": r["notes"],
-            "inspector_email": r["inspector_email"], 
-            "date": r["timestamp"],
-            "actual_weight": r["actual_weight"],
-            "seal_intact": bool(r["seal_intact"]) if r["seal_intact"] is not None else None,
-            "structural_damage": bool(r["structural_damage"]) if r["structural_damage"] is not None else None,
-            "qr_token": r["qr_token"],
-            "assigned_risk_level": r["assigned_risk_level"] if "assigned_risk_level" in r.keys() else None,
-            "inspection_summary": r["inspection_summary"] if "inspection_summary" in r.keys() else None,
-            "vessel_imo": r["vessel_imo"] if "vessel_imo" in r.keys() else None,
-            "vessel_name": r["vessel_name"] if "vessel_name" in r.keys() else None,
-            "country_of_origin": r["country_of_origin"] if "country_of_origin" in r.keys() else None,
-            "gross_tonnage": r["gross_tonnage"] if "gross_tonnage" in r.keys() else r["weight"],
-            "rms_risk_level": r["rms_risk_level"] if ("rms_risk_level" in r.keys() and r["rms_risk_level"] is not None) else r["assigned_risk_level"],
-            "rms_analysis_memo": r["rms_analysis_memo"] if ("rms_analysis_memo" in r.keys() and r["rms_analysis_memo"] is not None) else r["inspection_summary"]
+            "id": str(r["_id"]), 
+            "bill_of_lading": r.get("bill_of_lading"), 
+            "origin_port": r.get("origin_port"), 
+            "cargo_type": r.get("cargo_type"), 
+            "weight": r.get("weight"), 
+            "image_url": r.get("image_url"), 
+            "risk_level": r.get("risk_level"), 
+            "status": r.get("status"), 
+            "notes": r.get("notes"),
+            "inspector_email": r.get("inspector_email"), 
+            "date": r.get("timestamp"),
+            "actual_weight": r.get("actual_weight"),
+            "seal_intact": bool(r["seal_intact"]) if r.get("seal_intact") is not None else None,
+            "structural_damage": bool(r["structural_damage"]) if r.get("structural_damage") is not None else None,
+            "qr_token": r.get("qr_token"),
+            "assigned_risk_level": r.get("assigned_risk_level"),
+            "inspection_summary": r.get("inspection_summary"),
+            "vessel_imo": r.get("vessel_imo"),
+            "vessel_name": r.get("vessel_name"),
+            "country_of_origin": r.get("country_of_origin"),
+            "gross_tonnage": r.get("gross_tonnage") if r.get("gross_tonnage") is not None else r.get("weight"),
+            "rms_risk_level": r.get("rms_risk_level") if r.get("rms_risk_level") is not None else r.get("assigned_risk_level"),
+            "rms_analysis_memo": r.get("rms_analysis_memo") if r.get("rms_analysis_memo") is not None else r.get("inspection_summary")
         })
     return jsonify(result), 200
 
@@ -541,25 +484,25 @@ def inspect_cargo():
     structural_damage = data.get('structural_damage')
     image_url = data.get('image_url')
     
-    conn = get_db()
-    cursor = conn.cursor()
-    
+    query = {}
     if inspection_id:
-        cursor.execute('''
-            UPDATE inspections 
-            SET actual_weight=?, seal_intact=?, structural_damage=?, image_url=?, status='Inspected - Awaiting Authority Adjudication'
-            WHERE id=? AND (status='Pending' OR status='Awaiting Physical Inspection')
-        ''', (actual_weight, seal_intact, structural_damage, image_url, inspection_id))
+        try:
+            query["_id"] = ObjectId(inspection_id)
+        except:
+            return jsonify({"status": "error", "message": "Invalid ID format"}), 400
     else:
-        cursor.execute('''
-            UPDATE inspections 
-            SET actual_weight=?, seal_intact=?, structural_damage=?, image_url=?, status='Inspected - Awaiting Authority Adjudication'
-            WHERE bill_of_lading=? AND (status='Pending' OR status='Awaiting Physical Inspection')
-        ''', (actual_weight, seal_intact, structural_damage, image_url, manifest_id))
+        query["bill_of_lading"] = manifest_id
         
-    conn.commit()
-    conn.close()
+    query["status"] = {"$in": ["Pending", "Awaiting Physical Inspection"]}
     
+    inspections_col.update_one(query, {"$set": {
+        "actual_weight": actual_weight,
+        "seal_intact": seal_intact,
+        "structural_damage": structural_damage,
+        "image_url": image_url,
+        "status": "Inspected - Awaiting Authority Adjudication"
+    }})
+        
     log_action("Inspect Cargo", "inspector", f"BoL {manifest_id or inspection_id} physical inspection completed.")
     return jsonify({"status": "success"}), 200
 
@@ -570,34 +513,44 @@ def review_inspection():
     status = data.get('status') # 'Approved', 'Rejected', 'Port Clearance Granted', 'Clearance Denied - Detained for Physical Audit'
     notes = data.get('notes')
     
-    conn = get_db()
-    cursor = conn.cursor()
-    
+    try:
+        obj_id = ObjectId(inspection_id)
+    except:
+        return jsonify({"status": "error", "message": "Invalid ID format"}), 400
+        
     # Strictly enforce that approved/granted cargo cannot be modified
-    cursor.execute("SELECT status FROM inspections WHERE id=?", (inspection_id,))
-    row = cursor.fetchone()
-    if row and row[0] in ['Approved', 'Port Clearance Granted']:
-        conn.close()
+    row = inspections_col.find_one({"_id": obj_id})
+    if row and row.get("status") in ['Approved', 'Port Clearance Granted']:
         return jsonify({"status": "error", "message": "This cargo/vessel manifest has already been cleared and approved. Decisions are final and cannot be modified."}), 400
         
     qr_token = None
     if status in ['Approved', 'Port Clearance Granted']:
         qr_token = f"NMPA-PCC-{inspection_id}-{random.randint(100000, 999999)}"
-        cursor.execute("UPDATE inspections SET status=?, notes=?, qr_token=? WHERE id=?", (status, notes, qr_token, inspection_id))
+        inspections_col.update_one({"_id": obj_id}, {"$set": {
+            "status": status,
+            "notes": notes,
+            "qr_token": qr_token
+        }})
     elif status == 'Re-Inspect':
         # Re-inspect resets status back to Pending and clears inspector fields
-        cursor.execute("UPDATE inspections SET status='Pending', notes=?, actual_weight=NULL, seal_intact=NULL, structural_damage=NULL WHERE id=?", (notes, inspection_id))
+        inspections_col.update_one({"_id": obj_id}, {"$set": {
+            "status": "Pending",
+            "notes": notes,
+            "actual_weight": None,
+            "seal_intact": None,
+            "structural_damage": None
+        }})
     else:
-        cursor.execute("UPDATE inspections SET status=?, notes=? WHERE id=?", (status, notes, inspection_id))
+        inspections_col.update_one({"_id": obj_id}, {"$set": {
+            "status": status,
+            "notes": notes
+        }})
     
     # Get inspector email to send notification
-    cursor.execute("SELECT inspector_email, bill_of_lading FROM inspections WHERE id=?", (inspection_id,))
-    row = cursor.fetchone()
-    conn.commit()
-    conn.close()
-    
+    row = inspections_col.find_one({"_id": obj_id})
     if row:
-        inspector_email, bol = row
+        inspector_email = row.get("inspector_email")
+        bol = row.get("bill_of_lading")
         subject = f"NMPA Custom Adjudication - {status} - B/L {bol}"
         body = f"The Import General Manifest for Bill of Lading {bol} has been marked as {status} by the Port Authority.\nAdjudication Notes: {notes}"
         send_email_notification(inspector_email, subject, body)
@@ -607,18 +560,19 @@ def review_inspection():
 
 @app.route('/api/logs', methods=['GET'])
 def get_logs():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM audit_logs ORDER BY id DESC")
-    logs = [{"id": r[0], "action": r[1], "role": r[2], "details": r[3], "date": r[4]} for r in cursor.fetchall()]
-    conn.close()
+    logs = []
+    for r in audit_logs_col.find().sort("_id", pymongo.DESCENDING):
+        logs.append({
+            "id": str(r["_id"]),
+            "action": r.get("action"),
+            "role": r.get("user_role"),
+            "details": r.get("details"),
+            "date": r.get("timestamp")
+        })
     return jsonify(logs), 200
 
 @app.route('/api/complaints', methods=['GET', 'POST'])
 def handle_complaints():
-    conn = get_db()
-    cursor = conn.cursor()
-    
     if request.method == 'POST':
         data = request.json or {}
         email = data.get('email')
@@ -633,75 +587,69 @@ def handle_complaints():
             is_escalated = bool(is_escalated)
             
         if is_escalated:
-            cursor.execute('''
-                INSERT INTO chairman_office_inbox (email, category, description, is_escalated_to_chairman, severity_level)
-                VALUES (?, ?, ?, 1, ?)
-            ''', (email, subject, message, severity))
-            complaint_id = cursor.lastrowid
-            conn.commit()
-            conn.close()
+            res = chairman_office_inbox_col.insert_one({
+                "email": email,
+                "category": subject,
+                "description": message,
+                "is_escalated_to_chairman": True,
+                "severity_level": severity,
+                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
             log_action("Escalate Complaint", "System", f"Escalated complaint by {email} to Chairman")
             return jsonify({
                 "status": "success", 
                 "message": "Grievance escalated directly to Chairman.",
                 "routed_to": "CHAIRMAN_OFFICE_INBOX",
-                "id": complaint_id
+                "id": str(res.inserted_id)
             }), 201
         else:
-            cursor.execute('''
-                INSERT INTO complaints (inspector_email, subject, message, is_escalated_to_chairman, severity_level)
-                VALUES (?, ?, ?, 0, ?)
-            ''', (email, subject, message, severity))
-            complaint_id = cursor.lastrowid
-            conn.commit()
-            conn.close()
+            res = complaints_col.insert_one({
+                "inspector_email": email,
+                "subject": subject,
+                "message": message,
+                "is_escalated_to_chairman": False,
+                "severity_level": severity,
+                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
             log_action("Submit Complaint", "System", f"Complaint submitted by {email}")
             return jsonify({
                 "status": "success", 
                 "message": "Complaint submitted to standard queue.",
                 "routed_to": "STANDARD_GRIEVANCE_QUEUE",
-                "id": complaint_id
+                "id": str(res.inserted_id)
             }), 201
         
     else:
-        cursor.execute("SELECT id, inspector_email, subject, message, timestamp, is_escalated_to_chairman, severity_level FROM complaints ORDER BY id DESC")
-        rows = cursor.fetchall()
-        conn.close()
-        
         result = []
-        for r in rows:
+        for r in complaints_col.find().sort("_id", pymongo.DESCENDING):
             result.append({
-                "id": r[0],
-                "email": r[1],
-                "subject": r[2],
-                "message": r[3],
-                "date": r[4],
-                "is_escalated_to_chairman": bool(r[5]),
-                "severity_level": r[6]
+                "id": str(r["_id"]),
+                "email": r.get("inspector_email"),
+                "subject": r.get("subject"),
+                "message": r.get("message"),
+                "date": r.get("timestamp"),
+                "is_escalated_to_chairman": bool(r.get("is_escalated_to_chairman")),
+                "severity_level": r.get("severity_level")
             })
         return jsonify(result), 200
 
 @app.route('/api/chairman/complaints', methods=['GET'])
 def get_chairman_complaints():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, email, category, description, severity_level, timestamp FROM chairman_office_inbox ORDER BY id DESC")
-    rows = cursor.fetchall()
-    conn.close()
-    
     result = []
-    for r in rows:
+    for r in chairman_office_inbox_col.find().sort("_id", pymongo.DESCENDING):
         result.append({
-            "id": r[0],
-            "email": r[1],
-            "subject": r[2],
-            "message": r[3],
-            "severity_level": r[4],
-            "date": r[5],
+            "id": str(r["_id"]),
+            "email": r.get("email"),
+            "subject": r.get("category"),
+            "message": r.get("description"),
+            "severity_level": r.get("severity_level"),
+            "date": r.get("timestamp"),
             "is_escalated_to_chairman": True
         })
     return jsonify(result), 200
 
 if __name__ == '__main__':
     init_db()
-    app.run(port=5000, debug=True)
+    # Read port from environment, fallback to 5000
+    port = int(os.getenv("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
