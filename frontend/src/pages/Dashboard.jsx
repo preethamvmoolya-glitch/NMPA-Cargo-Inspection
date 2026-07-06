@@ -8,7 +8,7 @@ import {
 } from 'antd';
 import { 
   InboxOutlined, CheckCircleOutlined, ClockCircleOutlined, 
-  HistoryOutlined, QuestionCircleOutlined
+  HistoryOutlined, QuestionCircleOutlined, ReloadOutlined
 } from '@ant-design/icons';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../LanguageContext';
@@ -458,8 +458,8 @@ const Dashboard = () => {
             </Text>
           </Col>
           <Col xs={24} md={6} style={{ textAlign: 'right', marginTop: '10px' }}>
-            <Button type="default" ghost onClick={fetchData} icon={<HistoryOutlined />}>
-              {t('refreshLogs')}
+            <Button type="default" ghost onClick={fetchData} icon={<ReloadOutlined />} size="small">
+              {language === 'en' ? 'Refresh' : 'ताज़ा करें'}
             </Button>
           </Col>
         </Row>
