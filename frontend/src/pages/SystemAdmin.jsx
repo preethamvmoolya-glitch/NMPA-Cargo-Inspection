@@ -257,8 +257,8 @@ const SystemAdmin = () => {
             </Text>
           </Col>
           <Col xs={24} md={6} style={{ textAlign: 'right', marginTop: '10px' }}>
-            <Button type="default" ghost onClick={fetchAll} icon={<ReloadOutlined />}>
-              {t('syncServer')}
+            <Button type="default" ghost onClick={fetchAll} icon={<ReloadOutlined />} size="small">
+              {language === 'en' ? 'Refresh' : 'ताज़ा करें'}
             </Button>
           </Col>
         </Row>
