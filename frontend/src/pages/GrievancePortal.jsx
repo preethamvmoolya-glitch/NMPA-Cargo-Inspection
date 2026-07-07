@@ -46,6 +46,9 @@ const GrievancePortal = () => {
   const [fetchingDetails, setFetchingDetails] = useState(false);
   const [corporateName, setCorporateName] = useState('');
 
+  // File list state for Grievance
+  const [grievanceFileList, setGrievanceFileList] = useState([]);
+
   // Status search states
   const [statusGrievanceId, setStatusGrievanceId] = useState('');
   const [searchedGrievance, setSearchedGrievance] = useState(null);
@@ -112,6 +115,16 @@ const GrievancePortal = () => {
     }, 1000);
   };
 
+  // Helper to convert files to base64
+  const getBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   // Handle complaint submission
   const handleGrievanceSubmit = async (values) => {
     if (statusValue !== 'Others' && !memberDetailsFetched) {
@@ -126,6 +139,16 @@ const GrievancePortal = () => {
     }
 
     setSubmitting(true);
+
+    let base64Doc = '';
+    if (grievanceFileList.length > 0) {
+      try {
+        base64Doc = await getBase64(grievanceFileList[0].originFileObj || grievanceFileList[0]);
+      } catch (err) {
+        message.warning('Failed to encode document.');
+      }
+    }
+
     let combinedDescription = `[Grievance Status/Role]: ${statusValue}\n`;
     if (statusValue !== 'Others') {
       combinedDescription += `[${memberIdType} Identifier]: ${values.identifierValue || memberIdValue}\n`;
@@ -148,7 +171,8 @@ const GrievancePortal = () => {
           category: values.category,
           description: combinedDescription,
           is_escalated_to_chairman: values.isEscalated,
-          severity_level: values.severity || 'Medium'
+          severity_level: values.severity || 'Medium',
+          document: base64Doc
         })
       });
 
@@ -202,6 +226,7 @@ const GrievancePortal = () => {
     setCorporateName('');
     setCaptchaRegister(generateCaptcha());
     setCaptchaInputRegister('');
+    setGrievanceFileList([]);
   };
 
   // View Status Search logic
@@ -403,8 +428,7 @@ const GrievancePortal = () => {
         {[
           { key: 'register', label: t('tabRegisterGrievance'), icon: <EditOutlined /> },
           { key: 'reminder', label: t('tabSendReminder'), icon: <BellOutlined /> },
-          { key: 'status', label: t('tabViewStatus'), icon: <EyeOutlined /> },
-          { key: 'upload', label: t('tabUploadDocument'), icon: <UploadOutlined /> }
+          { key: 'status', label: t('tabViewStatus'), icon: <EyeOutlined /> }
         ].map(tab => {
           const isActive = activeTab === tab.key;
           return (
@@ -746,6 +770,16 @@ const GrievancePortal = () => {
                       <Input.TextArea rows={4} placeholder={t('descriptionPlaceholder')} style={{ resize: 'none' }} />
                     </Form.Item>
 
+                    {/* Upload Grievance Document (Optional) */}
+                    <Form.Item
+                      label={<span style={{ fontWeight: 700 }}>Upload Grievance Document (Optional)</span>}
+                      required={false}
+                    >
+                      <Upload beforeUpload={() => false} maxCount={1} fileList={grievanceFileList} onChange={({ fileList }) => setGrievanceFileList(fileList)}>
+                        <Button icon={<UploadOutlined />}>{t('selectFileBtn')}</Button>
+                      </Upload>
+                    </Form.Item>
+
                     {/* Escalate directly to Chairman */}
                     <Form.Item
                       name="isEscalated"
@@ -1035,86 +1069,6 @@ const GrievancePortal = () => {
             </div>
           )}
 
-          {/* TAB CONTENT: UPLOAD DOCUMENT */}
-          {activeTab === 'upload' && (
-            <div>
-              <div style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: '12px', marginBottom: '20px' }}>
-                <span style={{ color: '#000000', fontWeight: '800', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <UploadOutlined /> {t('uploadDocTitle')}
-                </span>
-              </div>
-
-              <Form
-                form={uploadForm}
-                layout="vertical"
-                onFinish={handleUploadDocument}
-              >
-                <Form.Item
-                  name="registrationNumber"
-                  label={<span style={{ fontWeight: 700 }}>{t('regNumberLabel')}</span>}
-                  rules={[{ required: true, message: t('regNumberLabel') }]}
-                >
-                  <Input placeholder={t('regNumberPlaceholder')} style={{ maxWidth: '400px' }} />
-                </Form.Item>
-
-                {/* Upload File Input */}
-                <Form.Item
-                  label={<span style={{ fontWeight: 700 }}>{t('selectDocLabel')}</span>}
-                  required
-                >
-                  <Upload beforeUpload={() => false} maxCount={1}>
-                    <Button icon={<UploadOutlined />}>{t('selectFileBtn')}</Button>
-                  </Upload>
-                </Form.Item>
-
-                {/* Captcha */}
-                <Form.Item
-                  label={<span style={{ fontWeight: 700 }}>{t('securityCode')}</span>}
-                  required
-                  style={{ marginBottom: '25px' }}
-                >
-                  <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <Input 
-                      placeholder={t('typeSecurityCode')}
-                      value={captchaInputUpload}
-                      onChange={(e) => setCaptchaInputUpload(e.target.value)}
-                      style={{ maxWidth: '200px' }}
-                    />
-                    <div style={{
-                      background: 'repeating-linear-gradient(45deg, #f5f5f5, #e8e8e8 10px, #d8d8d8 10px, #d8d8d8 20px)',
-                      color: '#2e1c7d',
-                      fontFamily: 'monospace',
-                      fontSize: '1.25rem',
-                      fontWeight: 'bold',
-                      fontStyle: 'italic',
-                      letterSpacing: '0.25em',
-                      padding: '4px 16px',
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      userSelect: 'none',
-                      textDecoration: 'line-through'
-                    }}>
-                      {captchaUpload}
-                    </div>
-                    <Button 
-                      icon={<RetweetOutlined />} 
-                      onClick={() => setCaptchaUpload(generateCaptcha())}
-                      title="Refresh Captcha"
-                    />
-                  </div>
-                </Form.Item>
-
-                <Button 
-                  type="primary" 
-                  htmlType="submit"
-                  loading={fetchingDetails}
-                  style={{ background: '#000000', borderColor: '#000000', fontWeight: 600 }}
-                >
-                  {t('uploadDocBtn')}
-                </Button>
-              </Form>
-            </div>
-          )}
 
         </Card>
       </div>
