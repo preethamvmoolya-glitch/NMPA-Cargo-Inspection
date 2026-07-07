@@ -16,11 +16,31 @@ CORS(app)
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/nmpa_cargo")
 
 # Setup MongoDB Connection
-client = pymongo.MongoClient(MONGO_URI)
-# Use default database from URI, fallback to 'nmpa_cargo'
-db = client.get_default_database()
-if db is None:
-    db = client["nmpa_cargo"]
+try:
+    if "<cluster-url>" in MONGO_URI or "<username>" in MONGO_URI:
+        raise ValueError("Placeholder values found in MONGO_URI connection string.")
+    
+    # Try connecting with a timeout of 3 seconds
+    client = pymongo.MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000)
+    # Trigger a connection check
+    client.server_info()
+    
+    db = client.get_default_database()
+    if db is None:
+        db = client["nmpa_cargo"]
+except Exception as e:
+    print("\n" + "="*80)
+    print(" CRITICAL ERROR: COULD NOT CONNECT TO MONGODB DATABASE")
+    print("="*80)
+    print(f"Error details: {e}")
+    print("\nTo resolve this issue:")
+    print("1. Open the backend/.env file.")
+    print("2. Replace the MONGO_URI placeholder with your actual MongoDB Atlas connection string.")
+    print("   Example: MONGO_URI=mongodb+srv://admin:secretPass@mycluster.mongodb.net/nmpa_cargo?...")
+    print("3. Restart the backend server.")
+    print("="*80 + "\n")
+    import sys
+    sys.exit(1)
 
 # MongoDB Collections
 users_col = db["users"]
@@ -28,6 +48,7 @@ inspections_col = db["inspections"]
 audit_logs_col = db["audit_logs"]
 complaints_col = db["complaints"]
 chairman_office_inbox_col = db["chairman_office_inbox"]
+
 
 def init_db():
     # Seed/Reset default users to match requested credentials
