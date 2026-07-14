@@ -347,23 +347,23 @@ const Login = () => {
             </div>
 
             <button id="login-submit" type="submit" className="btn btn-primary btn-full"
-              style={{ fontSize: '0.95rem', padding: '0.75rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              style={{ fontSize: '0.9rem', padding: '0.55rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
               {t('loginBtn')}
             </button>
 
             {/* Quick Demo Accounts Selection */}
             <div style={{
-              marginTop: '1rem',
-              padding: '0.75rem',
+              marginTop: '0.75rem',
+              padding: '0.6rem 0.75rem',
               background: 'rgba(21, 101, 192, 0.04)',
               border: '1.5px dashed var(--nmpa-border-dark)',
               borderRadius: '0.35rem',
               textAlign: 'left'
             }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--nmpa-text)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--nmpa-text)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                 {t('demoCreds')}
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.4rem' }}>
                 {[
                   { label: t('demoAdmin'), user: 'Admin99', pass: 'Admin@123' },
                   { label: t('demoAuthority'), user: 'Auth99', pass: 'Auth@123' },
@@ -410,13 +410,13 @@ const Login = () => {
             <button
               type="button"
               className="btn btn-secondary btn-full"
-              style={{ marginTop: '1rem', fontSize: '0.85rem' }}
+              style={{ marginTop: '0.75rem', fontSize: '0.82rem' }}
               onClick={() => navigate('/grievance')}
             >
               Grievance Portal
             </button>
 
-            <div style={{ marginTop: '1.25rem', borderTop: '1px solid var(--nmpa-border)', paddingTop: '0.75rem', textAlign: 'center' }}>
+            <div style={{ marginTop: '0.85rem', borderTop: '1px solid var(--nmpa-border)', paddingTop: '0.6rem', textAlign: 'center' }}>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                 {[
                   { key: 'reqAccess', text: 'Request Access' },
