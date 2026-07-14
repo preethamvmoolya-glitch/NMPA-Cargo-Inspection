@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -33,6 +33,33 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 function App() {
+  const [appLoading, setAppLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAppLoading(false);
+    }, 1800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (appLoading) {
+    return (
+      <div className="preloader-screen">
+        <div className="preloader-container">
+          <div className="preloader-logo-spin">
+            <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" />
+          </div>
+          <div className="preloader-bar">
+            <div className="preloader-bar-fill"></div>
+          </div>
+          <h1 className="preloader-title">NEW MANGALORE PORT AUTHORITY</h1>
+          <p className="preloader-subtitle">Cargo Inspection & Adjudication System</p>
+          <p className="preloader-status">Initializing Secure Gate Access & RMS Engine...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <LanguageProvider>
       <Router basename={BASENAME}>
