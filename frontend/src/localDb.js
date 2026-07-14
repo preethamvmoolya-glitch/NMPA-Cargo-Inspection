@@ -565,8 +565,9 @@ export function initLocalDb() {
   getStore("nmpa_users", DEFAULT_USERS);
   let inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
   
-  // If the inspections list is the legacy list or is too small, force reset to load our 7-vessel demo dataset!
-  if (!inspections || inspections.length < 5) {
+  // If our signature demo vessel "M.T. Sovereign" is missing from the inspections list, force-load the new 7-vessel presentation dataset!
+  const hasDemoVessel = inspections.some(i => i.vessel_name === "M.T. Sovereign");
+  if (!hasDemoVessel) {
     setStore("nmpa_inspections", DEFAULT_INSPECTIONS);
     inspections = DEFAULT_INSPECTIONS;
     console.log("[localDb] Force-seeded new presentation dataset to nmpa_inspections.");
@@ -593,19 +594,22 @@ export function initLocalDb() {
     console.log("[localDb] Successfully migrated legacy mock inspections to 3x3 Risk Matrix.");
   }
 
-  // Clear/reset standard complaints, escalated complaints, and logs if they are not fully populated
+  // Clear/reset standard complaints, escalated complaints, and logs if they do not contain our seeded entries
   let logs = getStore("nmpa_logs", DEFAULT_LOGS);
-  if (!logs || logs.length < 4) {
+  const hasDemoLog = logs.some(l => l.details && l.details.includes("M.T. Sovereign"));
+  if (!hasDemoLog) {
     setStore("nmpa_logs", DEFAULT_LOGS);
   }
 
   let complaints = getStore("nmpa_complaints", DEFAULT_COMPLAINTS);
-  if (!complaints || complaints.length < 1) {
+  const hasDemoComplaint = complaints.some(c => c.subject === "Weighbridge Calibration Variance");
+  if (!hasDemoComplaint) {
     setStore("nmpa_complaints", DEFAULT_COMPLAINTS);
   }
 
   let chairmanComplaints = getStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
-  if (!chairmanComplaints || chairmanComplaints.length < 1) {
+  const hasDemoChairman = chairmanComplaints.some(c => c.category === "Unregistered Vessel In Anchorage Area");
+  if (!hasDemoChairman) {
     setStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
   }
 }
