@@ -565,6 +565,13 @@ export function initLocalDb() {
   getStore("nmpa_users", DEFAULT_USERS);
   let inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
   
+  // If the inspections list is the legacy list or is too small, force reset to load our 7-vessel demo dataset!
+  if (!inspections || inspections.length < 5) {
+    setStore("nmpa_inspections", DEFAULT_INSPECTIONS);
+    inspections = DEFAULT_INSPECTIONS;
+    console.log("[localDb] Force-seeded new presentation dataset to nmpa_inspections.");
+  }
+  
   // Recalculate/migrate all inspections in the mock localStorage DB to match the new 3x3 matrix logic
   let migrated = false;
   const updatedInspections = inspections.map(item => {
@@ -586,9 +593,21 @@ export function initLocalDb() {
     console.log("[localDb] Successfully migrated legacy mock inspections to 3x3 Risk Matrix.");
   }
 
-  getStore("nmpa_logs", DEFAULT_LOGS);
-  getStore("nmpa_complaints", DEFAULT_COMPLAINTS);
-  getStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
+  // Clear/reset standard complaints, escalated complaints, and logs if they are not fully populated
+  let logs = getStore("nmpa_logs", DEFAULT_LOGS);
+  if (!logs || logs.length < 4) {
+    setStore("nmpa_logs", DEFAULT_LOGS);
+  }
+
+  let complaints = getStore("nmpa_complaints", DEFAULT_COMPLAINTS);
+  if (!complaints || complaints.length < 1) {
+    setStore("nmpa_complaints", DEFAULT_COMPLAINTS);
+  }
+
+  let chairmanComplaints = getStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
+  if (!chairmanComplaints || chairmanComplaints.length < 1) {
+    setStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
+  }
 }
 
 // Mock Fetch Wrapper
