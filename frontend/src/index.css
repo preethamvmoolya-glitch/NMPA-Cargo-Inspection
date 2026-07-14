@@ -29,6 +29,218 @@
   --pending:  #E65100;
 }
 
+/* ─── DARK THEME COLOR OVERRIDES ────────────────────────────── */
+body.dark-theme {
+  --nmpa-white:       #14151f; /* Premium dark slate card background */
+  --nmpa-off-white:   #090a0f; /* Deep dark body background */
+  --nmpa-border:      #262938;
+  --nmpa-border-dark: #373b4f;
+  --nmpa-text:        #ffffff;
+  --nmpa-text-body:   #e2e8f0;
+  --nmpa-text-muted:  #94a3b8;
+  --nmpa-blue-pale:   #182235;
+  --nmpa-row-alt:     #1a1d29;
+  --nmpa-blue:        #3b82f6; /* Readable light blue for links/actions */
+  --nmpa-blue-light:  #60a5fa;
+  --nmpa-blue-mid:    #2563eb;
+  --nmpa-header-bg:   #10111a; /* Darker main header */
+  --nmpa-nav-bg:      #14151f; /* Darker sub-navbar */
+}
+
+/* ─── DARK THEME COMPONENT OVERRIDES ────────────────────────── */
+
+/* Body & page background */
+body.dark-theme {
+  background-color: var(--nmpa-off-white);
+  color: var(--nmpa-text-body);
+}
+
+/* Dashboard inner-page background overlay - become dark */
+body.dark-theme .inner-page-wrapper::after {
+  background: rgba(9, 10, 15, 0.88);
+}
+
+/* Login page */
+body.dark-theme .login-page {
+  background: #090a0f;
+}
+body.dark-theme .login-right {
+  background: #14151f;
+  border-left-color: #262938;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.5);
+}
+body.dark-theme .login-logo {
+  background: #1e2030;
+  border-color: #3b82f6;
+}
+body.dark-theme .login-title {
+  color: #ffffff;
+}
+body.dark-theme .login-subtitle {
+  color: #94a3b8;
+}
+body.dark-theme .role-tab {
+  background: #1a1d29;
+  color: #94a3b8;
+  border-right-color: #373b4f;
+}
+body.dark-theme .role-tab:hover:not(.active) {
+  background: #182235;
+  color: #60a5fa;
+}
+
+/* Input fields in dark mode - via Ant Design config + custom overrides */
+body.dark-theme .ant-input,
+body.dark-theme .ant-input-affix-wrapper,
+body.dark-theme .ant-select-selector,
+body.dark-theme .ant-picker,
+body.dark-theme .ant-input-number {
+  background: #1e2030 !important;
+  border-color: #373b4f !important;
+  color: #e2e8f0 !important;
+}
+body.dark-theme .ant-input::placeholder,
+body.dark-theme .ant-input-affix-wrapper input::placeholder {
+  color: #64748b !important;
+}
+body.dark-theme .ant-input-affix-wrapper .ant-input-suffix {
+  color: #94a3b8;
+}
+
+/* Cards and tables */
+body.dark-theme .ant-card {
+  background: #14151f !important;
+  border-color: #262938 !important;
+}
+body.dark-theme .ant-card-head {
+  background: #10111a !important;
+  border-bottom-color: #262938 !important;
+  color: #e2e8f0 !important;
+}
+body.dark-theme .ant-card-body {
+  background: #14151f !important;
+  color: #e2e8f0 !important;
+}
+body.dark-theme .ant-table {
+  background: #14151f !important;
+  color: #e2e8f0 !important;
+}
+body.dark-theme .ant-table-thead > tr > th {
+  background: #10111a !important;
+  color: #94a3b8 !important;
+  border-bottom-color: #262938 !important;
+}
+body.dark-theme .ant-table-tbody > tr > td {
+  background: #14151f !important;
+  border-bottom-color: #1a1d29 !important;
+  color: #e2e8f0 !important;
+}
+body.dark-theme .ant-table-tbody > tr:nth-child(even) > td {
+  background: #1a1d29 !important;
+}
+body.dark-theme .ant-table-tbody > tr:hover > td {
+  background: #182235 !important;
+}
+
+/* Modal overrides */
+body.dark-theme .ant-modal-content,
+body.dark-theme .ant-modal-header {
+  background: #14151f !important;
+  border-color: #262938 !important;
+}
+body.dark-theme .ant-modal-title,
+body.dark-theme .ant-modal-body {
+  color: #e2e8f0 !important;
+}
+
+/* Drawer */
+body.dark-theme .ant-drawer-content,
+body.dark-theme .ant-drawer-header {
+  background: #14151f !important;
+  border-color: #262938 !important;
+}
+body.dark-theme .ant-drawer-title {
+  color: #e2e8f0 !important;
+}
+
+/* Statistic values */
+body.dark-theme .ant-statistic-title {
+  color: #94a3b8 !important;
+}
+body.dark-theme .ant-statistic-content {
+  color: #e2e8f0 !important;
+}
+
+/* Tabs */
+body.dark-theme .ant-tabs-tab {
+  color: #94a3b8 !important;
+}
+body.dark-theme .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #60a5fa !important;
+}
+body.dark-theme .ant-tabs-ink-bar {
+  background: #60a5fa !important;
+}
+
+/* Select dropdown */
+body.dark-theme .ant-select-dropdown {
+  background: #1e2030 !important;
+  border-color: #373b4f !important;
+}
+body.dark-theme .ant-select-item {
+  color: #e2e8f0 !important;
+}
+body.dark-theme .ant-select-item-option-active,
+body.dark-theme .ant-select-item-option-selected {
+  background: #182235 !important;
+  color: #60a5fa !important;
+}
+
+/* Forms */
+body.dark-theme .ant-form-item-label > label {
+  color: #94a3b8 !important;
+}
+
+/* App layout background */
+body.dark-theme .app-layout {
+  background-color: #090a0f;
+}
+body.dark-theme .main-content-container {
+  background-color: #090a0f;
+}
+
+/* Preloader in dark mode */
+body.dark-theme .preloader-screen {
+  background: #090a0f;
+}
+body.dark-theme .preloader-title {
+  color: #60a5fa;
+}
+body.dark-theme .preloader-subtitle {
+  color: #94a3b8;
+}
+body.dark-theme .preloader-bar {
+  background: #262938;
+}
+body.dark-theme .preloader-bar-fill {
+  background: #3b82f6;
+}
+body.dark-theme .preloader-logo-spin {
+  background: #1e2030;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+}
+body.dark-theme .preloader-logo-spin::after {
+  border-color: #262938;
+  border-top-color: #3b82f6;
+}
+
+/* Error box */
+body.dark-theme .error-box {
+  background: #2d1515;
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -526,7 +738,7 @@ button { cursor: pointer; font-family: inherit; }
 
 .login-right {
   width: 460px; /* Wider container */
-  background: #fff;
+  background: var(--nmpa-white);
   border-left: 1px solid var(--nmpa-border);
   display: flex;
   flex-direction: column;
@@ -549,7 +761,7 @@ button { cursor: pointer; font-family: inherit; }
 .login-logo {
   width: 52px; /* Smaller logo */
   height: 52px;
-  background: #fff;
+  background: var(--nmpa-white);
   border-radius: 50%;
   border: 3px solid var(--nmpa-blue);
   display: flex;
@@ -586,7 +798,7 @@ button { cursor: pointer; font-family: inherit; }
   font-size: 0.72rem;
   font-weight: 600;
   border: none;
-  background: #fff;
+  background: var(--nmpa-white);
   color: var(--nmpa-text-muted);
   cursor: pointer;
   display: flex;

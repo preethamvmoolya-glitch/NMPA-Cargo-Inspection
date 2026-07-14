@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { translations } from './translations';
 
 const LanguageContext = createContext();
@@ -8,10 +8,29 @@ export const LanguageProvider = ({ children }) => {
     return localStorage.getItem('appLanguage') || 'en';
   });
 
+  const [darkMode, setDarkModeState] = useState(() => {
+    return localStorage.getItem('appDarkMode') === 'true';
+  });
+
   const setLanguage = (lang) => {
     localStorage.setItem('appLanguage', lang);
     setLanguageState(lang);
   };
+
+  const toggleDarkMode = () => {
+    const nextVal = !darkMode;
+    localStorage.setItem('appDarkMode', nextVal ? 'true' : 'false');
+    setDarkModeState(nextVal);
+  };
+
+  // Sync body theme class whenever darkMode changes
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.remove('dark-theme');
+    }
+  }, [darkMode]);
 
   const t = (key) => {
     const langDict = translations[language] || translations.en;
@@ -26,7 +45,7 @@ export const LanguageProvider = ({ children }) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, darkMode, toggleDarkMode, t }}>
       {children}
     </LanguageContext.Provider>
   );

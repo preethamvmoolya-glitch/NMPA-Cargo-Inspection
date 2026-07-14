@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import { Modal, Form, Input, Select, Checkbox, message, Button } from 'antd';
 import { useLanguage } from '../LanguageContext';
 import API_BASE from '../api';
@@ -15,7 +15,7 @@ const Login = () => {
   const [escalationModalVisible, setEscalationModalVisible] = useState(false);
   const [escalationForm] = Form.useForm();
   const [submittingEscalation, setSubmittingEscalation] = useState(false);
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage, darkMode, toggleDarkMode, t } = useLanguage();
   const [captchaCode, setCaptchaCode] = useState(() => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
     let result = '';
@@ -169,6 +169,29 @@ const Login = () => {
               HINDI
             </span>
           </div>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+          {/* Dark Mode Toggle */}
+          <button
+            type="button"
+            onClick={toggleDarkMode}
+            title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              outline: 'none'
+            }}
+          >
+            {darkMode ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
           <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
           <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.78rem' }}>
             {t('loginTitle')} · v2.0

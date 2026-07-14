@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { 
   LogOut, User, Shield, Clock, History, HelpCircle, 
-  FileText, BarChart3, Settings, Users, MessageSquare, AlertTriangle, CheckCircle2
+  FileText, BarChart3, Settings, Users, MessageSquare, AlertTriangle, CheckCircle2,
+  Sun, Moon
 } from 'lucide-react';
 import { Modal } from 'antd';
 import { useLanguage } from '../LanguageContext';
@@ -13,7 +14,7 @@ const Sidebar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const role = localStorage.getItem('userRole');
   const userName = localStorage.getItem('userName') || 'User';
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage, darkMode, toggleDarkMode, t } = useLanguage();
 
   const [logoModalVisible, setLogoModalVisible] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
@@ -187,22 +188,48 @@ const Sidebar = () => {
 
       {/* Sidebar Footer */}
       <div className="sidebar-footer">
-        {/* Language Selection */}
-        <div className="sidebar-lang-toggle">
-          <button 
-            type="button" 
-            className={`lang-btn ${language === 'en' ? 'active' : ''}`}
-            onClick={() => setLanguage('en')}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '0.75rem' }}>
+          {/* Language Selection */}
+          <div className="sidebar-lang-toggle" style={{ margin: 0 }}>
+            <button 
+              type="button" 
+              className={`lang-btn ${language === 'en' ? 'active' : ''}`}
+              onClick={() => setLanguage('en')}
+            >
+              EN
+            </button>
+            <span className="lang-sep">|</span>
+            <button 
+              type="button" 
+              className={`lang-btn ${language === 'hi' ? 'active' : ''}`}
+              onClick={() => setLanguage('hi')}
+            >
+              हिं
+            </button>
+          </div>
+
+          {/* Dark Mode Toggle */}
+          <button
+            type="button"
+            className="theme-toggle-btn"
+            onClick={toggleDarkMode}
+            title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              outline: 'none'
+            }}
           >
-            EN
-          </button>
-          <span className="lang-sep">|</span>
-          <button 
-            type="button" 
-            className={`lang-btn ${language === 'hi' ? 'active' : ''}`}
-            onClick={() => setLanguage('hi')}
-          >
-            हिं
+            {darkMode ? <Sun size={15} /> : <Moon size={15} />}
           </button>
         </div>
 
