@@ -181,11 +181,42 @@ const Login = () => {
         {/* Left: Port Image */}
         <div className="login-left">
           <img src={`${import.meta.env.BASE_URL}port-bg.png`} alt="New Mangalore Port" />
-          <div className="login-left-overlay">
-            <h2>{t('nmpaTitle')}</h2>
-            <p>{t('loginTitle')}</p>
-            <p style={{ fontSize: '0.8rem', marginTop: '0.25rem', opacity: 0.75 }}>
-              Secure · Efficient · Transparent
+          <div className="login-left-overlay" style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+            padding: '4rem',
+            background: 'linear-gradient(135deg, rgba(13, 43, 94, 0.8) 0%, rgba(13, 43, 94, 0.45) 100%)'
+          }}>
+            <h1 style={{
+              color: '#fff',
+              fontSize: '2.6rem',
+              fontWeight: 800,
+              lineHeight: 1.25,
+              marginBottom: '1.5rem',
+              maxWidth: '85%',
+              textShadow: '0 2px 10px rgba(0, 0, 0, 0.25)'
+            }}>
+              {language === 'en' ? 'Make Your Cargo Inspections Hassle-Free' : 'अपने कार्गो निरीक्षण को परेशानी मुक्त बनाएं'}
+            </h1>
+            <h2 style={{
+              color: '#fff',
+              fontSize: '1.45rem',
+              fontWeight: 600,
+              marginBottom: '0.35rem',
+              textShadow: '0 1px 5px rgba(0, 0, 0, 0.2)'
+            }}>
+              {language === 'en' ? 'Login as a Port Official' : 'पत्तन अधिकारी के रूप में लॉगिन करें'}
+            </h2>
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.95)',
+              fontSize: '1rem',
+              fontWeight: 500,
+              margin: 0,
+              textShadow: '0 1px 4px rgba(0, 0, 0, 0.15)'
+            }}>
+              {language === 'en' ? 'Inspector, Port Authority, Admin' : 'इंस्पेक्टर, पत्तन प्राधिकरण, एडमिन'}
             </p>
           </div>
         </div>
