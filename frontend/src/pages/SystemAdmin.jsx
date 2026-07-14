@@ -10,7 +10,6 @@ import {
   UserAddOutlined, ReloadOutlined, DeleteOutlined, EditOutlined, 
   CheckOutlined, CloseOutlined, SecurityScanOutlined, CommentOutlined
 } from '@ant-design/icons';
-import Navbar from '../components/Navbar';
 import { useLanguage } from '../LanguageContext';
 
 const { Title, Text } = Typography;
@@ -251,10 +250,17 @@ const SystemAdmin = () => {
       }}>
         <Row align="middle" justify="space-between">
           <Col xs={24} md={18}>
-            <Title level={3} style={{ color: '#fff', margin: 0 }}>{t('adminTitle')}</Title>
-            <Text style={{ color: 'rgba(255,255,255,0.8)' }}>
-              {t('adminSubtitle')}
-            </Text>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div style={{ width: '48px', height: '48px', background: '#fff', borderRadius: '50%', padding: '3px', display: 'flex', alignItems: 'center', justify: 'center', flexShrink: 0 }}>
+                <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+              </div>
+              <div>
+                <Title level={3} style={{ color: '#fff', margin: 0 }}>{t('adminTitle')}</Title>
+                <Text style={{ color: 'rgba(255,255,255,0.8)' }}>
+                  {t('adminSubtitle')}
+                </Text>
+              </div>
+            </div>
           </Col>
           <Col xs={24} md={6} style={{ textAlign: 'right', marginTop: '10px' }}>
             <Button type="default" ghost onClick={fetchAll} icon={<ReloadOutlined />} size="small">
@@ -268,6 +274,7 @@ const SystemAdmin = () => {
       <Card style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
         <Tabs 
           activeKey={activeTab} 
+          renderTabBar={() => null}
           onChange={handleTabChange}
           centered
           items={[

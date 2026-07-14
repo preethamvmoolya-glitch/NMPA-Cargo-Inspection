@@ -7,7 +7,7 @@ import PortAuthority from './pages/PortAuthority';
 import VerifyClearance from './pages/VerifyClearance';
 import GrievancePortal from './pages/GrievancePortal';
 import { LanguageProvider } from './LanguageContext';
-import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
 
 // GitHub Pages subpath basename
 const BASENAME = import.meta.env.BASE_URL;
@@ -21,12 +21,14 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/dashboard" />;
   }
   return (
-    <>
-      <Navbar />
-      <div className="inner-page-wrapper">
-        {children}
+    <div className="app-layout">
+      <Sidebar />
+      <div className="main-content-container">
+        <div className="inner-page-wrapper">
+          {children}
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

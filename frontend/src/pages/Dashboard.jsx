@@ -10,7 +10,6 @@ import {
   InboxOutlined, CheckCircleOutlined, ClockCircleOutlined, 
   HistoryOutlined, QuestionCircleOutlined, ReloadOutlined
 } from '@ant-design/icons';
-import Navbar from '../components/Navbar';
 import { useLanguage } from '../LanguageContext';
 
 const { Title, Text } = Typography;
@@ -92,6 +91,8 @@ const Dashboard = () => {
           rmsAnalysisMemo: item.rms_analysis_memo || item.inspection_summary
         }));
         setAllCargo(mapped);
+        const pendingCount = mapped.filter(item => item.status === 'Pending' || item.status === 'Awaiting Physical Inspection').length;
+        window.dispatchEvent(new CustomEvent('nmpa-pending-count', { detail: pendingCount }));
       } else {
         message.error(language === 'en' ? 'Failed to retrieve cargo listings.' : 'कार्गो सूची प्राप्त करने में विफल।');
       }
@@ -452,10 +453,17 @@ const Dashboard = () => {
       }}>
         <Row align="middle" justify="space-between">
           <Col xs={24} md={18}>
-            <Title level={3} style={{ color: '#fff', margin: 0 }}>{t('inspectorStation')}</Title>
-            <Text style={{ color: 'rgba(255,255,255,0.8)' }}>
-              {t('operatorLabel')}: {userName} · {t('nmpaTitle')} {language === 'en' ? 'Gate Access' : 'गेट एक्सेस'}
-            </Text>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div style={{ width: '48px', height: '48px', background: '#fff', borderRadius: '50%', padding: '3px', display: 'flex', alignItems: 'center', justify: 'center', flexShrink: 0 }}>
+                <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+              </div>
+              <div>
+                <Title level={3} style={{ color: '#fff', margin: 0 }}>{t('inspectorStation')}</Title>
+                <Text style={{ color: 'rgba(255,255,255,0.8)' }}>
+                  {t('operatorLabel')}: {userName} · {t('nmpaTitle')} {language === 'en' ? 'Gate Access' : 'गेट एक्सेस'}
+                </Text>
+              </div>
+            </div>
           </Col>
           <Col xs={24} md={6} style={{ textAlign: 'right', marginTop: '10px' }}>
             <Button type="default" ghost onClick={fetchData} icon={<ReloadOutlined />} size="small">
@@ -509,7 +517,7 @@ const Dashboard = () => {
 
       {/* Tabs Layout */}
       <Card style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
-        <Tabs activeKey={activeTab} onChange={handleTabChange} items={[
+        <Tabs activeKey={activeTab} renderTabBar={() => null} onChange={handleTabChange} items={[
           {
             key: '1',
             label: (

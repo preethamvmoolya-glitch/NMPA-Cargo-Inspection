@@ -11,7 +11,6 @@ import {
   FileSearchOutlined, PrinterOutlined
 } from '@ant-design/icons';
 import { QRCode } from 'antd';
-import Navbar from '../components/Navbar';
 import { useLanguage } from '../LanguageContext';
 
 const { Title, Text } = Typography;
@@ -370,6 +369,8 @@ const PortAuthority = () => {
           rmsAnalysisMemo: item.rms_analysis_memo || item.inspection_summary
         }));
         setInspectedCargoList(mapped);
+        const pendingApprovals = mapped.filter(item => item.status === 'Inspected - Awaiting Authority Adjudication' || item.status === 'Awaiting Authority Adjudication' || item.status === 'Pending Approval').length;
+        window.dispatchEvent(new CustomEvent('nmpa-approvals-count', { detail: pendingApprovals }));
       } else {
         message.error(language === 'en' ? 'Failed to retrieve inspection queue.' : 'निरीक्षण कतार प्राप्त करने में विफल।');
       }
@@ -688,10 +689,17 @@ const PortAuthority = () => {
       }}>
         <Row align="middle" justify="space-between">
           <Col xs={24} md={18}>
-            <Title level={3} style={{ color: '#fff', margin: 0 }}>{t('authorityStation')}</Title>
-            <Text style={{ color: 'rgba(255,255,255,0.8)' }}>
-              {t('authoritySubtitle')}
-            </Text>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div style={{ width: '48px', height: '48px', background: '#fff', borderRadius: '50%', padding: '3px', display: 'flex', alignItems: 'center', justify: 'center', flexShrink: 0 }}>
+                <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+              </div>
+              <div>
+                <Title level={3} style={{ color: '#fff', margin: 0 }}>{t('authorityStation')}</Title>
+                <Text style={{ color: 'rgba(255,255,255,0.8)' }}>
+                  {t('authoritySubtitle')}
+                </Text>
+              </div>
+            </div>
           </Col>
           <Col xs={24} md={6} style={{ textAlign: 'right', marginTop: '10px' }}>
             <Button type="default" ghost onClick={fetchInspections} icon={<ReloadOutlined />} size="small">
@@ -705,6 +713,7 @@ const PortAuthority = () => {
       <Card style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
         <Tabs
           activeKey={activeTab}
+          renderTabBar={() => null}
           onChange={handleTabChange}
           centered
           items={[
