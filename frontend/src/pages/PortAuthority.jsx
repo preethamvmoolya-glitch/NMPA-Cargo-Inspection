@@ -689,17 +689,10 @@ const PortAuthority = () => {
       }}>
         <Row align="middle" justify="space-between">
           <Col xs={24} md={18}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div style={{ width: '48px', height: '48px', background: '#fff', borderRadius: '50%', padding: '3px', display: 'flex', alignItems: 'center', justify: 'center', flexShrink: 0 }}>
-                <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
-              </div>
-              <div>
-                <Title level={3} style={{ color: '#fff', margin: 0 }}>{t('authorityStation')}</Title>
-                <Text style={{ color: 'rgba(255,255,255,0.8)' }}>
-                  {t('authoritySubtitle')}
-                </Text>
-              </div>
-            </div>
+            <Title level={3} style={{ color: '#fff', margin: 0 }}>{t('authorityStation')}</Title>
+            <Text style={{ color: 'rgba(255,255,255,0.8)' }}>
+              {t('authoritySubtitle')}
+            </Text>
           </Col>
           <Col xs={24} md={6} style={{ textAlign: 'right', marginTop: '10px' }}>
             <Button type="default" ghost onClick={fetchInspections} icon={<ReloadOutlined />} size="small">
