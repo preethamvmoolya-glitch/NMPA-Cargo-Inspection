@@ -37,54 +37,284 @@ const DEFAULT_USERS = [
 const DEFAULT_INSPECTIONS = [
   {
     id: 1,
-    bill_of_lading: "BL-NMPA-2026-908",
-    origin_port: "Singapore",
-    cargo_type: "Containerized Timber and Raw Cashew Logistics",
-    weight: 25000,
+    bill_of_lading: "BOL-PET-9021",
+    origin_port: "Iran",
+    cargo_type: "Crude Petroleum (UN 1267 Flammable)",
+    weight: 18500,
+    image_url: "",
+    risk_level: "CRITICAL RISK",
+    status: "Awaiting Physical Inspection",
+    inspector_email: "inspector99@nmpa.gov",
+    assigned_risk_level: "CRITICAL RISK",
+    inspection_summary: JSON.stringify({
+      risk_rating: "CRITICAL RISK",
+      confidence_score: 0.95,
+      primary_trigger: "PETROLEUM [3x3=9]",
+      inspection_focus: "MANDATORY PHYSICAL AUDIT: immediate cargo sampling, MSDS review, and flag registry verification. | Origin: High (Origin matches high-risk/sanctioned database) | Impact: Level 3 - High-hazard commodity (PETROLEUM) (High weight: 18,500 MT)"
+    }),
+    vessel_imo: "9182736",
+    vessel_name: "M.T. Sovereign",
+    country_of_origin: "Iran",
+    gross_tonnage: 18500,
+    rms_risk_level: "CRITICAL RISK",
+    rms_analysis_memo: JSON.stringify({
+      risk_rating: "CRITICAL RISK",
+      confidence_score: 0.95,
+      primary_trigger: "PETROLEUM [3x3=9]",
+      inspection_focus: "MANDATORY PHYSICAL AUDIT: immediate cargo sampling, MSDS review, and flag registry verification. | Origin: High (Origin matches high-risk/sanctioned database) | Impact: Level 3 - High-hazard commodity (PETROLEUM) (High weight: 18,500 MT)"
+    }),
+    actual_weight: null,
+    seal_intact: null,
+    structural_damage: null,
+    qr_token: null,
+    date: new Date(Date.now() - 3600000 * 2).toISOString()
+  },
+  {
+    id: 2,
+    bill_of_lading: "BOL-CAS-5512",
+    origin_port: "Vietnam",
+    cargo_type: "Cashew Nuts (Raw Agricultural)",
+    weight: 8500,
     image_url: "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=400&q=80",
     risk_level: "ELEVATED RISK",
-    status: "Port Clearance Granted",
+    status: "Inspected - Awaiting Authority Adjudication",
     inspector_email: "inspector99@nmpa.gov",
     assigned_risk_level: "ELEVATED RISK",
     inspection_summary: JSON.stringify({
       risk_rating: "ELEVATED RISK",
       confidence_score: 0.85,
-      primary_trigger: "TIMBER [1x3=3]",
-      inspection_focus: "TARGETED AUDIT: verify phytosanitary papers, tariff registration, and scan seal integrity. | Origin: Low (Origin is verified pre-approved safe partner) | Impact: Level 3 - Standard/perishable commodity (TIMBER) (High weight: 25,000 MT)"
+      primary_trigger: "CASHEW [2x2=4]",
+      inspection_focus: "TARGETED AUDIT: verify phytosanitary papers, tariff registration, and scan seal integrity. | Origin: Medium (Standard maritime security profile) | Impact: Level 2 - Standard/perishable commodity (CASHEW) (Med weight: 8,500 MT)"
     }),
-    vessel_imo: "9497268",
-    vessel_name: "MV Mangalore Express",
-    country_of_origin: "Singapore",
-    gross_tonnage: 25000,
+    vessel_imo: "9203847",
+    vessel_name: "Cashew Queen",
+    country_of_origin: "Vietnam",
+    gross_tonnage: 8500,
     rms_risk_level: "ELEVATED RISK",
     rms_analysis_memo: JSON.stringify({
       risk_rating: "ELEVATED RISK",
       confidence_score: 0.85,
-      primary_trigger: "TIMBER [1x3=3]",
-      inspection_focus: "TARGETED AUDIT: verify phytosanitary papers, tariff registration, and scan seal integrity. | Origin: Low (Origin is verified pre-approved safe partner) | Impact: Level 3 - Standard/perishable commodity (TIMBER) (High weight: 25,000 MT)"
+      primary_trigger: "CASHEW [2x2=4]",
+      inspection_focus: "TARGETED AUDIT: verify phytosanitary papers, tariff registration, and scan seal integrity. | Origin: Medium (Standard maritime security profile) | Impact: Level 2 - Standard/perishable commodity (CASHEW) (Med weight: 8,500 MT)"
     }),
-    actual_weight: 25000,
+    actual_weight: 8512.5,
     seal_intact: true,
     structural_damage: false,
-    qr_token: "NMPA-PCC-908-123456",
-    date: new Date(Date.now() - 3600000 * 2).toISOString()
+    qr_token: null,
+    notes: "Customs seal checked. Cashew quality certification attached. Weight within tolerance (+0.14%).",
+    date: new Date(Date.now() - 3600000 * 5).toISOString()
+  },
+  {
+    id: 3,
+    bill_of_lading: "BOL-TEX-1039",
+    origin_port: "Singapore",
+    cargo_type: "Cotton Textiles & Garments",
+    weight: 3200,
+    image_url: "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=400&q=80",
+    risk_level: "ROUTINE RISK",
+    status: "Port Clearance Granted",
+    inspector_email: "inspector99@nmpa.gov",
+    assigned_risk_level: "ROUTINE RISK",
+    inspection_summary: JSON.stringify({
+      risk_rating: "ROUTINE RISK",
+      confidence_score: 0.90,
+      primary_trigger: "TEXTILES [1x1=1]",
+      inspection_focus: "ROUTINE INSPECTION: calibrate weighbridge tonnage and run barcode visual scanning. | Origin: Low (Origin is verified pre-approved safe partner) | Impact: Level 1 - Routine dry commodity (TEXTILES)"
+    }),
+    vessel_imo: "9312984",
+    vessel_name: "Silk Road Express",
+    country_of_origin: "Singapore",
+    gross_tonnage: 3200,
+    rms_risk_level: "ROUTINE RISK",
+    rms_analysis_memo: JSON.stringify({
+      risk_rating: "ROUTINE RISK",
+      confidence_score: 0.90,
+      primary_trigger: "TEXTILES [1x1=1]",
+      inspection_focus: "ROUTINE INSPECTION: calibrate weighbridge tonnage and run barcode visual scanning. | Origin: Low (Origin is verified pre-approved safe partner) | Impact: Level 1 - Routine dry commodity (TEXTILES)"
+    }),
+    actual_weight: 3200.0,
+    seal_intact: true,
+    structural_damage: false,
+    qr_token: "NMPA-PCC-676b92a3f91-10298",
+    notes: "Verified at weighbridge #2. Barcode scanner completed validation. Authority cleared for unloading.",
+    date: new Date(Date.now() - 3600000 * 24).toISOString()
+  },
+  {
+    id: 4,
+    bill_of_lading: "BOL-SUL-4028",
+    origin_port: "Somalia",
+    cargo_type: "Granular Sulfur (Hazardous Class 4)",
+    weight: 16000,
+    image_url: "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=400&q=80",
+    risk_level: "CRITICAL RISK",
+    status: "Clearance Denied - Detained for Physical Audit",
+    inspector_email: "inspector99@nmpa.gov",
+    assigned_risk_level: "CRITICAL RISK",
+    inspection_summary: JSON.stringify({
+      risk_rating: "CRITICAL RISK",
+      confidence_score: 0.95,
+      primary_trigger: "SULFUR [3x3=9]",
+      inspection_focus: "MANDATORY PHYSICAL AUDIT: immediate cargo sampling, MSDS review, and flag registry verification. | Origin: High (Origin matches high-risk/sanctioned database) | Impact: Level 3 - High-hazard commodity (SULFUR) (High weight: 16,000 MT)"
+    }),
+    vessel_imo: "9048372",
+    vessel_name: "Volcano Trader",
+    country_of_origin: "Somalia",
+    gross_tonnage: 16000,
+    rms_risk_level: "CRITICAL RISK",
+    rms_analysis_memo: JSON.stringify({
+      risk_rating: "CRITICAL RISK",
+      confidence_score: 0.95,
+      primary_trigger: "SULFUR [3x3=9]",
+      inspection_focus: "MANDATORY PHYSICAL AUDIT: immediate cargo sampling, MSDS review, and flag registry verification. | Origin: High (Origin matches high-risk/sanctioned database) | Impact: Level 3 - High-hazard commodity (SULFUR) (High weight: 16,000 MT)"
+    }),
+    actual_weight: 16010,
+    seal_intact: true,
+    structural_damage: true,
+    qr_token: null,
+    notes: "Container wall shows slight structural degradation. Detained in hazardous cargo bay B3 pending chemical sampling.",
+    date: new Date(Date.now() - 3600000 * 48).toISOString()
+  },
+  {
+    id: 5,
+    bill_of_lading: "BOL-COF-6677",
+    origin_port: "Brazil",
+    cargo_type: "Arabica Coffee Beans",
+    weight: 9000,
+    image_url: "",
+    risk_level: "ELEVATED RISK",
+    status: "Awaiting Physical Inspection",
+    inspector_email: "inspector99@nmpa.gov",
+    assigned_risk_level: "ELEVATED RISK",
+    inspection_summary: JSON.stringify({
+      risk_rating: "ELEVATED RISK",
+      confidence_score: 0.85,
+      primary_trigger: "COFFEE [2x2=4]",
+      inspection_focus: "TARGETED AUDIT: verify phytosanitary papers, tariff registration, and scan seal integrity. | Origin: Medium (Standard maritime security profile) | Impact: Level 2 - Standard/perishable commodity (COFFEE) (Med weight: 9,000 MT)"
+    }),
+    vessel_imo: "9174829",
+    vessel_name: "Arabica Carrier",
+    country_of_origin: "Brazil",
+    gross_tonnage: 9000,
+    rms_risk_level: "ELEVATED RISK",
+    rms_analysis_memo: JSON.stringify({
+      risk_rating: "ELEVATED RISK",
+      confidence_score: 0.85,
+      primary_trigger: "COFFEE [2x2=4]",
+      inspection_focus: "TARGETED AUDIT: verify phytosanitary papers, tariff registration, and scan seal integrity. | Origin: Medium (Standard maritime security profile) | Impact: Level 2 - Standard/perishable commodity (COFFEE) (Med weight: 9,000 MT)"
+    }),
+    actual_weight: null,
+    seal_intact: null,
+    structural_damage: null,
+    qr_token: null,
+    date: new Date(Date.now() - 3600000 * 8).toISOString()
+  },
+  {
+    id: 6,
+    bill_of_lading: "BOL-CER-1122",
+    origin_port: "Japan",
+    cargo_type: "Porcelain Tiles & Decorative Ceramics",
+    weight: 4500,
+    image_url: "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=400&q=80",
+    risk_level: "ROUTINE RISK",
+    status: "Approved",
+    inspector_email: "inspector99@nmpa.gov",
+    assigned_risk_level: "ROUTINE RISK",
+    inspection_summary: JSON.stringify({
+      risk_rating: "ROUTINE RISK",
+      confidence_score: 0.90,
+      primary_trigger: "CERAMICS [1x1=1]",
+      inspection_focus: "ROUTINE INSPECTION: calibrate weighbridge tonnage and run barcode visual scanning. | Origin: Low (Origin is verified pre-approved safe partner) | Impact: Level 1 - Routine dry commodity (CERAMICS)"
+    }),
+    vessel_imo: "9283746",
+    vessel_name: "Claymore Liner",
+    country_of_origin: "Japan",
+    gross_tonnage: 4500,
+    rms_risk_level: "ROUTINE RISK",
+    rms_analysis_memo: JSON.stringify({
+      risk_rating: "ROUTINE RISK",
+      confidence_score: 0.90,
+      primary_trigger: "CERAMICS [1x1=1]",
+      inspection_focus: "ROUTINE INSPECTION: calibrate weighbridge tonnage and run barcode visual scanning. | Origin: Low (Origin is verified pre-approved safe partner) | Impact: Level 1 - Routine dry commodity (CERAMICS)"
+    }),
+    actual_weight: 4498.2,
+    seal_intact: true,
+    structural_damage: false,
+    qr_token: "NMPA-PCC-CER-198273",
+    notes: "Routine inspection passed. Clean bill of health. Custom clearance approved.",
+    date: new Date(Date.now() - 3600000 * 30).toISOString()
+  },
+  {
+    id: 7,
+    bill_of_lading: "BOL-METH-3310",
+    origin_port: "Venezuela",
+    cargo_type: "Liquid Methanol (Hazardous UN 1230)",
+    weight: 22000,
+    image_url: "https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=400&q=80",
+    risk_level: "CRITICAL RISK",
+    status: "Inspected - Awaiting Authority Adjudication",
+    inspector_email: "inspector99@nmpa.gov",
+    assigned_risk_level: "CRITICAL RISK",
+    inspection_summary: JSON.stringify({
+      risk_rating: "CRITICAL RISK",
+      confidence_score: 0.95,
+      primary_trigger: "METHANOL [3x3=9]",
+      inspection_focus: "MANDATORY PHYSICAL AUDIT: immediate cargo sampling, MSDS review, and flag registry verification. | Origin: High (Origin matches high-risk/sanctioned database) | Impact: Level 3 - High-hazard commodity (METHANOL) (High weight: 22,000 MT)"
+    }),
+    vessel_imo: "9247384",
+    vessel_name: "M.T. Nebula",
+    country_of_origin: "Venezuela",
+    gross_tonnage: 22000,
+    rms_risk_level: "CRITICAL RISK",
+    rms_analysis_memo: JSON.stringify({
+      risk_rating: "CRITICAL RISK",
+      confidence_score: 0.95,
+      primary_trigger: "METHANOL [3x3=9]",
+      inspection_focus: "MANDATORY PHYSICAL AUDIT: immediate cargo sampling, MSDS review, and flag registry verification. | Origin: High (Origin matches high-risk/sanctioned database) | Impact: Level 3 - High-hazard commodity (METHANOL) (High weight: 22,000 MT)"
+    }),
+    actual_weight: 21995,
+    seal_intact: true,
+    structural_damage: false,
+    qr_token: null,
+    notes: "Pressure valve integrity checked. Chemical compliance sheet uploaded. Waiting authority sign-off.",
+    date: new Date(Date.now() - 3600000 * 12).toISOString()
   }
 ];
 
 const DEFAULT_LOGS = [
   {
     id: 1,
-    action: "Database Initialized",
-    role: "System",
-    details: "Seeded local storage mock tables.",
-    date: new Date(Date.now() - 3600000 * 5).toISOString()
+    action: "Register Manifest",
+    role: "inspector",
+    details: "Registered new General Cargo manifest for Vessel M.T. Sovereign (B/L: BOL-PET-9021).",
+    date: new Date(Date.now() - 3600000 * 2).toISOString()
   },
   {
     id: 2,
-    action: "Create User",
-    role: "System",
-    details: "Created system operators: Admin99, Auth99, Inspector99",
+    action: "Inspect Cargo",
+    role: "inspector",
+    details: "Physical inspection recorded for Cashew Queen (B/L: BOL-CAS-5512). Seal intact.",
     date: new Date(Date.now() - 3600000 * 4).toISOString()
+  },
+  {
+    id: 3,
+    action: "Review Adjudication",
+    role: "port_authority",
+    details: "Port Clearance Granted for Silk Road Express (B/L: BOL-TEX-1039). PCC Certificate generated.",
+    date: new Date(Date.now() - 3600000 * 20).toISOString()
+  },
+  {
+    id: 4,
+    action: "Escalate Complaint",
+    role: "System",
+    details: "Escalated security alert from auth99@nmpa.gov directly to Chairman Office Inbox.",
+    date: new Date(Date.now() - 3600000 * 3).toISOString()
+  },
+  {
+    id: 5,
+    action: "User Login",
+    role: "system_admin",
+    details: "User Admin99 logged in successfully from station terminal ADMIN-4.",
+    date: new Date(Date.now() - 600000).toISOString()
   }
 ];
 
@@ -92,9 +322,9 @@ const DEFAULT_COMPLAINTS = [
   {
     id: 1,
     email: "inspector99@nmpa.gov",
-    subject: "Weighbridge Calibration",
-    message: "Requested calibration check on Lane 3 weighbridge due to repeat offset readings.",
-    date: new Date(Date.now() - 3600000 * 3).toISOString(),
+    subject: "Weighbridge Calibration Variance",
+    message: "Weighbridge #3 is showing a deviation of +5kg per Metric Ton compared to weighbridge #1. Needs urgent maintenance recalibration.",
+    date: new Date(Date.now() - 3600000 * 6).toISOString(),
     is_escalated_to_chairman: false,
     severity_level: "Medium"
   }
@@ -104,10 +334,10 @@ const DEFAULT_CHAIRMAN_COMPLAINTS = [
   {
     id: 1,
     email: "auth99@nmpa.gov",
-    category: "Security Protocol Violation",
-    description: "Confidential report on security clearance bypass on south gate lane.",
-    severity_level: "Critical",
-    date: new Date(Date.now() - 3600000 * 2).toISOString(),
+    category: "Unregistered Vessel In Anchorage Area",
+    description: "An unregistered merchant ship (without transponding AIS signals) was observed waiting outside the harbor limits. Local Port Security and Coast Guard have been alerted.",
+    severity_level: "High",
+    date: new Date(Date.now() - 3600000 * 3).toISOString(),
     is_escalated_to_chairman: true
   }
 ];
