@@ -898,6 +898,29 @@ body.dark-theme .header-underline {
   margin-top: -0.2rem;
 }
 
+.login-brand-heading {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--nmpa-text);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.login-brand-bar {
+  width: 40px;
+  height: 4px;
+  background: var(--nmpa-blue);
+  margin: 10px auto 0 auto;
+  border-radius: 2px;
+}
+
+body.dark-theme .login-brand-heading {
+  color: #ffffff;
+}
+
 /* Role selector tabs */
 .role-tabs {
   display: flex;

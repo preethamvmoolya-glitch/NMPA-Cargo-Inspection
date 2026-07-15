@@ -234,21 +234,12 @@ const Login = () => {
 
         {/* Right: Login Panel */}
         <div className="login-right animate-slide-in">
-          {/* Logo + Title */}
+          {/* Form Brand Header */}
           <div className="login-logo-wrap">
-            <div 
-              className="login-logo" 
-              style={{ overflow: 'hidden', padding: '4px', cursor: 'pointer' }}
-              onClick={() => setLogoModalVisible(true)}
-            >
-              <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-            </div>
-            <div className="login-title" style={{ fontSize: '1.25rem' }}>
-              {t('nmpaTitle')}
-            </div>
-            <div className="login-subtitle">
-              {t('loginTitle')}
-            </div>
+            <h1 className="login-brand-heading">
+              {t('loginTitle').toUpperCase()}
+            </h1>
+            <div className="login-brand-bar"></div>
           </div>
 
           {/* Error */}
