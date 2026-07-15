@@ -35,9 +35,13 @@ const printCertificate = (record, qrToken, qrDataUrl, language, t) => {
   const cargoType = (record.cargoType || 'N/A').toUpperCase();
   const weight = record.declaredWeight || record.grossTonnage || 'N/A';
 
-  const paragraphText = `THE VESSEL ${vesselName} (IMO: ${vesselImo}) WITH ${countryOrigin} REGISTRATION/FLAG ARRIVED FROM ${countryOrigin} LOADED WITH CARGO ${cargoType} (GROSS TONNAGE: ${weight} MT) HAS COMPLIED WITH THE REGULATORY REQUIREMENTS UNDER THE CUSTOMS ACT, 1962 & THE INDIAN PORTS ACT, 1908 AND AI RISK MANAGEMENT SYSTEM (RMS) SECURITY AUDITS. THE VESSEL IS PERMITTED TO SAIL OUT OF THE PORT.`;
+  const isDetained = record.status === 'Clearance Denied - Detained for Physical Audit' || record.status === 'Rejected';
 
-  const htmlContent = `
+  const paragraphText = isDetained
+    ? `THE VESSEL ${vesselName} (IMO: ${vesselImo}) ARRIVED FROM ${countryOrigin} LOADED WITH CARGO ${cargoType} (DECLARED WEIGHT: ${weight} MT) HAS BEEN DETAINED FOR DETAILED PHYSICAL COMPLIANCE AUDIT UNDER THE CUSTOMS ACT, 1962 & THE INDIAN PORTS ACT, 1908. THE AUTOMATED RISK MANAGEMENT SYSTEM (RMS) IDENTIFIED AN OUT-OF-SPECIFICATION METRIC FLAGGED AS ${record.rmsRiskLevel || 'HIGH RISK'}. THE VESSEL IS STRICTLY PROHIBITED FROM DEPARTURE OR CARGO DISCHARGE UNTIL PHYSICAL AUDIT APPROVAL AND ADJUDICATION IS GRANTED BY THE PORT AUTHORITY OFFICER.`
+    : `THE VESSEL ${vesselName} (IMO: ${vesselImo}) WITH ${countryOrigin} REGISTRATION/FLAG ARRIVED FROM ${countryOrigin} LOADED WITH CARGO ${cargoType} (GROSS TONNAGE: ${weight} MT) HAS COMPLIED WITH THE REGULATORY REQUIREMENTS UNDER THE CUSTOMS ACT, 1962 & THE INDIAN PORTS ACT, 1908 AND AI RISK MANAGEMENT SYSTEM (RMS) SECURITY AUDITS. THE VESSEL IS PERMITTED TO SAIL OUT OF THE PORT.`;
+
+  let htmlContent = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -300,6 +304,17 @@ const printCertificate = (record, qrToken, qrDataUrl, language, t) => {
     </body>
     </html>
   `;
+
+  if (isDetained) {
+    htmlContent = htmlContent
+      .replaceAll('#94C9A9', '#FFCDD2')
+      .replaceAll('#0e3f27', '#b71c1c')
+      .replace("PORT CLEARANCE CERTIFICATE - पत्तन निकासी का प्रमाण पत्र", "QUARANTINE & DETAINMENT ORDER (QDO) - क्वारंताइन और निरोध आदेश")
+      .replaceAll('PCC ', 'QDO ')
+      .replaceAll('Port Clearance Officer', 'Enforcement & Adjudication Officer')
+      .replace("THIS CERTIFICATE IS VALID TILL SAILING OF THE VESSEL FROM THE PORT. ONE COPY OF THE CERTIFICATE WILL BE FORWARDED TO THE CUSTOMS AND GATE SECURITY AUTHORITY FOR GRANTING PORT CLEARANCE, TWO COPIES OF THE CERTIFICATE TO BE HANDED OVER TO THE BOARDING PILOT FOR VOYAGE DEPARTURE INTEGRITY AUDIT BY THE PORT AUTHORITY.", "THIS ORDER DIRECTS IMMEDIATE PHYSICAL HOLD AND CARGO SUSPENSION ON THE VESSEL. THE VESSEL AND AGENT SHALL COMPLY WITH ALL REGULATORY ORDERS. PILOTS, TUGS, AND HARBOR MASTERS SHALL NOT ALLOCATE DEPARTURE SLOTS UNTIL A REVOCATION OF THIS ORDER IS ISSUED BY THE COMPETENT AUTHORITY.")
+      .replace("This Is System Generated Certificate.", "This Is System Generated Enforcement Order.");
+  }
 
   printWindow.document.write(htmlContent);
   printWindow.document.close();
@@ -889,6 +904,21 @@ const PortAuthority = () => {
                         dataIndex: 'status',
                         key: 'status',
                         render: (status) => <Tag color="red">{language === 'en' ? 'DETAINED (QDO)' : 'निरुद्ध (QDO)'}</Tag>
+                      },
+                      {
+                        title: t('tblAction'),
+                        key: 'action',
+                        render: (_, record) => (
+                          <Button 
+                            type="primary" 
+                            danger
+                            icon={<PrinterOutlined />}
+                            size="small"
+                            onClick={() => printCertificate(record, record.qrToken, null, language, t)}
+                          >
+                            {language === 'en' ? 'Print QDO' : 'क्यूडीओ प्रिंट करें'}
+                          </Button>
+                        )
                       }
                     ]}
                     loading={loading}
@@ -986,6 +1016,41 @@ const PortAuthority = () => {
                         dataIndex: 'status',
                         key: 'status',
                         render: (status) => renderStatusTag(status)
+                      },
+                      {
+                        title: t('tblAction'),
+                        key: 'action',
+                        render: (_, record) => {
+                          const isCleared = record.status === 'Port Clearance Granted' || record.status === 'Approved';
+                          const isDetained = record.status === 'Clearance Denied - Detained for Physical Audit' || record.status === 'Rejected';
+                          
+                          if (isCleared) {
+                            return (
+                              <Button 
+                                type="primary" 
+                                icon={<PrinterOutlined />}
+                                size="small"
+                                onClick={() => printCertificate(record, record.qrToken, null, language, t)}
+                                style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+                              >
+                                {language === 'en' ? 'Print PCC' : 'पीसीसी प्रिंट करें'}
+                              </Button>
+                            );
+                          } else if (isDetained) {
+                            return (
+                              <Button 
+                                type="primary" 
+                                danger
+                                icon={<PrinterOutlined />}
+                                size="small"
+                                onClick={() => printCertificate(record, record.qrToken, null, language, t)}
+                              >
+                                {language === 'en' ? 'Print QDO' : 'क्यूडीओ प्रिंट करें'}
+                              </Button>
+                            );
+                          }
+                          return <Text type="secondary">—</Text>;
+                        }
                       }
                     ]}
                     loading={loading}
