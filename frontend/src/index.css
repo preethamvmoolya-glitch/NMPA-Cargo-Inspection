@@ -714,6 +714,21 @@ body.dark-theme .login-header {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.header-brand-text:hover .header-title {
+  color: var(--nmpa-blue) !important;
+}
+
+body.dark-theme .header-brand-text:hover .header-title {
+  color: var(--nmpa-blue-light) !important;
+}
+
+.header-brand-text:hover .header-subtitle {
+  opacity: 0.8;
 }
 
 .header-title {

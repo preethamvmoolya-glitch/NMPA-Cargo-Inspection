@@ -18,7 +18,10 @@ const NotFound = () => {
         >
           <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
-        <div className="header-brand-text">
+        <div 
+          className="header-brand-text"
+          onClick={() => window.location.href = 'https://newmangaloreport.gov.in/'}
+        >
           <div className="header-title">
             {t('nmpaTitle')}
           </div>
