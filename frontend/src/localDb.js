@@ -937,6 +937,40 @@ export function setupLocalDbFetch() {
         return jsonResponse(chair);
       }
 
+      // GET /api/public-metrics
+      if (pathname.endsWith("/api/public-metrics") && method === "GET") {
+        const inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
+        const totalInspections = inspections.length;
+        const pendingInspections = inspections.filter(i => i.status === "Awaiting Physical Inspection" || i.status === "Pending").length;
+        const clearedInspections = inspections.filter(i => i.status === "Approved" || i.status === "Port Clearance Granted").length;
+        
+        const preBerthing = Math.max(0.2, parseFloat((0.78 + (pendingInspections * 0.02)).toFixed(2)));
+        const trt = Math.max(10, parseFloat((43.23 + (pendingInspections * 0.15)).toFixed(2)));
+        
+        const totalClearedWeight = inspections
+          .filter(i => i.status === "Approved" || i.status === "Port Clearance Granted")
+          .reduce((sum, item) => sum + (item.weight || 0), 0);
+        const berthOutput = Math.round(19535 + (totalClearedWeight / 20));
+        
+        const completedCount = inspections.filter(i => i.status !== "Awaiting Physical Inspection" && i.status !== "Pending").length;
+        const operatingRatio = totalInspections > 0 
+          ? parseFloat((38.61 + (completedCount - pendingInspections) * 0.1).toFixed(2))
+          : 38.61;
+          
+        const dateStart = new Date("2026-06-01T00:00:00Z").getTime();
+        const dateNow = Date.now();
+        const deltaSeconds = Math.max(0, (dateNow - dateStart) / 1000);
+        const solarGenerated = parseFloat((59.26 + (deltaSeconds * 0.000002)).toFixed(6));
+        
+        return jsonResponse({
+          pre_berthing_detention: preBerthing,
+          average_trt: trt,
+          output_per_berth_day: berthOutput,
+          operating_ratio: operatingRatio,
+          solar_generated: solarGenerated
+        });
+      }
+
       // Fallback
       return originalFetch.apply(this, arguments);
 

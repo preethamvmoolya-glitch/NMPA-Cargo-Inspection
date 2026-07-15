@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import { Modal, Form, Input, Select, Checkbox, message, Button } from 'antd';
@@ -16,6 +16,32 @@ const Login = () => {
   const [escalationForm] = Form.useForm();
   const [submittingEscalation, setSubmittingEscalation] = useState(false);
   const { language, setLanguage, darkMode, toggleDarkMode, t } = useLanguage();
+  
+  const [metrics, setMetrics] = useState({
+    pre_berthing_detention: 0.78,
+    average_trt: 43.23,
+    output_per_berth_day: 19535,
+    operating_ratio: 38.61,
+    solar_generated: 59.26
+  });
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/public-metrics`);
+        if (response.ok) {
+          const data = await response.json();
+          setMetrics(data);
+        }
+      } catch (err) {
+        console.warn("Error loading live metrics, using defaults", err);
+      }
+    };
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   const [captchaCode, setCaptchaCode] = useState(() => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
     let result = '';
@@ -228,40 +254,118 @@ const Login = () => {
           <div className="login-left-overlay" style={{
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center',
+            justifyContent: 'space-between',
             alignItems: 'flex-start',
-            padding: '4rem',
-            background: 'linear-gradient(135deg, rgba(13, 43, 94, 0.8) 0%, rgba(13, 43, 94, 0.45) 100%)'
+            padding: '3rem 4rem',
+            background: 'linear-gradient(135deg, rgba(13, 43, 94, 0.85) 0%, rgba(13, 43, 94, 0.50) 100%)',
+            height: '100%',
+            boxSizing: 'border-box'
           }}>
-            <h1 style={{
-              color: '#fff',
-              fontSize: '2.6rem',
-              fontWeight: 800,
-              lineHeight: 1.25,
-              marginBottom: '1.5rem',
-              maxWidth: '85%',
-              textShadow: '0 2px 10px rgba(0, 0, 0, 0.25)'
-            }}>
-              {language === 'en' ? 'Make Your Cargo Inspections Hassle-Free' : 'अपने कार्गो निरीक्षण को परेशानी मुक्त बनाएं'}
-            </h1>
-            <h2 style={{
-              color: '#fff',
-              fontSize: '1.45rem',
-              fontWeight: 600,
-              marginBottom: '0.35rem',
-              textShadow: '0 1px 5px rgba(0, 0, 0, 0.2)'
-            }}>
-              {language === 'en' ? 'Login as a Port Official' : 'पत्तन अधिकारी के रूप में लॉगिन करें'}
-            </h2>
-            <p style={{
-              color: 'rgba(255, 255, 255, 0.95)',
-              fontSize: '1rem',
-              fontWeight: 500,
-              margin: 0,
-              textShadow: '0 1px 4px rgba(0, 0, 0, 0.15)'
-            }}>
-              {language === 'en' ? 'Inspector, Port Authority, Admin' : 'इंस्पेक्टर, पत्तन प्राधिकरण, एडमिन'}
-            </p>
+            {/* Top Text content */}
+            <div style={{ marginTop: 'auto', marginBottom: '2.5rem' }}>
+              <h1 style={{
+                color: '#fff',
+                fontSize: '2.6rem',
+                fontWeight: 800,
+                lineHeight: 1.25,
+                marginBottom: '1.2rem',
+                maxWidth: '85%',
+                textShadow: '0 2px 10px rgba(0, 0, 0, 0.25)'
+              }}>
+                {language === 'en' ? 'Make Your Cargo Inspections Hassle-Free' : 'अपने कार्गो निरीक्षण को परेशानी मुक्त बनाएं'}
+              </h1>
+              <h2 style={{
+                color: '#fff',
+                fontSize: '1.45rem',
+                fontWeight: 600,
+                marginBottom: '0.35rem',
+                textShadow: '0 1px 5px rgba(0, 0, 0, 0.2)'
+              }}>
+                {language === 'en' ? 'Login as a Port Official' : 'पत्तन अधिकारी के रूप में लॉगिन करें'}
+              </h2>
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.95)',
+                fontSize: '1rem',
+                fontWeight: 500,
+                margin: 0,
+                textShadow: '0 1px 4px rgba(0, 0, 0, 0.15)'
+              }}>
+                {language === 'en' ? 'Inspector, Port Authority, Admin' : 'इंस्पेक्टर, पत्तन प्राधिकरण, एडमिन'}
+              </p>
+            </div>
+
+            {/* Metrics cards Row */}
+            <div className="login-metrics-container">
+              {/* Card 1 */}
+              <div className="login-metric-card">
+                <div className="login-metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                  </svg>
+                </div>
+                <div className="login-metric-info">
+                  <div className="login-metric-value">{metrics.pre_berthing_detention} {language === 'en' ? 'days' : 'दिन'}</div>
+                  <div className="login-metric-label">{language === 'en' ? 'Average Pre-berthing detention' : 'औसत प्री-बर्थिंग डिटेंशन'}</div>
+                </div>
+              </div>
+
+              {/* Card 2 */}
+              <div className="login-metric-card">
+                <div className="login-metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                  </svg>
+                </div>
+                <div className="login-metric-info">
+                  <div className="login-metric-value">{metrics.average_trt} {language === 'en' ? 'Hrs' : 'घंटे'}</div>
+                  <div className="login-metric-label">{language === 'en' ? 'Average TRT' : 'औसत टीआरटी'}</div>
+                </div>
+              </div>
+
+              {/* Card 3 */}
+              <div className="login-metric-card">
+                <div className="login-metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                  </svg>
+                </div>
+                <div className="login-metric-info">
+                  <div className="login-metric-value">{metrics.output_per_berth_day?.toLocaleString()} {language === 'en' ? 'Tonnes' : 'टन'}</div>
+                  <div className="login-metric-label">{language === 'en' ? 'Average Output per berth day' : 'प्रति बर्थ दिन औसत उत्पादन'}</div>
+                </div>
+              </div>
+
+              {/* Card 4 */}
+              <div className="login-metric-card">
+                <div className="login-metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                  </svg>
+                </div>
+                <div className="login-metric-info">
+                  <div className="login-metric-value">{metrics.operating_ratio}%</div>
+                  <div className="login-metric-label">{language === 'en' ? 'Operating Ratio' : 'ऑपरेटिंग अनुपात'}</div>
+                </div>
+              </div>
+
+              {/* Card 5 */}
+              <div className="login-metric-card">
+                <div className="login-metric-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                  </svg>
+                </div>
+                <div className="login-metric-info">
+                  <div className="login-metric-value">{metrics.solar_generated?.toFixed(4)} MUs</div>
+                  <div className="login-metric-label">{language === 'en' ? 'Solar Power generated upto June 2026' : 'जून 2026 तक सौर ऊर्जा उत्पादन'}</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

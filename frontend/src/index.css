@@ -1668,3 +1668,76 @@ body.dark-theme .not-found-icon-wrap {
 .not-found-actions .btn {
   flex: 1;
 }
+
+/* ─── LOGIN METRICS CARDS ROW ─────────────────────────────── */
+.login-metrics-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  width: 100%;
+  margin-top: auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1200px) {
+  .login-metrics-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .login-metrics-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.login-metric-card {
+  background: rgba(12, 27, 48, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.login-metric-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 213, 79, 0.4);
+}
+
+.login-metric-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.login-metric-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.login-metric-value {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.90rem;
+  line-height: 1.15;
+}
+
+.login-metric-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.58rem;
+  font-weight: 500;
+  line-height: 1.15;
+  margin-top: 2px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
