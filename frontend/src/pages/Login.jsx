@@ -187,6 +187,36 @@ const Login = () => {
         </div>
       </div>
 
+      {/* Notice Ticker Bar */}
+      <div className="notice-ticker-container">
+        <div className="notice-ticker-label">
+          {t('circularNotice')}
+        </div>
+        <div className="notice-ticker-track">
+          <div className="notice-ticker-text">
+            <span className="notice-ticker-item">
+              <span className="notice-ticker-bullet">•</span>
+              {t('noticeText1')}
+            </span>
+            <span className="notice-ticker-item">
+              <span className="notice-ticker-bullet">•</span>
+              {t('noticeText2')}
+            </span>
+            <span className="notice-ticker-item">
+              <span className="notice-ticker-bullet">•</span>
+              {t('noticeText3')}
+            </span>
+            <span className="notice-ticker-item">
+              <span className="notice-ticker-bullet">•</span>
+              {t('noticeText4')}
+            </span>
+          </div>
+        </div>
+        <div className="notice-ticker-view-all">
+          <a href="#view-all" onClick={(e) => e.preventDefault()}>{language === 'en' ? 'View all' : 'सभी देखें'}</a>
+        </div>
+      </div>
+
       {/* Main Body: Left image + Right form */}
       <div className="login-body">
         {/* Left: Port Image */}
