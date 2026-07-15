@@ -12,6 +12,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [logoModalVisible, setLogoModalVisible] = useState(false);
+  const [portMapModalVisible, setPortMapModalVisible] = useState(false);
   const [escalationModalVisible, setEscalationModalVisible] = useState(false);
   const [escalationForm] = Form.useForm();
   const [submittingEscalation, setSubmittingEscalation] = useState(false);
@@ -292,6 +293,26 @@ const Login = () => {
               }}>
                 {language === 'en' ? 'Inspector, Port Authority, Admin' : 'इंस्पेक्टर, पत्तन प्राधिकरण, एडमिन'}
               </p>
+            </div>
+
+            {/* Port Map Banner Card */}
+            <div 
+              className="login-port-map-banner"
+              onClick={() => setPortMapModalVisible(true)}
+              style={{ backgroundImage: `url(${import.meta.env.BASE_URL}port-map.png)` }}
+            >
+              <div className="port-map-banner-overlay">
+                <div className="port-map-pill">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  {language === 'en' ? 'Port Map' : 'पोर्ट मैप'}
+                </div>
+                <div className="port-map-slogan">
+                  CRUISING TOWARDS NEW FRONTIERS
+                </div>
+              </div>
             </div>
 
             {/* Metrics cards Row */}
@@ -788,6 +809,25 @@ const Login = () => {
             </Button>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Port Map High-Res Modal */}
+      <Modal
+        title={language === 'en' ? "NMPA Port Layout Map" : "एनएमपीए पोर्ट लेआउट मैप"}
+        open={portMapModalVisible}
+        onCancel={() => setPortMapModalVisible(false)}
+        footer={null}
+        width={1000}
+        centered
+        styles={{ body: { padding: 10, background: '#fff9e6' } }}
+      >
+        <div style={{ width: '100%', overflow: 'auto', textAlign: 'center' }}>
+          <img 
+            src={`${import.meta.env.BASE_URL}port-map.png`} 
+            alt="New Mangalore Port Layout Map" 
+            style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} 
+          />
+        </div>
       </Modal>
     </div>
   );
