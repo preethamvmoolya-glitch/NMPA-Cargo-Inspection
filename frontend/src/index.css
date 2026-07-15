@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap');
 
 /* ─── NMPA COLOR PALETTE ─────────────────────────────────────── */
 :root {
@@ -687,21 +687,131 @@ button { cursor: pointer; font-family: inherit; }
 }
 
 .login-header {
-  background: var(--nmpa-header-bg);
+  background: var(--nmpa-white) !important;
   padding: 0.4rem 1.5rem;
-  height: 56px;
+  height: 64px;
   display: flex;
   align-items: center;
   gap: 1rem;
-  border-bottom: 3px solid var(--nmpa-blue-light);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  border-bottom: 2px solid var(--nmpa-border);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
   box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+body.dark-theme .login-header {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+
+.login-header .nmpa-logo-circle {
+  width: 46px;
+  height: 46px;
+  border: 2px solid var(--nmpa-border);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.header-brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.header-title {
+  color: var(--nmpa-text);
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  transition: color 0.3s ease;
+}
+
+.header-underline {
+  height: 3px;
+  background: linear-gradient(to bottom, #000000 50%, #00e5ff 50%);
+  width: 100%;
+  margin: 2px 0 3px 0;
+  border-radius: 1px;
+}
+
+body.dark-theme .header-underline {
+  background: linear-gradient(to bottom, #ffffff 50%, #3b82f6 50%);
+}
+
+.header-subtitle {
+  font-family: 'Dancing Script', cursive;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--nmpa-blue);
+  line-height: 1;
+  transition: color 0.3s ease;
+}
+
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-actions .separator {
+  color: var(--nmpa-border-dark);
+  opacity: 0.7;
+}
+
+.language-toggle {
+  display: flex;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.language-toggle span {
+  color: var(--nmpa-text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+}
+
+.language-toggle span:hover {
+  color: var(--nmpa-blue);
+}
+
+.language-toggle span.active {
+  color: var(--nmpa-text);
+  border-bottom-color: var(--nmpa-text);
+}
+
+.theme-toggle-btn {
+  background: var(--nmpa-blue-pale);
+  border: 1px solid var(--nmpa-border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nmpa-text);
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--nmpa-border);
+  color: var(--nmpa-blue);
+}
+
+.header-version {
+  color: var(--nmpa-text-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
 }
 
 .login-body {
   display: flex;
   flex: 1;
-  height: calc(100vh - 56px);
+  height: calc(100vh - 64px);
   min-height: 0;
   overflow: hidden;
 }

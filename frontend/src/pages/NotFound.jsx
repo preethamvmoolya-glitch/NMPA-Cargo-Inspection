@@ -13,56 +13,44 @@ const NotFound = () => {
       <div className="login-header">
         <div 
           className="nmpa-logo-circle" 
-          style={{ width: 52, height: 52, cursor: 'pointer' }}
+          style={{ cursor: 'pointer' }}
           onClick={() => navigate('/')}
         >
           <img src={`${import.meta.env.BASE_URL}nmpa-logo.png`} alt="NMPA Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
-        <div>
-          <div style={{ color: '#fff', fontWeight: 800, fontSize: '1.15rem', letterSpacing: '0.02em' }}>
+        <div className="header-brand-text">
+          <div className="header-title">
             {t('nmpaTitle')}
           </div>
-          <div style={{ color: 'var(--nmpa-blue-pale)', fontSize: '0.72rem', fontStyle: 'italic' }}>
+          <div className="header-underline"></div>
+          <div className="header-subtitle">
             {t('nmpaSub')}
           </div>
         </div>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <div className="header-actions">
           {/* Language Toggle */}
-          <div className="language-toggle" style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', fontWeight: 600 }}>
+          <div className="language-toggle">
             <span 
-              style={{ color: language === 'en' ? '#fff' : 'rgba(255,255,255,0.5)', cursor: 'pointer', borderBottom: language === 'en' ? '2px solid #fff' : 'none', paddingBottom: '2px' }}
+              className={language === 'en' ? 'active' : ''}
               onClick={() => setLanguage('en')}
             >
               ENGLISH
             </span>
-            <span style={{ color: 'rgba(255,255,255,0.5)' }}>|</span>
+            <span className="separator">|</span>
             <span 
-              style={{ color: language === 'hi' ? '#fff' : 'rgba(255,255,255,0.5)', cursor: 'pointer', borderBottom: language === 'hi' ? '2px solid #fff' : 'none', paddingBottom: '2px' }}
+              className={language === 'hi' ? 'active' : ''}
               onClick={() => setLanguage('hi')}
             >
               HINDI
             </span>
           </div>
-          <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+          <span className="separator">|</span>
           {/* Dark Mode Toggle */}
           <button
             type="button"
+            className="theme-toggle-btn"
             onClick={toggleDarkMode}
             title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: 'none',
-              borderRadius: '50%',
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              outline: 'none'
-            }}
           >
             {darkMode ? <Sun size={15} /> : <Moon size={15} />}
           </button>
