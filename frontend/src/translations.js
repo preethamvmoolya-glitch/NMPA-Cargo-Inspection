@@ -351,7 +351,11 @@ export const translations = {
     uploadDocBtn: "UPLOAD DOCUMENT",
     uploadSuccessMsg: "Supporting documentation successfully attached to Grievance ID: ",
     grmsFooterText: "Copyright © 2026. All rights reserved. Designed and Developed by New Mangalore Port Authority (NMPA) Grievance Cell, Government of India.",
-    homeLabel: "Home"
+    homeLabel: "Home",
+    pageNotFound: "Page Not Found",
+    pageNotFoundDesc: "The page you are looking for does not exist, has been removed, or is temporarily unavailable.",
+    goBackHome: "Go Back Home",
+    grievancePortal: "Grievance Portal"
   },
   hi: {
     // Navbar & Brand
@@ -706,6 +710,10 @@ export const translations = {
     uploadDocBtn: "दस्तावेज़ अपलोड करें",
     uploadSuccessMsg: "सहायक दस्तावेज शिकायत आईडी में सफलतापूर्वक संलग्न कर दिए गए: ",
     grmsFooterText: "कॉपीराइट © 2026. सर्वाधिकार सुरक्षित। नूतन मंगलूर पत्तन प्राधिकरण (एनएमपीए) शिकायत सेल, भारत सरकार द्वारा परिकल्पित और विकसित।",
-    homeLabel: "मुख्य पृष्ठ"
+    homeLabel: "मुख्य पृष्ठ",
+    pageNotFound: "पृष्ठ नहीं मिला",
+    pageNotFoundDesc: "जिस पृष्ठ को आप खोज रहे हैं वह मौजूद नहीं है, हटा दिया गया है, या अस्थायी रूप से अनुपलब्ध है।",
+    goBackHome: "मुख्य पृष्ठ पर जाएं",
+    grievancePortal: "शिकायत पोर्टल"
   }
 };

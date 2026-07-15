@@ -307,7 +307,7 @@ const Login = () => {
                     border: 'none',
                     background: 'none',
                     cursor: 'pointer',
-                    color: '#666',
+                    color: 'var(--nmpa-text-muted)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -401,7 +401,7 @@ const Login = () => {
                       setCaptchaInput(captchaCode);
                     }}
                     style={{
-                      background: '#fff',
+                      background: 'var(--nmpa-white)',
                       border: '1px solid var(--nmpa-border)',
                       borderRadius: '0.25rem',
                       padding: '0.35rem 0.2rem',
@@ -418,7 +418,7 @@ const Login = () => {
                       e.target.style.borderColor = 'var(--nmpa-blue)';
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.background = '#fff';
+                      e.target.style.background = 'var(--nmpa-white)';
                       e.target.style.color = 'var(--nmpa-text-body)';
                       e.target.style.borderColor = 'var(--nmpa-border)';
                     }}

@@ -7,6 +7,7 @@ import SystemAdmin from './pages/SystemAdmin';
 import PortAuthority from './pages/PortAuthority';
 import VerifyClearance from './pages/VerifyClearance';
 import GrievancePortal from './pages/GrievancePortal';
+import NotFound from './pages/NotFound';
 import { LanguageProvider, useLanguage } from './LanguageContext';
 import Sidebar from './components/Sidebar';
 
@@ -73,6 +74,7 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </Router>
