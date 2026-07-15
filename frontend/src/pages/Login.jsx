@@ -146,7 +146,7 @@ const Login = () => {
         </div>
         <div 
           className="header-brand-text"
-          onClick={() => window.location.href = 'https://newmangaloreport.gov.in/'}
+          onClick={() => window.open('https://newmangaloreport.gov.in/', '_blank')}
         >
           <div className="header-title">
             {t('nmpaTitle')}
