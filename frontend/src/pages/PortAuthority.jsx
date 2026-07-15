@@ -313,7 +313,7 @@ const PortAuthority = () => {
 
   useEffect(() => {
     const tabInt = parseInt(tabParam);
-    if (tabInt >= 0 && tabInt <= 2) {
+    if (tabInt >= 0 && tabInt <= 3) {
       setActiveTab(String(tabInt + 1));
     }
   }, [tabParam]);
