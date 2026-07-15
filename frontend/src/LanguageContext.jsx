@@ -9,7 +9,7 @@ export const LanguageProvider = ({ children }) => {
   });
 
   const [darkMode, setDarkModeState] = useState(() => {
-    return localStorage.getItem('appDarkMode') === 'true';
+    return sessionStorage.getItem('appDarkMode') === 'true';
   });
 
   const setLanguage = (lang) => {
@@ -19,7 +19,7 @@ export const LanguageProvider = ({ children }) => {
 
   const toggleDarkMode = () => {
     const nextVal = !darkMode;
-    localStorage.setItem('appDarkMode', nextVal ? 'true' : 'false');
+    sessionStorage.setItem('appDarkMode', nextVal ? 'true' : 'false');
     setDarkModeState(nextVal);
   };
 
