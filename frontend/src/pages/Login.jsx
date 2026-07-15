@@ -235,11 +235,10 @@ const Login = () => {
         {/* Right: Login Panel */}
         <div className="login-right animate-slide-in">
           {/* Form Brand Header */}
-          <div className="login-logo-wrap">
+          <div className="login-logo-wrap" style={{ marginBottom: '1.25rem' }}>
             <h1 className="login-brand-heading">
               {t('loginTitle').toUpperCase()}
             </h1>
-            <div className="login-brand-bar"></div>
           </div>
 
           {/* Error */}

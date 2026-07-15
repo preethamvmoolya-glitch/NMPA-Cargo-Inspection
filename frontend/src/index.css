@@ -899,22 +899,14 @@ body.dark-theme .header-underline {
 }
 
 .login-brand-heading {
-  font-size: 1.3rem;
-  font-weight: 800;
+  font-size: 1.65rem;
+  font-weight: 900;
   color: var(--nmpa-text);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   text-align: center;
   margin: 0;
-  line-height: 1.2;
-}
-
-.login-brand-bar {
-  width: 40px;
-  height: 4px;
-  background: var(--nmpa-blue);
-  margin: 10px auto 0 auto;
-  border-radius: 2px;
+  line-height: 1.25;
 }
 
 body.dark-theme .login-brand-heading {
