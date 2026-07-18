@@ -16,6 +16,8 @@ const Login = () => {
   const [escalationForm] = Form.useForm();
   const [submittingEscalation, setSubmittingEscalation] = useState(false);
   const [portMapUrl, setPortMapUrl] = useState('https://newmangaloreport.gov.in/portmap/');
+  const [sagarSetuUrl, setSagarSetuUrl] = useState('https://nlpmarine.gov.in/landings/landing-page');
+  const [indiaGovUrl, setIndiaGovUrl] = useState('https://www.india.gov.in/');
   const { language, setLanguage, darkMode, toggleDarkMode, t } = useLanguage();
   
   const [metrics, setMetrics] = useState({
@@ -50,6 +52,8 @@ const Login = () => {
         if (response.ok) {
           const data = await response.json();
           if (data.official_url) setPortMapUrl(data.official_url);
+          if (data.sagar_setu_url) setSagarSetuUrl(data.sagar_setu_url);
+          if (data.india_gov_url) setIndiaGovUrl(data.india_gov_url);
         }
       } catch (err) {
         console.warn("Error fetching port map data", err);
@@ -201,6 +205,20 @@ const Login = () => {
           <div className="header-subtitle">
             {t('nmpaSub')}
           </div>
+        </div>
+        <div className="header-links">
+          <img 
+            src={`${import.meta.env.BASE_URL}india-gov-logo.png`} 
+            alt="India.gov.in" 
+            className="header-link-logo"
+            onClick={() => window.open(indiaGovUrl, '_blank')}
+          />
+          <img 
+            src={`${import.meta.env.BASE_URL}sagar-setu-logo.png`} 
+            alt="Sagar Setu" 
+            className="header-link-logo"
+            onClick={() => window.open(sagarSetuUrl, '_blank')}
+          />
         </div>
         <div className="header-actions">
           {/* Language Toggle */}

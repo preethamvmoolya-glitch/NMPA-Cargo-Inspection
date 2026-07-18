@@ -352,6 +352,8 @@ def get_port_map_data():
     return jsonify({
         "status": "success",
         "official_url": "https://newmangaloreport.gov.in/portmap/",
+        "sagar_setu_url": "https://nlpmarine.gov.in/landings/landing-page",
+        "india_gov_url": "https://www.india.gov.in/",
         "markers": markers
     }), 200
 

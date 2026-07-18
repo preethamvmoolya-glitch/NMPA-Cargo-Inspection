@@ -761,6 +761,27 @@ body.dark-theme .header-underline {
   transition: color 0.3s ease;
 }
 
+.header-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: 2.5rem;
+}
+
+.header-link-logo {
+  height: 34px;
+  width: auto;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.05));
+}
+
+.header-link-logo:hover {
+  transform: translateY(-1.5px);
+  opacity: 0.95;
+}
+
 .header-actions {
   margin-left: auto;
   display: flex;
