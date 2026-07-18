@@ -18,6 +18,11 @@ const Login = () => {
   const [portMapUrl, setPortMapUrl] = useState('https://newmangaloreport.gov.in/portmap/');
   const [sagarSetuUrl, setSagarSetuUrl] = useState('https://nlpmarine.gov.in/landings/landing-page');
   const [indiaGovUrl, setIndiaGovUrl] = useState('https://www.india.gov.in/');
+  const [requestAccessModalVisible, setRequestAccessModalVisible] = useState(false);
+  const [reqAccessForm] = Form.useForm();
+  const [submittingReqAccess, setSubmittingReqAccess] = useState(false);
+  const [reqAccessCaptchaCode, setReqAccessCaptchaCode] = useState('');
+  const [reqAccessCaptchaInput, setReqAccessCaptchaInput] = useState('');
   const { language, setLanguage, darkMode, toggleDarkMode, t } = useLanguage();
   
   const [metrics, setMetrics] = useState({
@@ -64,6 +69,67 @@ const Login = () => {
 
   const handlePortMapBannerClick = () => {
     window.open(portMapUrl, '_blank');
+  };
+
+  const refreshReqAccessCaptcha = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    let result = '';
+    for (let i = 0; i < 5; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setReqAccessCaptchaCode(result);
+    setReqAccessCaptchaInput('');
+  };
+
+  useEffect(() => {
+    if (requestAccessModalVisible) {
+      refreshReqAccessCaptcha();
+    }
+  }, [requestAccessModalVisible]);
+
+  const handleRequestAccessSubmit = async (values) => {
+    if (!reqAccessCaptchaInput) {
+      message.error(language === 'en' ? 'Please enter captcha code.' : 'कृपया कैप्चा कोड दर्ज करें।');
+      return;
+    }
+
+    if (reqAccessCaptchaInput.toLowerCase() !== reqAccessCaptchaCode.toLowerCase()) {
+      message.error(language === 'en' ? 'Incorrect Captcha. Please try again.' : 'गलत कैप्चा। कृपया पुन: प्रयास करें।');
+      refreshReqAccessCaptcha();
+      return;
+    }
+
+    setSubmittingReqAccess(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/request-access`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: values.customerName,
+          partyId: values.partyId,
+          partyType: values.partyType,
+          email: values.email,
+          gstNo: values.gstNo,
+          password: values.password,
+          address: values.address || '',
+          mobile: values.mobile,
+          landline: values.landline || '',
+          comments: values.comments || ''
+        })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        message.success(data.message || (language === 'en' ? 'Access request submitted successfully.' : 'पहुंच अनुरोध सफलतापूर्वक सबमिट किया गया।'));
+        setRequestAccessModalVisible(false);
+        reqAccessForm.resetFields();
+      } else {
+        message.error(data.message || (language === 'en' ? 'Failed to submit request.' : 'अनुरोध सबमिट करने में विफल।'));
+      }
+    } catch (err) {
+      message.error(language === 'en' ? 'Connection error.' : 'कनेक्शन त्रुटि।');
+    } finally {
+      setSubmittingReqAccess(false);
+    }
   };
 
   const [captchaCode, setCaptchaCode] = useState(() => {
@@ -617,7 +683,23 @@ const Login = () => {
                   { key: 'dataCalc', text: 'Data Calculator' },
                   { key: 'termsCond', text: 'Terms & Conditions' }
                 ].map(link => (
-                  <a key={link.key} href="#" style={{ fontSize: '0.75rem', color: 'var(--nmpa-blue)' }}>{t(link.key)}</a>
+                  <a 
+                    key={link.key} 
+                    href="#" 
+                    style={{ fontSize: '0.75rem', color: 'var(--nmpa-blue)' }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (link.key === 'reqAccess') {
+                        setRequestAccessModalVisible(true);
+                      } else if (link.key === 'contactUs') {
+                        window.open('https://newmangaloreport.gov.in/contactus/', '_blank');
+                      } else if (link.key === 'termsCond') {
+                        window.open('https://newmangaloreport.gov.in/termsconditions/', '_blank');
+                      }
+                    }}
+                  >
+                    {t(link.key)}
+                  </a>
                 ))}
               </div>
             </div>
@@ -843,7 +925,206 @@ const Login = () => {
             </Button>
           </Form.Item>
         </Form>
-      </Modal>    </div>
+      </Modal>
+
+      {/* Request Access Form Modal */}
+      <Modal
+        title={
+          <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--nmpa-text)' }}>
+            {language === 'en' ? 'Request Access - Cargo Inspection System' : 'पहुंच अनुरोध - कार्गो निरीक्षण प्रणाली'}
+          </div>
+        }
+        open={requestAccessModalVisible}
+        onCancel={() => {
+          setRequestAccessModalVisible(false);
+          reqAccessForm.resetFields();
+        }}
+        footer={null}
+        destroyOnClose
+        width={650}
+      >
+        <Form
+          form={reqAccessForm}
+          layout="vertical"
+          onFinish={handleRequestAccessSubmit}
+          style={{ marginTop: '15px' }}
+        >
+          <Form.Item
+            name="customerName"
+            label={language === 'en' ? 'CUSTOMER NAME / ORGANIZATION' : 'ग्राहक का नाम / संगठन'}
+            rules={[{ required: true, message: 'Please enter Customer Name' }]}
+          >
+            <Input placeholder="e.g. Mangalore Shipping Agency" />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="partyId"
+                label={language === 'en' ? 'PARTY ID / USERNAME' : 'पार्टी आईडी / उपयोगकर्ता नाम'}
+                rules={[
+                  { required: true, message: 'Please enter Party ID' },
+                  { pattern: /^[a-zA-Z0-9_]{4,15}$/, message: 'Must be 4-15 characters, alphanumeric & underscores only' }
+                ]}
+              >
+                <Input placeholder="e.g. MSA_AGT99" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="partyType"
+                label={language === 'en' ? 'PARTY TYPE' : 'पार्टी का प्रकार'}
+                rules={[{ required: true, message: 'Please select Party Type' }]}
+              >
+                <Select placeholder="Select Type">
+                  <Select.Option value="PRIVATE">PRIVATE</Select.Option>
+                  <Select.Option value="GOVT">GOVERNMENT</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="email"
+                label={language === 'en' ? 'EMAIL ID' : 'ईमेल आईडी'}
+                rules={[
+                  { required: true, message: 'Please enter Email ID' },
+                  { type: 'email', message: 'Please enter a valid Email ID' }
+                ]}
+              >
+                <Input placeholder="name@domain.com" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="gstNo"
+                label={language === 'en' ? 'GST NO / REGISTRATION' : 'जीएसटी नंबर / पंजीकरण'}
+                rules={[{ required: true, message: 'Please enter GST NO' }]}
+              >
+                <Input placeholder="e.g. 29AAAAA0000A1Z1" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item
+            name="password"
+            label={language === 'en' ? 'PASSWORD' : 'पासवर्ड'}
+            rules={[
+              { required: true, message: 'Please enter Password' },
+              { min: 8, message: 'Password must be at least 8 characters long' }
+            ]}
+          >
+            <Input.Password placeholder="Enter desired password" />
+          </Form.Item>
+
+          <Form.Item
+            name="address"
+            label={language === 'en' ? 'CUSTOMER ADDRESS' : 'ग्राहक का पता'}
+          >
+            <Input.TextArea rows={3} placeholder="Enter official correspondence address..." style={{ resize: 'none' }} />
+          </Form.Item>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="mobile"
+                label={language === 'en' ? 'MOBILE NO' : 'मोबाइल नंबर'}
+                rules={[
+                  { required: true, message: 'Please enter Mobile Number' },
+                  { len: 10, message: 'Must be exactly 10 digits' },
+                  { pattern: /^[0-9]+$/, message: 'Must contain numbers only' }
+                ]}
+              >
+                <Input maxLength={10} placeholder="10-digit mobile number" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="landline"
+                label={language === 'en' ? 'LANDLINE NO' : 'लैंडलाइन नंबर'}
+                rules={[
+                  { max: 12, message: 'Must not exceed 12 digits' },
+                  { pattern: /^[0-9]*$/, message: 'Must contain numbers only' }
+                ]}
+              >
+                <Input maxLength={12} placeholder="Optional landline number" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item
+            name="comments"
+            label={language === 'en' ? 'COMMENTS / JUSTIFICATION' : 'टिप्पणियाँ / औचित्य'}
+          >
+            <Input.TextArea rows={3} placeholder="State reasons or justification for requesting access..." style={{ resize: 'none' }} />
+          </Form.Item>
+
+          {/* Captcha Block */}
+          <Form.Item label={language === 'en' ? "Security Verification" : "सुरक्षा सत्यापन"} required>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%)',
+                color: '#004d40',
+                padding: '8px 20px',
+                fontSize: '1.4rem',
+                fontWeight: 'bold',
+                letterSpacing: '4px',
+                borderRadius: '4px',
+                userSelect: 'none',
+                fontStyle: 'italic',
+                boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.1)'
+              }}>
+                {reqAccessCaptchaCode}
+              </div>
+              <Button type="default" onClick={refreshReqAccessCaptcha}>
+                {language === 'en' ? 'Refresh' : 'ताज़ा करें'}
+              </Button>
+            </div>
+            <Input
+              value={reqAccessCaptchaInput}
+              onChange={(e) => setReqAccessCaptchaInput(e.target.value)}
+              placeholder={language === 'en' ? "Enter captcha text" : "कैप्चा पाठ दर्ज करें"}
+            />
+          </Form.Item>
+
+          <div style={{
+            fontSize: '0.75rem',
+            color: '#555',
+            background: 'var(--nmpa-blue-pale)',
+            padding: '8px 12px',
+            borderLeft: '3px solid var(--nmpa-blue)',
+            marginBottom: '20px',
+            borderRadius: '0 4px 4px 0',
+            lineHeight: '1.4'
+          }}>
+            {language === 'en' 
+              ? 'Notice: All submitted information is verified against Ministry databases. False registrations are subject to legal penalties under IT Act.'
+              : 'सूचना: सभी सबमिट की गई जानकारी का सत्यापन सरकारी डेटाबेस से किया जाता है। गलत पंजीकरण आईटी अधिनियम के तहत कानूनी दंड के अधीन हैं।'}
+          </div>
+
+          <Form.Item style={{ textAlign: 'right', marginBottom: 0 }}>
+            <Button
+              style={{ marginRight: '8px' }}
+              onClick={() => {
+                setRequestAccessModalVisible(false);
+                reqAccessForm.resetFields();
+              }}
+            >
+              {language === 'en' ? 'Cancel' : 'रद्द करें'}
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={submittingReqAccess}
+            >
+              {language === 'en' ? 'Submit Request' : 'अनुरोध सबमिट करें'}
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </div>
   );
 };
 

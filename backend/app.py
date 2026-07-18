@@ -357,6 +357,60 @@ def get_port_map_data():
         "markers": markers
     }), 200
 
+@app.route('/api/request-access', methods=['POST'])
+def request_access():
+    data = request.json
+    customer_name = data.get('customerName')
+    party_id = data.get('partyId')
+    party_type = data.get('partyType')
+    email = data.get('email')
+    gst_no = data.get('gstNo')
+    password = data.get('password')
+    address = data.get('address')
+    mobile = data.get('mobile')
+    landline = data.get('landline')
+    comments = data.get('comments')
+
+    # Ensure username is generated from party_id
+    username = party_id if party_id else email.split('@')[0]
+    
+    # Enforce password strength rule:
+    # 1. At least 8 characters
+    # 2. At least one uppercase, one lowercase, one number, one special character
+    import re
+    if len(password) < 8 or not re.search("[a-z]", password) or not re.search("[A-Z]", password) or not re.search("[0-9]", password) or not re.search("[@$!%*?&]", password):
+        return jsonify({"status": "error", "message": "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)."}), 400
+
+    # Check unique username and email
+    if users_col.find_one({"username": username}):
+        return jsonify({"status": "error", "message": "A user with this Party ID already exists."}), 400
+        
+    if users_col.find_one({"email": email}):
+        return jsonify({"status": "error", "message": "A user with this Email ID already exists."}), 400
+
+    new_user = {
+        "username": username,
+        "password": password,
+        "email": email,
+        "role": "vessel_agent",  # Default role for requested access
+        "is_approved": False,
+        "two_fa_enabled": True,
+        "last_login": None,
+        "details": {
+            "customer_name": customer_name,
+            "party_id": party_id,
+            "party_type": party_type,
+            "gst_no": gst_no,
+            "address": address,
+            "mobile": mobile,
+            "landline": landline,
+            "comments": comments
+        }
+    }
+    users_col.insert_one(new_user)
+    log_action("Request Access", "guest", f"Access requested by {username} ({customer_name})")
+    return jsonify({"status": "success", "message": "Access request submitted successfully. Account pending approval from System Admin."}), 201
+
 @app.route('/api/users', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def manage_users():
     if request.method == 'GET':
