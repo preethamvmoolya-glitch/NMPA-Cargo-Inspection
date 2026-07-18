@@ -12,10 +12,10 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [logoModalVisible, setLogoModalVisible] = useState(false);
-  const [portMapModalVisible, setPortMapModalVisible] = useState(false);
   const [escalationModalVisible, setEscalationModalVisible] = useState(false);
   const [escalationForm] = Form.useForm();
   const [submittingEscalation, setSubmittingEscalation] = useState(false);
+  const [portMapUrl, setPortMapUrl] = useState('https://newmangaloreport.gov.in/portmap/');
   const { language, setLanguage, darkMode, toggleDarkMode, t } = useLanguage();
   
   const [metrics, setMetrics] = useState({
@@ -42,6 +42,25 @@ const Login = () => {
     const interval = setInterval(fetchMetrics, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const fetchPortMapData = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/port-map`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.official_url) setPortMapUrl(data.official_url);
+        }
+      } catch (err) {
+        console.warn("Error fetching port map data", err);
+      }
+    };
+    fetchPortMapData();
+  }, []);
+
+  const handlePortMapBannerClick = () => {
+    window.open(portMapUrl, '_blank');
+  };
 
   const [captchaCode, setCaptchaCode] = useState(() => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
@@ -298,7 +317,7 @@ const Login = () => {
             {/* Port Map Banner Card */}
             <div 
               className="login-port-map-banner"
-              onClick={() => setPortMapModalVisible(true)}
+              onClick={handlePortMapBannerClick}
               style={{ backgroundImage: `url(${import.meta.env.BASE_URL}port-map.png)` }}
             >
               <div className="port-map-banner-overlay">
@@ -809,27 +828,7 @@ const Login = () => {
             </Button>
           </Form.Item>
         </Form>
-      </Modal>
-
-      {/* Port Map High-Res Modal */}
-      <Modal
-        title={language === 'en' ? "NMPA Port Layout Map" : "एनएमपीए पोर्ट लेआउट मैप"}
-        open={portMapModalVisible}
-        onCancel={() => setPortMapModalVisible(false)}
-        footer={null}
-        width={1000}
-        centered
-        styles={{ body: { padding: 10, background: '#fff9e6' } }}
-      >
-        <div style={{ width: '100%', overflow: 'auto', textAlign: 'center' }}>
-          <img 
-            src={`${import.meta.env.BASE_URL}port-map.png`} 
-            alt="New Mangalore Port Layout Map" 
-            style={{ maxWidth: '100%', height: 'auto', borderRadius: '4px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} 
-          />
-        </div>
-      </Modal>
-    </div>
+      </Modal>    </div>
   );
 };
 

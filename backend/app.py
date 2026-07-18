@@ -273,6 +273,88 @@ def login():
         }), 200
     return jsonify({"status": "error", "message": "Invalid credentials."}), 401
 
+@app.route('/api/port-map', methods=['GET'])
+def get_port_map_data():
+    # Return a list of markers for a similar but different port layout (centered at Chennai Port: [13.0900, 80.2900])
+    # Also return the official NMPA live map URL as requested.
+    markers = {
+        "1": {
+            "name": "Berth No. 1 - Container Terminal",
+            "lat": 13.0950,
+            "lng": 80.2925,
+            "icon_number": 1,
+            "description": "<strong>Draught:</strong> 15.5 mtrs<br><strong>Length:</strong> 250 mtrs<br>Primary terminal for handling major container ships. Equipped with high-speed gantry cranes."
+        },
+        "2": {
+            "name": "Berth No. 2 - Dry Bulk Berth",
+            "lat": 13.0935,
+            "lng": 80.2938,
+            "icon_number": 2,
+            "description": "<strong>Draught:</strong> 14.0 mtrs<br><strong>Length:</strong> 210 mtrs<br>Handles dry bulk materials like coal, iron ore, and minerals. Equipped with automatic conveyor belts."
+        },
+        "3": {
+            "name": "Berth No. 3 - Liquid Cargo Dock",
+            "lat": 13.0910,
+            "lng": 80.2942,
+            "icon_number": 3,
+            "description": "<strong>Draught:</strong> 14.8 mtrs<br><strong>Length:</strong> 220 mtrs<br>Primary dock for petroleum, chemicals, and liquid fuels. Safety clearance is monitored via automated pipeline sensors."
+        },
+        "4": {
+            "name": "Berth No. 4 - Ro-Ro Terminal",
+            "lat": 13.0885,
+            "lng": 80.2930,
+            "icon_number": 4,
+            "description": "<strong>Draught:</strong> 11.5 mtrs<br><strong>Length:</strong> 180 mtrs<br>Dedicated terminal for Roll-on/Roll-off vessels. Handles automobile exports and wheeled cargo."
+        },
+        "5": {
+            "name": "Gate 1 - Main Weighbridge",
+            "lat": 13.0858,
+            "lng": 80.2882,
+            "icon_number": 5,
+            "description": "Primary gate for container trucks and commercial vehicles. Automated RFID scanning and cargo weight verification."
+        },
+        "6": {
+            "name": "Customs Adjudication Office",
+            "lat": 13.0865,
+            "lng": 80.2870,
+            "icon_number": 6,
+            "description": "Handles duty estimation, cargo clearances, and inspection approvals. Contains the physical document verification desks."
+        },
+        "7": {
+            "name": "Inspection Bay Alpha - RMS Unit",
+            "lat": 13.0878,
+            "lng": 80.2890,
+            "icon_number": 7,
+            "description": "Central cargo physical examination area. Features container scanning, x-ray inspection units, and chemical testing labs."
+        },
+        "8": {
+            "name": "Administrative Headquarters",
+            "lat": 13.0845,
+            "lng": 80.2858,
+            "icon_number": 8,
+            "description": "Main administrative building for Port Authority Officers. Oversees security operations and logistics billing."
+        },
+        "9": {
+            "name": "Coast Guard Security Station",
+            "lat": 13.0965,
+            "lng": 80.2895,
+            "icon_number": 9,
+            "description": "Provides 24/7 security watch for maritime domain. Coordinates anti-smuggling and safety patrols in port waters."
+        },
+        "10": {
+            "name": "Vessel Anchorage Control Tower",
+            "lat": 13.0905,
+            "lng": 80.2908,
+            "icon_number": 10,
+            "description": "Vessel Traffic Management System (VTMS) radar and signal control tower. Coordinates berthing priority and safety clearances."
+        }
+    }
+    return jsonify({
+        "status": "success",
+        "official_url": "https://newmangaloreport.gov.in/portmap/",
+        "markers": markers
+    }), 200
+
 @app.route('/api/users', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def manage_users():
     if request.method == 'GET':
