@@ -209,14 +209,14 @@ const Login = () => {
               className={language === 'en' ? 'active' : ''}
               onClick={() => setLanguage('en')}
             >
-              ENGLISH
+              E
             </span>
             <span className="separator">|</span>
             <span 
               className={language === 'hi' ? 'active' : ''}
               onClick={() => setLanguage('hi')}
             >
-              HINDI
+              H
             </span>
           </div>
           <span className="separator">|</span>
