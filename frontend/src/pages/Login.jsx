@@ -261,9 +261,6 @@ const Login = () => {
             </span>
           </div>
         </div>
-        <div className="notice-ticker-view-all">
-          <a href="#view-all" onClick={(e) => e.preventDefault()}>{language === 'en' ? 'View all' : 'सभी देखें'}</a>
-        </div>
       </div>
 
       {/* Main Body: Left image + Right form */}
