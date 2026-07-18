@@ -23,6 +23,8 @@ const Login = () => {
   const [submittingReqAccess, setSubmittingReqAccess] = useState(false);
   const [reqAccessCaptchaCode, setReqAccessCaptchaCode] = useState('');
   const [reqAccessCaptchaInput, setReqAccessCaptchaInput] = useState('');
+  const [contactUsModalVisible, setContactUsModalVisible] = useState(false);
+  const [termsModalVisible, setTermsModalVisible] = useState(false);
   const { language, setLanguage, darkMode, toggleDarkMode, t } = useLanguage();
   
   const [metrics, setMetrics] = useState({
@@ -680,7 +682,6 @@ const Login = () => {
                 {[
                   { key: 'reqAccess', text: 'Request Access' },
                   { key: 'contactUs', text: 'Contact Us' },
-                  { key: 'dataCalc', text: 'Data Calculator' },
                   { key: 'termsCond', text: 'Terms & Conditions' }
                 ].map(link => (
                   <a 
@@ -692,9 +693,9 @@ const Login = () => {
                       if (link.key === 'reqAccess') {
                         setRequestAccessModalVisible(true);
                       } else if (link.key === 'contactUs') {
-                        window.open('https://newmangaloreport.gov.in/contactus/', '_blank');
+                        setContactUsModalVisible(true);
                       } else if (link.key === 'termsCond') {
-                        window.open('https://newmangaloreport.gov.in/termsconditions/', '_blank');
+                        setTermsModalVisible(true);
                       }
                     }}
                   >
@@ -1123,6 +1124,126 @@ const Login = () => {
             </Button>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Contact Us Modal */}
+      <Modal
+        title={
+          <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--nmpa-text)' }}>
+            {language === 'en' ? 'Contact Us' : 'हमसे संपर्क करें'}
+          </div>
+        }
+        open={contactUsModalVisible}
+        onCancel={() => setContactUsModalVisible(false)}
+        footer={null}
+        destroyOnClose
+        width={500}
+      >
+        <div style={{ 
+          padding: '20px 24px', 
+          backgroundColor: '#eef2f5', 
+          borderRadius: '8px', 
+          border: '1px solid #dcdcdc', 
+          color: '#2B3763', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '20px', 
+          marginTop: '10px' 
+        }}>
+          <div>
+            <h4 style={{ color: '#0D2B5E', fontWeight: 'bold', fontSize: '1.05rem', marginBottom: '8px' }}>
+              {language === 'en' ? 'NMPA Mangalore Office' : 'एनएमपीए मंगलौर कार्यालय'}
+            </h4>
+            <p style={{ margin: 0, lineHeight: '1.5', color: '#4A5568' }}>
+              New Mangalore Port Authority<br />
+              Panambur, Mangalore,<br />
+              Karnataka - 575010
+            </p>
+          </div>
+
+          <div>
+            <h4 style={{ color: '#0D2B5E', fontWeight: 'bold', fontSize: '1.05rem', marginBottom: '8px' }}>
+              {language === 'en' ? 'General & Tech Support' : 'सामान्य और तकनीकी सहायता'}
+            </h4>
+            <p style={{ margin: 0, lineHeight: '1.6', color: '#4A5568' }}>
+              📧 Support Email: <a href="mailto:support-nmpa@gov.in" style={{ color: '#1565C0', textDecoration: 'underline' }}>support-nmpa@gov.in</a><br />
+              📞 Toll-Free Helpline: <strong style={{ color: '#2D3748' }}>1800-11-2026</strong> (Available 24x7)
+            </p>
+          </div>
+
+          <div>
+            <h4 style={{ color: '#0D2B5E', fontWeight: 'bold', fontSize: '1.05rem', marginBottom: '8px' }}>
+              {language === 'en' ? 'Departmental Nodes' : 'विभागीय नोड्स'}
+            </h4>
+            <p style={{ margin: 0, lineHeight: '1.6', color: '#4A5568' }}>
+              Customs Department Desk: ext 201<br />
+              Health Department Desk: ext 205<br />
+              Traffic Control Room: ext 309
+            </p>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Website Policies (Terms & Conditions) Modal */}
+      <Modal
+        title={
+          <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--nmpa-text)' }}>
+            {language === 'en' ? 'Website Policies' : 'वेबसाइट नीतियां'}
+          </div>
+        }
+        open={termsModalVisible}
+        onCancel={() => setTermsModalVisible(false)}
+        footer={null}
+        destroyOnClose
+        width={550}
+      >
+        <div style={{ 
+          padding: '20px 24px', 
+          backgroundColor: '#eef2f5', 
+          borderRadius: '8px', 
+          border: '1px solid #dcdcdc', 
+          color: '#2B3763', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '20px', 
+          marginTop: '10px' 
+        }}>
+          <div>
+            <h4 style={{ color: '#0D2B5E', fontWeight: 'bold', fontSize: '1.05rem', marginBottom: '6px' }}>
+              {language === 'en' ? 'Privacy Policy' : 'गोपनीयता नीति'}
+            </h4>
+            <p style={{ margin: 0, lineHeight: '1.5', color: '#4A5568', fontSize: '0.9rem' }}>
+              We are committed to protecting your personal data and privacy. All details entered on the portal are encrypted and handled securely under government regulations.
+            </p>
+          </div>
+
+          <div>
+            <h4 style={{ color: '#0D2B5E', fontWeight: 'bold', fontSize: '1.05rem', marginBottom: '6px' }}>
+              {language === 'en' ? 'Hyperlinking Policy' : 'हाइपरलिंकिंग नीति'}
+            </h4>
+            <p style={{ margin: 0, lineHeight: '1.5', color: '#4A5568', fontSize: '0.9rem' }}>
+              Prior permission is required before hyperlinks can be directed from any website to this portal.
+            </p>
+          </div>
+
+          <div>
+            <h4 style={{ color: '#0D2B5E', fontWeight: 'bold', fontSize: '1.05rem', marginBottom: '6px' }}>
+              {language === 'en' ? 'Copyright Policy' : 'कॉपीराइट नीति'}
+            </h4>
+            <p style={{ margin: 0, lineHeight: '1.5', color: '#4A5568', fontSize: '0.9rem' }}>
+              Material featured on this portal may be reproduced free of charge. However, the material must be reproduced accurately and not used in a derogatory manner or in a misleading context.
+            </p>
+          </div>
+
+          <div>
+            <h4 style={{ color: '#0D2B5E', fontWeight: 'bold', fontSize: '1.05rem', marginBottom: '6px' }}>
+              {language === 'en' ? 'Security Policy' : 'सुरक्षा नीति'}
+            </h4>
+            <p style={{ margin: 0, lineHeight: '1.5', color: '#4A5568', fontSize: '0.9rem' }}>
+              The single window portal uses standard security protocols. Users are advised not to share their passwords or 2FA keys.
+            </p>
+          </div>
+        </div>
       </Modal>
     </div>
   );
