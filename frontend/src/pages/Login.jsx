@@ -626,7 +626,7 @@ const Login = () => {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.4rem' }}>
                 {[
-                  { label: t('demoAdmin'), user: 'Admin99', pass: 'Admin@123' },
+                  { label: t('demoAdmin'), user: 'preethamvmoolya', pass: 'Admin@123' },
                   { label: t('demoAuthority'), user: 'Auth99', pass: 'Auth@123' },
                   { label: t('demoInspector'), user: 'Inspector99', pass: 'Insp@123' }
                 ].map(cred => (

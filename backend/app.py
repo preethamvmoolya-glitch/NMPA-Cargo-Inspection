@@ -53,7 +53,7 @@ chairman_office_inbox_col = db["chairman_office_inbox"]
 def init_db():
     # Seed/Reset default users to match requested credentials
     for username, password, email, role in [
-        ("Admin99", "Admin@123", "admin99@nmpa.gov", "system_admin"),
+        ("preethamvmoolya", "Admin@123", "preethamvmoolya@nmpa.gov", "system_admin"),
         ("Auth99", "Auth@123", "auth99@nmpa.gov", "port_authority"),
         ("Inspector99", "Insp@123", "inspector99@nmpa.gov", "inspector")
     ]:

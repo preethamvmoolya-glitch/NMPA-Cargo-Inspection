@@ -61,7 +61,7 @@ PHASE 1: SYSTEM ADMIN SETUP
 ---
 1. Open the browser and go to: http://localhost:5173/port_cargo_web/
 2. Click the "Admin" button in the DEMO CREDENTIALS block to autofill.
-   - Username: Admin99
+   - Username: preethamvmoolya
    - Password: Admin@123
    - Enter the Captcha shown on screen and click LOGIN.
 3. You will be routed to the System Admin Console:
@@ -152,7 +152,7 @@ PHASE 7: TRACK STATUS & ADMIN AUDITING (STATUS CELL & ADMIN CONSOLE)
    - Enter the copied Grievance Number (e.g., NMPA-GRV-1004).
    - Enter the Captcha and click "VIEW STATUS".
    - Verify it displays: Status: "ESCALATED TO CHAIRMAN'S OFFICE - UNDER REVIEW" and your details.
-2. Login to the System Admin Console (Admin99 / Admin@123).
+2. Login to the System Admin Console (preethamvmoolya / Admin@123).
 3. Click the "Grievances" tab.
    - Select "Secure Chairman's Office Inbox" sub-tab.
    - Verify that your submitted grievance is listed with Category "OPERATIONAL BOTTLENECK" and email "contact@mngshipping.com".

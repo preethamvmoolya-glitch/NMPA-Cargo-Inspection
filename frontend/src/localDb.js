@@ -4,9 +4,9 @@
 const DEFAULT_USERS = [
   {
     id: 1,
-    username: "Admin99",
+    username: "preethamvmoolya",
     password: "Admin@123",
-    email: "admin99@nmpa.gov",
+    email: "preethamvmoolya@nmpa.gov",
     role: "system_admin",
     is_approved: true,
     two_fa_enabled: true,
@@ -313,7 +313,7 @@ const DEFAULT_LOGS = [
     id: 5,
     action: "User Login",
     role: "system_admin",
-    details: "User Admin99 logged in successfully from station terminal ADMIN-4.",
+    details: "User preethamvmoolya logged in successfully from station terminal ADMIN-4.",
     date: new Date(Date.now() - 600000).toISOString()
   }
 ];
@@ -562,7 +562,20 @@ function logAction(action, role, details = "") {
 
 // Initialize tables in localStorage
 export function initLocalDb() {
-  getStore("nmpa_users", DEFAULT_USERS);
+  let users = getStore("nmpa_users", DEFAULT_USERS);
+  let usersUpdated = false;
+  users = users.map(u => {
+    if (u.username === "Admin99") {
+      u.username = "preethamvmoolya";
+      u.email = "preethamvmoolya@nmpa.gov";
+      usersUpdated = true;
+    }
+    return u;
+  });
+  if (usersUpdated) {
+    setStore("nmpa_users", users);
+  }
+  
   let inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
   
   // If our signature demo vessel "M.T. Sovereign" is missing from the inspections list, force-load the new 7-vessel presentation dataset!

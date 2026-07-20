@@ -142,7 +142,7 @@ def seed():
     # Ensure users exist
     print("Seeding demo users...")
     for username, password, email, role in [
-        ("Admin99", "Admin@123", "admin99@nmpa.gov", "system_admin"),
+        ("preethamvmoolya", "Admin@123", "preethamvmoolya@nmpa.gov", "system_admin"),
         ("Auth99", "Auth@123", "auth99@nmpa.gov", "port_authority"),
         ("Inspector99", "Insp@123", "inspector99@nmpa.gov", "inspector")
     ]:
@@ -348,7 +348,7 @@ def seed():
         {
             "action": "User Login",
             "user_role": "system_admin",
-            "details": "User Admin99 logged in successfully from station terminal ADMIN-4.",
+            "details": "User preethamvmoolya logged in successfully from station terminal ADMIN-4.",
             "timestamp": (now - datetime.timedelta(minutes=30)).strftime("%Y-%m-%d %H:%M:%S")
         }
     ])

@@ -221,7 +221,7 @@ def generate_pdf():
     
     # 2.2.5 Assumptions
     pdf.add_subsubsection_header("2.2.5", "Assumptions")
-    pdf.add_paragraph("It is assumed that physical weigh scales are calibrated to report weights in Metric Tons (MT) to a precision of two decimal places. It is also assumed that the system administrator has initialized default accounts (Admin99, Auth99, Inspector99) to bypass initial registration blocks during system boot-up.")
+    pdf.add_paragraph("It is assumed that physical weigh scales are calibrated to report weights in Metric Tons (MT) to a precision of two decimal places. It is also assumed that the system administrator has initialized default accounts (preethamvmoolya, Auth99, Inspector99) to bypass initial registration blocks during system boot-up.")
     
     # 2.3 Special Requirements
     pdf.add_page()
