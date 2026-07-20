@@ -323,7 +323,7 @@ const DEFAULT_COMPLAINTS = [
     id: 1,
     email: "inspector99@nmpa.gov",
     subject: "Weighbridge Calibration Variance",
-    message: "Weighbridge #3 is showing a deviation of +5kg per Metric Ton compared to weighbridge #1. Needs urgent maintenance recalibration.",
+    message: "[Grievance Status/Role]: Others\n[Name]: Rajan Nair\n[Gender]: Male\n[Address]: Gate 7, South Berth Complex, Panambur\n[Pincode]: 575010\n[Country]: India\n[State]: Karnataka\n[Contact]: 9845012345\n\n[Grievance details]:\nWeighbridge #3 is showing a deviation of +5kg per Metric Ton compared to weighbridge #1. Needs urgent maintenance recalibration before the next cargo weighment cycle.",
     date: new Date(Date.now() - 3600000 * 6).toISOString(),
     is_escalated_to_chairman: false,
     severity_level: "Medium",
@@ -335,13 +335,50 @@ const DEFAULT_COMPLAINTS = [
     id: 2,
     email: "inspector99@nmpa.gov",
     subject: "Late Port Gate Dues Discrepancy",
-    message: "System shows mismatch in payment log sync for container gate pass ID GATE-8812.",
+    message: "[Grievance Status/Role]: Others\n[Name]: Sushila Hegde\n[Gender]: Female\n[Address]: Opposite NMPA Main Gate, Kulur\n[Pincode]: 575013\n[Country]: India\n[State]: Karnataka\n[Contact]: 9900112233\n\n[Grievance details]:\nSystem shows mismatch in payment log sync for container gate pass ID GATE-8812. The gate dues were credited but the system still shows outstanding balance. Please reconcile urgently.",
     date: new Date(Date.now() - 3600000 * 80).toISOString(),
     is_escalated_to_chairman: false,
     severity_level: "High",
     sla_status: "Pending",
     sla_deadline: new Date(Date.now() - 3600000 * 80 + 3600000 * 72).toISOString(),
     escalated_to_chairman: false
+  },
+  {
+    id: 3,
+    email: "portuser@nmpa.gov",
+    subject: "Operational Bottleneck",
+    message: "[Grievance Status/Role]: Employer\n[Name]: Mohammed Farooq\n[Gender]: Male\n[Address]: Berth 12, Container Terminal\n[Pincode]: 575010\n[Country]: India\n[State]: Karnataka\n[Contact]: 9876501234\n\n[Grievance details]:\nSignificant delay in container scanning at Gate-3 entry point due to non-functional X-ray scanner. Trucks have been waiting for over 4 hours causing severe congestion.",
+    date: new Date(Date.now() - 3600000 * 30).toISOString(),
+    is_escalated_to_chairman: false,
+    severity_level: "High",
+    sla_status: "Under Investigation",
+    sla_deadline: new Date(Date.now() - 3600000 * 30 + 3600000 * 72).toISOString(),
+    escalated_to_chairman: false
+  },
+  {
+    id: 4,
+    email: "cargo.agent@shippingco.in",
+    subject: "General Malpractice",
+    message: "[Grievance Status/Role]: Others\n[Name]: Priya Shetty\n[Gender]: Female\n[Address]: 45 Harbour View, Mangalore\n[Pincode]: 575001\n[Country]: India\n[State]: Karnataka\n[Contact]: 9741008899\n\n[Grievance details]:\nCargo documentation of B/L BOL-TEX-4455 was processed incorrectly — declared weight was entered as 1500 MT instead of 1050 MT. The error was discovered at final billing stage. Request correction and audit.",
+    date: new Date(Date.now() - 3600000 * 48).toISOString(),
+    is_escalated_to_chairman: false,
+    severity_level: "Medium",
+    sla_status: "Resolved",
+    sla_deadline: new Date(Date.now() - 3600000 * 48 + 3600000 * 72).toISOString(),
+    escalated_to_chairman: false
+  },
+  {
+    id: 5,
+    email: "whistleblower@secure.nmpa.gov",
+    subject: "Corruption/Bribery",
+    message: "[Grievance Status/Role]: Others\n[Name]: Anonymous\n[Gender]: Male\n[Address]: N/A\n[Pincode]: N/A\n[Country]: India\n[State]: Karnataka\n[Contact]: N/A\n\n[Grievance details]:\nA port officer at Gate-1 was seen accepting a cash payment from a truck driver in exchange for expedited clearance, bypassing standard inspection protocols. This was witnessed at approximately 11:30 AM on the reported date.",
+    date: new Date(Date.now() - 3600000 * 96).toISOString(),
+    is_escalated_to_chairman: false,
+    severity_level: "Critical",
+    sla_status: "SLA Breached",
+    sla_deadline: new Date(Date.now() - 3600000 * 96 + 3600000 * 72).toISOString(),
+    escalated_to_chairman: true,
+    is_escalated_to_chairman: true
   }
 ];
 
@@ -357,8 +394,34 @@ const DEFAULT_CHAIRMAN_COMPLAINTS = [
     sla_status: "Resolved",
     sla_deadline: new Date(Date.now() - 3600000 * 3 + 3600000 * 72).toISOString(),
     escalated_to_chairman: true
+  },
+  {
+    id: 2,
+    email: "whistleblower@secure.nmpa.gov",
+    category: "[SLA BREACH] Corruption/Bribery",
+    description: "[Grievance Status/Role]: Others\n[Name]: Anonymous\n[Contact]: N/A\n\n[Grievance details]:\nA port officer at Gate-1 was seen accepting a cash payment from a truck driver in exchange for expedited clearance, bypassing standard inspection protocols.",
+    severity_level: "Critical",
+    date: new Date(Date.now() - 3600000 * 24).toISOString(),
+    is_escalated_to_chairman: true,
+    sla_status: "Under Investigation",
+    sla_deadline: new Date(Date.now() - 3600000 * 96 + 3600000 * 72).toISOString(),
+    escalated_to_chairman: true,
+    origin_complaint_id: 5
+  },
+  {
+    id: 3,
+    email: "security@nmpa.gov",
+    category: "Severe Misconduct",
+    description: "Supervisor on Night Shift (Berth 4) was found sleeping on duty and did not conduct mandatory hourly rounds during the 0200–0400 window. Reported by CCTV review team.",
+    severity_level: "High",
+    date: new Date(Date.now() - 3600000 * 18).toISOString(),
+    is_escalated_to_chairman: true,
+    sla_status: "Pending",
+    sla_deadline: new Date(Date.now() - 3600000 * 18 + 3600000 * 72).toISOString(),
+    escalated_to_chairman: true
   }
 ];
+
 
 // AI RMS Assess logic in JS
 function aiRmsAssess(commodityDesc, countryOfOrigin, grossTonnage) {
@@ -633,13 +696,15 @@ export function initLocalDb() {
   }
 
   let complaints = getStore("nmpa_complaints", DEFAULT_COMPLAINTS);
-  const hasDemoComplaint = complaints.some(c => c.subject === "Weighbridge Calibration Variance");
+  const hasDemoComplaint = complaints.some(c => c.subject === "Weighbridge Calibration Variance") &&
+    complaints.some(c => c.subject === "Corruption/Bribery");
   if (!hasDemoComplaint) {
     setStore("nmpa_complaints", DEFAULT_COMPLAINTS);
   }
 
   let chairmanComplaints = getStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
-  const hasDemoChairman = chairmanComplaints.some(c => c.category === "Unregistered Vessel In Anchorage Area");
+  const hasDemoChairman = chairmanComplaints.some(c => c.category === "Unregistered Vessel In Anchorage Area") &&
+    chairmanComplaints.some(c => c.category === "Severe Misconduct");
   if (!hasDemoChairman) {
     setStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
   }

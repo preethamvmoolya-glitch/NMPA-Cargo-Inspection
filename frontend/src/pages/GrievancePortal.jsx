@@ -168,10 +168,14 @@ const GrievancePortal = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: values.email,
+          subject: values.category,
           category: values.category,
+          message: combinedDescription,
           description: combinedDescription,
           is_escalated_to_chairman: values.isEscalated,
+          isEscalatedToChairman: values.isEscalated,
           severity_level: values.severity || 'Medium',
+          severityLevel: values.severity || 'Medium',
           document: base64Doc
         })
       });
