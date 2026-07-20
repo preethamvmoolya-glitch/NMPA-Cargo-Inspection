@@ -267,11 +267,19 @@ const GrievancePortal = () => {
       const found = allComps.find(c => String(c.id) === String(searchId) || String(c.id) === String(searchId - 1000));
       
       if (found) {
+        let finalStatus = "PENDING REDRESSAL";
+        if (found.sla_status === "Resolved") {
+          finalStatus = "RESOLVED";
+        } else if (found.sla_status === "Under Investigation") {
+          finalStatus = "UNDER INVESTIGATION";
+        } else if (found.sla_status === "SLA Breached" || found.is_escalated_to_chairman || found.escalated_to_chairman) {
+          finalStatus = "ESCALATED TO CHAIRMAN'S OFFICE - UNDER REVIEW";
+        }
         setSearchedGrievance({
           regNum: `NMPA-GRV-${1000 + found.id}`,
           date: found.date,
           category: found.subject || found.category,
-          status: found.is_escalated_to_chairman ? "ESCALATED TO CHAIRMAN'S OFFICE - UNDER REVIEW" : "PENDING REDRESSAL",
+          status: finalStatus,
           description: found.message || found.description
         });
       } else {

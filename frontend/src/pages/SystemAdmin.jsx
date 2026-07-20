@@ -28,6 +28,47 @@ const roleMapToDB = {
   'Approver': 'port_authority'
 };
 
+const SlaCountdown = ({ deadline, onExpired }) => {
+  const [timeLeft, setTimeLeft] = useState(null);
+
+  useEffect(() => {
+    const updateTime = () => {
+      const diffMs = new Date(deadline).getTime() - Date.now();
+      if (diffMs <= 0) {
+        setTimeLeft(0);
+        if (onExpired) onExpired();
+      } else {
+        setTimeLeft(diffMs);
+      }
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, [deadline, onExpired]);
+
+  if (timeLeft === null) return null;
+  if (timeLeft <= 0) {
+    return <Tag color="red" style={{ fontWeight: 'bold' }}>🚨 SLA BREACHED</Tag>;
+  }
+
+  const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+  let color = "success"; // Green for safe time
+  if (hours < 12) {
+    color = "volcano"; // Volcano/Red-orange for urgent
+  } else if (hours < 24) {
+    color = "warning"; // Yellow for warning
+  }
+
+  return (
+    <Tag color={color} style={{ fontWeight: 'bold', fontFamily: 'monospace' }}>
+      ⏱️ {hours.toString().padStart(2, '0')}h {minutes.toString().padStart(2, '0')}m {seconds.toString().padStart(2, '0')}s
+    </Tag>
+  );
+};
+
 const SystemAdmin = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') || '0';
@@ -128,6 +169,28 @@ const SystemAdmin = () => {
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
+
+  const handleUpdateStatus = async (id, newStatus) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/complaints/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sla_status: newStatus })
+      });
+      if (response.ok) {
+        message.success(language === 'en' ? `Grievance status updated to ${newStatus}` : `शिकायत की स्थिति ${newStatus} में अपडेट की गई`);
+        fetchAll();
+      } else {
+        const err = await response.json();
+        message.error(err.message || 'Failed to update status.');
+      }
+    } catch {
+      message.error('Connection error.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Edit actions
   const isEditing = (record) => record.id === editingKey;
@@ -586,43 +649,125 @@ const SystemAdmin = () => {
                         children: (
                           <div style={{ marginTop: '15px' }}>
                             <Title level={4} style={{ marginBottom: '20px' }}>Standard Grievance Queue</Title>
-                            <Table 
-                              dataSource={complaints} 
-                              loading={loading}
-                              rowKey="id"
-                              pagination={{ pageSize: 6 }}
-                              bordered
-                              columns={[
-                                {
-                                  title: t('complaintsTimestamp'),
-                                  dataIndex: 'date',
-                                  key: 'date',
-                                  width: '20%',
-                                  render: (date) => date ? new Date(date).toLocaleString() : '—'
-                                },
-                                {
-                                  title: t('complaintsSender'),
-                                  dataIndex: 'email',
-                                  key: 'email',
-                                  width: '25%',
-                                  render: (email) => <Text strong>{email}</Text>
-                                },
-                                {
-                                  title: 'Grievance Category / Subject',
-                                  dataIndex: 'subject',
-                                  key: 'subject',
-                                  width: '25%',
-                                  render: (subject) => <Text style={{ color: 'var(--nmpa-blue-dark)', fontWeight: '500' }}>{subject}</Text>
-                                },
-                                {
-                                  title: t('complaintsMessage'),
-                                  dataIndex: 'message',
-                                  key: 'message',
-                                  width: '30%',
-                                  render: (message) => <Text type="secondary" style={{ whiteSpace: 'pre-wrap' }}>{message}</Text>
-                                }
-                              ]}
-                            />
+                            {(() => {
+                              const sortedComplaints = [...complaints].sort((a, b) => {
+                                const aBreached = a.sla_status === 'SLA Breached';
+                                const bBreached = b.sla_status === 'SLA Breached';
+                                if (aBreached && !bBreached) return -1;
+                                if (!aBreached && bBreached) return 1;
+                                return new Date(b.date) - new Date(a.date);
+                              });
+                              return (
+                                <Table 
+                                  dataSource={sortedComplaints} 
+                                  loading={loading}
+                                  rowKey="id"
+                                  pagination={{ pageSize: 6 }}
+                                  bordered
+                                  rowClassName={(record) => {
+                                    if (record.sla_status === 'SLA Breached') {
+                                      return 'sla-breached-row';
+                                    }
+                                    return '';
+                                  }}
+                                  columns={[
+                                    {
+                                      title: t('complaintsTimestamp'),
+                                      dataIndex: 'date',
+                                      key: 'date',
+                                      width: '15%',
+                                      render: (date) => date ? new Date(date).toLocaleString() : '—'
+                                    },
+                                    {
+                                      title: t('complaintsSender'),
+                                      dataIndex: 'email',
+                                      key: 'email',
+                                      width: '15%',
+                                      render: (email) => <Text strong>{email}</Text>
+                                    },
+                                    {
+                                      title: 'Grievance Category / Subject',
+                                      dataIndex: 'subject',
+                                      key: 'subject',
+                                      width: '15%',
+                                      render: (subject) => <Text style={{ color: 'var(--nmpa-blue-dark)', fontWeight: '500' }}>{subject}</Text>
+                                    },
+                                    {
+                                      title: t('complaintsMessage'),
+                                      dataIndex: 'message',
+                                      key: 'message',
+                                      width: '25%',
+                                      render: (message) => <Text type="secondary" style={{ whiteSpace: 'pre-wrap' }}>{message}</Text>
+                                    },
+                                    {
+                                      title: 'SLA Status',
+                                      dataIndex: 'sla_status',
+                                      key: 'sla_status',
+                                      width: '10%',
+                                      render: (status) => {
+                                        if (status === 'SLA Breached') return <Tag color="red" style={{ fontWeight: 'bold' }}>🚨 BREACHED</Tag>;
+                                        if (status === 'Under Investigation') return <Tag color="orange" style={{ fontWeight: 'bold' }}>🔍 INVESTIGATING</Tag>;
+                                        if (status === 'Resolved') return <Tag color="green" style={{ fontWeight: 'bold' }}>✅ RESOLVED</Tag>;
+                                        return <Tag color="blue" style={{ fontWeight: 'bold' }}>⏳ PENDING</Tag>;
+                                      }
+                                    },
+                                    {
+                                      title: 'SLA Timeline',
+                                      key: 'sla_timeline',
+                                      width: '10%',
+                                      render: (_, record) => {
+                                        if (record.sla_status === 'Pending') {
+                                          return (
+                                            <SlaCountdown 
+                                              deadline={record.sla_deadline} 
+                                              onExpired={() => {
+                                                fetchAll();
+                                              }} 
+                                            />
+                                          );
+                                        }
+                                        if (record.sla_status === 'SLA Breached') {
+                                          return <span style={{ color: '#d9534f', fontWeight: 'bold' }}>Breached (Escalated)</span>;
+                                        }
+                                        return <Tag color="success">SLA Met</Tag>;
+                                      }
+                                    },
+                                    {
+                                      title: 'Actions',
+                                      key: 'actions',
+                                      width: '10%',
+                                      render: (_, record) => {
+                                        if (record.sla_status === 'Resolved') return null;
+                                        return (
+                                          <Space size="small">
+                                            {record.sla_status === 'Pending' && (
+                                              <Button 
+                                                type="primary" 
+                                                size="small" 
+                                                onClick={() => handleUpdateStatus(record.id, 'Under Investigation')}
+                                              >
+                                                Investigate
+                                              </Button>
+                                            )}
+                                            {(record.sla_status === 'Pending' || record.sla_status === 'Under Investigation' || record.sla_status === 'SLA Breached') && (
+                                              <Button 
+                                                type="primary" 
+                                                danger 
+                                                size="small" 
+                                                onClick={() => handleUpdateStatus(record.id, 'Resolved')}
+                                                style={{ backgroundColor: '#2e7d32', borderColor: '#2e7d32' }}
+                                              >
+                                                Resolve
+                                              </Button>
+                                            )}
+                                          </Space>
+                                        );
+                                      }
+                                    }
+                                  ]}
+                                />
+                              );
+                            })()}
                           </div>
                         )
                       },

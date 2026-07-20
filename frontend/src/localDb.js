@@ -326,7 +326,22 @@ const DEFAULT_COMPLAINTS = [
     message: "Weighbridge #3 is showing a deviation of +5kg per Metric Ton compared to weighbridge #1. Needs urgent maintenance recalibration.",
     date: new Date(Date.now() - 3600000 * 6).toISOString(),
     is_escalated_to_chairman: false,
-    severity_level: "Medium"
+    severity_level: "Medium",
+    sla_status: "Pending",
+    sla_deadline: new Date(Date.now() - 3600000 * 6 + 3600000 * 72).toISOString(),
+    escalated_to_chairman: false
+  },
+  {
+    id: 2,
+    email: "inspector99@nmpa.gov",
+    subject: "Late Port Gate Dues Discrepancy",
+    message: "System shows mismatch in payment log sync for container gate pass ID GATE-8812.",
+    date: new Date(Date.now() - 3600000 * 80).toISOString(),
+    is_escalated_to_chairman: false,
+    severity_level: "High",
+    sla_status: "Pending",
+    sla_deadline: new Date(Date.now() - 3600000 * 80 + 3600000 * 72).toISOString(),
+    escalated_to_chairman: false
   }
 ];
 
@@ -338,7 +353,10 @@ const DEFAULT_CHAIRMAN_COMPLAINTS = [
     description: "An unregistered merchant ship (without transponding AIS signals) was observed waiting outside the harbor limits. Local Port Security and Coast Guard have been alerted.",
     severity_level: "High",
     date: new Date(Date.now() - 3600000 * 3).toISOString(),
-    is_escalated_to_chairman: true
+    is_escalated_to_chairman: true,
+    sla_status: "Resolved",
+    sla_deadline: new Date(Date.now() - 3600000 * 3 + 3600000 * 72).toISOString(),
+    escalated_to_chairman: true
   }
 ];
 
@@ -886,9 +904,51 @@ export function setupLocalDbFetch() {
       }
 
       // 9. /api/complaints
-      if (pathname.endsWith("/api/complaints")) {
+      if (pathname.includes("/api/complaints")) {
         if (method === "GET") {
           const complaints = getStore("nmpa_complaints", DEFAULT_COMPLAINTS);
+          const chairComp = getStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
+          let updated = false;
+          const nowStr = new Date().toISOString();
+          
+          complaints.forEach(c => {
+            if (c.sla_status === "Pending" && c.sla_deadline && nowStr > c.sla_deadline) {
+              c.sla_status = "SLA Breached";
+              c.is_escalated_to_chairman = true;
+              c.escalated_to_chairman = true;
+              c.severity_level = "Critical";
+              updated = true;
+              
+              // Also add to chairman complaints if not already there
+              const existsInChair = chairComp.some(cc => cc.origin_complaint_id === c.id);
+              if (!existsInChair) {
+                chairComp.unshift({
+                  id: Date.now() + Math.random(),
+                  origin_complaint_id: c.id,
+                  email: c.email,
+                  category: `[SLA BREACH] ${c.subject}`,
+                  description: c.message,
+                  severity_level: "Critical",
+                  date: nowStr,
+                  is_escalated_to_chairman: true
+                });
+                setStore("nmpa_chairman_complaints", chairComp);
+              }
+              
+              // Trigger webhook / event listener in frontend console/mock
+              console.log("\n================================================================================");
+              console.log(" --- WEBHOOK TRIGGERED (Mock): trigger_chairman_escalation_email ---");
+              console.log(` Ticket ID: ${c.id}`);
+              console.log(` Subject: ${c.subject}`);
+              console.log(` Sender: ${c.email}`);
+              console.log(` SLA Deadline: ${c.sla_deadline}`);
+              console.log("================================================================================\n");
+            }
+          });
+          
+          if (updated) {
+            setStore("nmpa_complaints", complaints);
+          }
           return jsonResponse(complaints);
         }
 
@@ -899,6 +959,8 @@ export function setupLocalDbFetch() {
           const finalMsg = message || description;
           const isEscalated = isEscalatedToChairman || is_escalated_to_chairman || false;
           const finalSev = severityLevel || severity_level || "Medium";
+          const nowStr = new Date().toISOString();
+          const slaDeadlineStr = new Date(Date.now() + 3600000 * 72).toISOString();
 
           if (isEscalated) {
             const chairComp = getStore("nmpa_chairman_complaints", DEFAULT_CHAIRMAN_COMPLAINTS);
@@ -908,8 +970,11 @@ export function setupLocalDbFetch() {
               category: finalSubj,
               description: finalMsg,
               severity_level: finalSev,
-              date: new Date().toISOString(),
-              is_escalated_to_chairman: true
+              date: nowStr,
+              is_escalated_to_chairman: true,
+              sla_status: "Resolved",
+              sla_deadline: slaDeadlineStr,
+              escalated_to_chairman: true
             };
             chairComp.unshift(newComp);
             setStore("nmpa_chairman_complaints", chairComp);
@@ -927,9 +992,12 @@ export function setupLocalDbFetch() {
               email,
               subject: finalSubj,
               message: finalMsg,
-              date: new Date().toISOString(),
+              date: nowStr,
               is_escalated_to_chairman: false,
-              severity_level: finalSev
+              severity_level: finalSev,
+              sla_status: "Pending",
+              sla_deadline: slaDeadlineStr,
+              escalated_to_chairman: false
             };
             comp.unshift(newComp);
             setStore("nmpa_complaints", comp);
@@ -941,6 +1009,30 @@ export function setupLocalDbFetch() {
               id: newComp.id
             }, 201);
           }
+        }
+
+        if (method === "PUT") {
+          const parts = pathname.split("/");
+          const idStr = parts[parts.length - 1];
+          const searchId = isNaN(parseInt(idStr)) ? parseInt(body.id) : parseInt(idStr);
+          
+          const complaints = getStore("nmpa_complaints", DEFAULT_COMPLAINTS);
+          const idx = complaints.findIndex(c => c.id === searchId);
+          if (idx !== -1) {
+            const { sla_status, status } = body;
+            const newStatus = sla_status || status;
+            complaints[idx].sla_status = newStatus;
+            
+            if (newStatus === "SLA Breached") {
+              complaints[idx].is_escalated_to_chairman = true;
+              complaints[idx].escalated_to_chairman = true;
+            }
+            
+            setStore("nmpa_complaints", complaints);
+            logAction("Update Grievance Status", "system_admin", `Grievance ID ${searchId} status updated to ${newStatus}`);
+            return jsonResponse({ status: "success", message: `Grievance status updated to ${newStatus}` });
+          }
+          return jsonResponse({ status: "error", message: "Grievance not found." }, 404);
         }
       }
 

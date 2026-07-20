@@ -765,6 +765,59 @@ def get_logs():
         })
     return jsonify(logs), 200
 
+def trigger_chairman_escalation_email(ticket):
+    print("\n" + "="*80)
+    print(" --- WEBHOOK TRIGGERED: trigger_chairman_escalation_email ---")
+    print(f" Ticket ID: {ticket.get('_id') or ticket.get('id')}")
+    print(f" Subject: {ticket.get('subject')}")
+    print(f" Sender: {ticket.get('inspector_email') or ticket.get('email')}")
+    print(f" SLA Deadline: {ticket.get('sla_deadline')}")
+    print("="*80 + "\n")
+
+import threading
+import time
+
+def start_sla_monitor():
+    def monitor_loop():
+        time.sleep(5)  # Wait for db initialization
+        while True:
+            try:
+                now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                pending_tickets = list(complaints_col.find({"sla_status": "Pending"}))
+                for ticket in pending_tickets:
+                    deadline = ticket.get("sla_deadline")
+                    if deadline and now_str > deadline:
+                        # Update database state to SLA Breached
+                        complaints_col.update_one(
+                            {"_id": ticket["_id"]},
+                            {"$set": {
+                                "sla_status": "SLA Breached",
+                                "escalated_to_chairman": True,
+                                "is_escalated_to_chairman": True
+                            }}
+                        )
+                        # Copy to Chairman's Inbox
+                        chairman_record = chairman_office_inbox_col.find_one({"origin_complaint_id": str(ticket["_id"])})
+                        if not chairman_record:
+                            chairman_office_inbox_col.insert_one({
+                                "origin_complaint_id": str(ticket["_id"]),
+                                "email": ticket.get("inspector_email"),
+                                "category": f"[SLA BREACH] {ticket.get('subject')}",
+                                "description": ticket.get("message"),
+                                "severity_level": "Critical",
+                                "timestamp": now_str,
+                                "is_escalated_to_chairman": True
+                            })
+                        
+                        log_action("Escalate Complaint (SLA Breach)", "System", f"SLA Breached for grievance ID {ticket['_id']}. Escalated to Chairman.")
+                        trigger_chairman_escalation_email(ticket)
+            except Exception as e:
+                print(f"SLA monitor error: {e}")
+            time.sleep(10)
+
+    monitor_thread = threading.Thread(target=monitor_loop, daemon=True)
+    monitor_thread.start()
+
 @app.route('/api/complaints', methods=['GET', 'POST'])
 def handle_complaints():
     if request.method == 'POST':
@@ -797,13 +850,18 @@ def handle_complaints():
                 "id": str(res.inserted_id)
             }), 201
         else:
+            now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            sla_deadline = (datetime.datetime.now() + datetime.timedelta(hours=72)).strftime("%Y-%m-%d %H:%M:%S")
             res = complaints_col.insert_one({
                 "inspector_email": email,
                 "subject": subject,
                 "message": message,
                 "is_escalated_to_chairman": False,
                 "severity_level": severity,
-                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                "timestamp": now_str,
+                "sla_status": "Pending",
+                "sla_deadline": sla_deadline,
+                "escalated_to_chairman": False
             })
             log_action("Submit Complaint", "System", f"Complaint submitted by {email}")
             return jsonify({
@@ -823,9 +881,38 @@ def handle_complaints():
                 "message": r.get("message"),
                 "date": r.get("timestamp"),
                 "is_escalated_to_chairman": bool(r.get("is_escalated_to_chairman")),
-                "severity_level": r.get("severity_level")
+                "severity_level": r.get("severity_level"),
+                "sla_status": r.get("sla_status", "Pending"),
+                "sla_deadline": r.get("sla_deadline"),
+                "escalated_to_chairman": bool(r.get("escalated_to_chairman", False))
             })
         return jsonify(result), 200
+
+@app.route('/api/complaints/<id>', methods=['PUT'])
+def update_complaint_status(id):
+    data = request.json or {}
+    new_status = data.get('sla_status') or data.get('status')
+    
+    if new_status not in ['Pending', 'Under Investigation', 'Resolved', 'SLA Breached']:
+        return jsonify({"status": "error", "message": "Invalid status value."}), 400
+        
+    try:
+        obj_id = ObjectId(id)
+    except:
+        return jsonify({"status": "error", "message": "Invalid ID format"}), 400
+        
+    complaint = complaints_col.find_one({"_id": obj_id})
+    if not complaint:
+        return jsonify({"status": "error", "message": "Complaint not found."}), 404
+        
+    update_fields = {"sla_status": new_status}
+    if new_status == "SLA Breached":
+        update_fields["escalated_to_chairman"] = True
+        update_fields["is_escalated_to_chairman"] = True
+        
+    complaints_col.update_one({"_id": obj_id}, {"$set": update_fields})
+    log_action("Update Grievance Status", "system_admin", f"Grievance ID {id} status updated to {new_status}")
+    return jsonify({"status": "success", "message": f"Grievance status updated to {new_status}."}), 200
 
 @app.route('/api/chairman/complaints', methods=['GET'])
 def get_chairman_complaints():
@@ -838,12 +925,14 @@ def get_chairman_complaints():
             "message": r.get("description"),
             "severity_level": r.get("severity_level"),
             "date": r.get("timestamp"),
-            "is_escalated_to_chairman": True
+            "is_escalated_to_chairman": True,
+            "origin_complaint_id": r.get("origin_complaint_id")
         })
     return jsonify(result), 200
 
 if __name__ == '__main__':
     init_db()
+    start_sla_monitor()
     # Read port from environment, fallback to 5000
     port = int(os.getenv("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
