@@ -31,7 +31,7 @@ def add_styled_heading(doc, text, level):
         run.font.name = 'Arial'
         run.font.size = Pt(16)
         run.bold = True
-        run.font.color.rgb = RGBColor(13, 43, 94) # NMPA Dark Blue
+        run.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
     elif level == 2:
         p.paragraph_format.space_before = Pt(12)
         p.paragraph_format.space_after = Pt(4)
@@ -39,7 +39,7 @@ def add_styled_heading(doc, text, level):
         run.font.name = 'Arial'
         run.font.size = Pt(13)
         run.bold = True
-        run.font.color.rgb = RGBColor(74, 85, 104) # Slate Gray/Blue
+        run.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
     elif level == 3:
         p.paragraph_format.space_before = Pt(8)
         p.paragraph_format.space_after = Pt(2)
@@ -47,18 +47,18 @@ def add_styled_heading(doc, text, level):
         run.font.name = 'Arial'
         run.font.size = Pt(11)
         run.bold = True
-        run.font.color.rgb = RGBColor(100, 110, 125)
+        run.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
     return p
 
 def add_styled_paragraph(doc, text):
     clean_txt = clean_text(text)
     p = doc.add_paragraph()
     p.paragraph_format.space_after = Pt(6)
-    p.paragraph_format.line_spacing = 1.15
+    p.paragraph_format.line_spacing = 1.5 # Standard University 1.5 Line Spacing
     run = p.add_run(clean_txt)
     run.font.name = 'Times New Roman'
-    run.font.size = Pt(11)
-    run.font.color.rgb = RGBColor(38, 38, 38)
+    run.font.size = Pt(12) # Standard University 12pt font size
+    run.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
     return p
 
 def add_styled_bullet(doc, title, text):
@@ -66,19 +66,19 @@ def add_styled_bullet(doc, title, text):
     clean_txt = clean_text(text)
     p = doc.add_paragraph(style='List Bullet')
     p.paragraph_format.space_after = Pt(4)
-    p.paragraph_format.line_spacing = 1.15
+    p.paragraph_format.line_spacing = 1.5 # Standard University 1.5 Line Spacing
     
     if clean_title:
         r_title = p.add_run(clean_title + " ")
         r_title.bold = True
         r_title.font.name = 'Times New Roman'
-        r_title.font.size = Pt(11)
-        r_title.font.color.rgb = RGBColor(13, 43, 94)
+        r_title.font.size = Pt(12)
+        r_title.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
         
     r_text = p.add_run(clean_txt)
     r_text.font.name = 'Times New Roman'
-    r_text.font.size = Pt(11)
-    r_text.font.color.rgb = RGBColor(38, 38, 38)
+    r_text.font.size = Pt(12)
+    r_text.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
     return p
 
 def add_code_block(doc, filename, code_lines):
@@ -90,9 +90,8 @@ def add_code_block(doc, filename, code_lines):
     run_title.bold = True
     run_title.font.name = 'Arial'
     run_title.font.size = Pt(10)
-    run_title.font.color.rgb = RGBColor(74, 85, 104)
+    run_title.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
 
-    # Chunk lines to speed up paragraph generation (150 lines per chunk)
     chunk_size = 150
     for chunk_start in range(0, len(code_lines), chunk_size):
         chunk_lines = code_lines[chunk_start:chunk_start+chunk_size]
@@ -111,8 +110,8 @@ def add_code_block(doc, filename, code_lines):
         
         run_code = p_code.add_run("\n".join(formatted_chunk))
         run_code.font.name = 'Courier New'
-        run_code.font.size = Pt(8)
-        run_code.font.color.rgb = RGBColor(70, 70, 70)
+        run_code.font.size = Pt(8.5) # University Code Standard font size
+        run_code.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
 
 def add_ui_screenshot(doc, img_path, caption_text):
     if not os.path.exists(img_path):
@@ -122,7 +121,7 @@ def add_ui_screenshot(doc, img_path, caption_text):
         run.bold = True
         run.font.name = 'Arial'
         run.font.size = Pt(10)
-        run.font.color.rgb = RGBColor(150, 0, 0)
+        run.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
         return
         
     p_img = doc.add_paragraph()
@@ -142,7 +141,7 @@ def add_ui_screenshot(doc, img_path, caption_text):
     run_cap.italic = True
     run_cap.font.name = 'Times New Roman'
     run_cap.font.size = Pt(9.5)
-    run_cap.font.color.rgb = RGBColor(100, 100, 100)
+    run_cap.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
 
 def add_schema_table(doc, headers, rows):
     table = doc.add_table(rows=1, cols=len(headers))
@@ -154,7 +153,7 @@ def add_schema_table(doc, headers, rows):
         hdr_cells[i].paragraphs[0].runs[0].font.bold = True
         hdr_cells[i].paragraphs[0].runs[0].font.name = 'Arial'
         hdr_cells[i].paragraphs[0].runs[0].font.size = Pt(9.5)
-        hdr_cells[i].paragraphs[0].runs[0].font.color.rgb = RGBColor(13, 43, 94)
+        hdr_cells[i].paragraphs[0].runs[0].font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
         
     for r_data in rows:
         row_cells = table.add_row().cells
@@ -162,6 +161,7 @@ def add_schema_table(doc, headers, rows):
             row_cells[i].text = clean_text(str(val))
             row_cells[i].paragraphs[0].runs[0].font.name = 'Times New Roman'
             row_cells[i].paragraphs[0].runs[0].font.size = Pt(9.5)
+            row_cells[i].paragraphs[0].runs[0].font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
             
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(0)
@@ -187,7 +187,7 @@ def generate_report_docx():
     r_org.font.name = 'Arial'
     r_org.font.size = Pt(12)
     r_org.bold = True
-    r_org.font.color.rgb = RGBColor(13, 43, 94)
+    r_org.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
     
     for _ in range(2):
         doc.add_paragraph()
@@ -198,7 +198,7 @@ def generate_report_docx():
     r_title.font.name = 'Arial'
     r_title.font.size = Pt(22)
     r_title.bold = True
-    r_title.font.color.rgb = RGBColor(13, 43, 94)
+    r_title.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
     
     p_sub = doc.add_paragraph()
     p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -206,7 +206,7 @@ def generate_report_docx():
     r_sub.font.name = 'Arial'
     r_sub.font.size = Pt(14)
     r_sub.italic = True
-    r_sub.font.color.rgb = RGBColor(74, 85, 104)
+    r_sub.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
     
     for _ in range(4):
         doc.add_paragraph()
@@ -223,7 +223,7 @@ def generate_report_docx():
     )
     r_meta.font.name = 'Times New Roman'
     r_meta.font.size = Pt(10.5)
-    r_meta.font.color.rgb = RGBColor(50, 50, 50)
+    r_meta.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
     
     doc.add_page_break()
     
@@ -233,7 +233,7 @@ def generate_report_docx():
     r_toc_title.font.name = 'Arial'
     r_toc_title.font.size = Pt(16)
     r_toc_title.bold = True
-    r_toc_title.font.color.rgb = RGBColor(13, 43, 94)
+    r_toc_title.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
     p_toc_title.paragraph_format.space_after = Pt(12)
     
     toc_items = [
@@ -267,19 +267,24 @@ def generate_report_docx():
         ("  5.2 Multi-Role Stepper Control Logic", "27"),
         ("  5.3 Bilingual Localization & LocalStorage Sync", "28"),
         ("  5.4 User Interface Gallery & Screenshot References", "30"),
-        ("Chapter 6: Quality Assurance & Testing Matrix", "34"),
-        ("  6.1 Testing Methodology & Strategy", "34"),
-        ("  6.2 Representative Test Cases & Verification Matrix", "35"),
-        ("Chapter 7: Conclusion & Scope for Future Enhancements", "37"),
-        ("  7.1 Project Conclusion Summary", "37"),
-        ("  7.2 Known System Boundaries", "38"),
-        ("  7.3 Scope for Technical Enhancements", "39"),
-        ("Chapter 8: Source Code Appendix (Comprehensive Code Archive)", "40"),
-        ("  8.1 Backend Services - app.py", "40"),
-        ("  8.2 Frontend Mock Interceptor - localDb.js", "49"),
-        ("  8.3 Frontend Grievance Portal View - GrievancePortal.jsx", "60"),
-        ("  8.4 Frontend Operator Control View - SystemAdmin.jsx", "72"),
-        ("Chapter 9: System Sign-Off & Integration Verification", "84")
+        ("Chapter 6: Operational Guidelines & User Operations Manual", "34"),
+        ("  6.1 Shipping Agent Portal Manual", "34"),
+        ("  6.2 Physical check / Inspection desk Manual", "35"),
+        ("  6.3 Port Authority Clearance Adjudication Manual", "35"),
+        ("  6.4 System Admin Dashboard & Grievances Console Manual", "36"),
+        ("Chapter 7: Quality Assurance & Testing Matrix", "38"),
+        ("  7.1 Testing Methodology & Strategy", "38"),
+        ("  7.2 Representative Test Cases & Verification Matrix", "39"),
+        ("Chapter 8: Conclusion & Scope for Future Enhancements", "41"),
+        ("  8.1 Project Conclusion Summary", "41"),
+        ("  8.2 Known System Boundaries", "42"),
+        ("  8.3 Scope for Technical Enhancements", "43"),
+        ("Chapter 9: Source Code Appendix (Comprehensive Code Archive)", "44"),
+        ("  9.1 Backend Services - app.py", "44"),
+        ("  9.2 Frontend Mock Interceptor - localDb.js", "53"),
+        ("  9.3 Frontend Grievance Portal View - GrievancePortal.jsx", "64"),
+        ("  9.4 Frontend Operator Control View - SystemAdmin.jsx", "76"),
+        ("Chapter 10: System Sign-Off & Integration Verification", "84")
     ]
     
     for item, page in toc_items:
@@ -291,7 +296,7 @@ def generate_report_docx():
         r_item.font.name = 'Arial' if "Chapter" in item else 'Times New Roman'
         r_item.font.size = Pt(10)
         r_item.bold = "Chapter" in item
-        r_item.font.color.rgb = RGBColor(13, 43, 94) if "Chapter" in item else RGBColor(38, 38, 38)
+        r_item.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
         
         # Dots
         dot_count = 100 - len(item) - len(page)
@@ -305,7 +310,7 @@ def generate_report_docx():
         r_page.font.name = 'Times New Roman'
         r_page.font.size = Pt(10)
         r_page.bold = "Chapter" in item
-        r_page.font.color.rgb = RGBColor(13, 43, 94) if "Chapter" in item else RGBColor(38, 38, 38)
+        r_page.font.color.rgb = RGBColor(0, 0, 0) # Strictly Black
         
     doc.add_page_break()
     
@@ -313,11 +318,9 @@ def generate_report_docx():
     doc_outline_path = r"c:\NMPA final project\NMPA_Project_Report_Expanded.docx"
     doc_outline = docx.Document(doc_outline_path)
     
-    # Read outline text
     skip_outline = True
     current_chapter = ""
     
-    # Dictionary of extensive in-depth expansions for sections
     expansions = {
         "1.1 Introduction of the System": (
             "The NMPA Cargo Inspection and Vessel Clearance System represents a major technical advancement "
@@ -401,17 +404,86 @@ def generate_report_docx():
             
         # Parse headings vs body text
         if txt.startswith("Chapter "):
-            current_chapter = txt
-            doc.add_page_break()
-            parts = txt.split(":", 1)
-            add_styled_heading(doc, parts[0].strip() + ": " + (parts[1].strip() if len(parts) > 1 else ""), 1)
-        elif txt.startswith("1.") or txt.startswith("2.") or txt.startswith("3.") or txt.startswith("4.") or txt.startswith("5.") or txt.startswith("6.") or txt.startswith("7."):
+            # If transitioning to Chapter 6 (originally Chapter 6 in outline), insert the manual first!
+            if "Chapter 6:" in txt:
+                doc.add_page_break()
+                add_styled_heading(doc, "Chapter 6: Operational Guidelines & User Operations Manual", 1)
+                add_styled_paragraph(doc, "This chapter serves as a comprehensive operational user guide mapping out user profiles, interface guidelines, and state-specific tasks for all actors in the NMPA-CIS system environment.")
+                
+                add_styled_heading(doc, "6.1 Shipping Agent Portal Manual", 2)
+                add_styled_paragraph(doc, "Shipping Agents manage vessel declarations and voyage request clearance status checks. Agents can log in using their credentials and check visual logs of ongoing clearances.\n\n"
+                                          "To register a grievance in the bilingual portal:\n"
+                                          "1. Select the relevant Role/Status (e.g. Others, Employer) in the welcome dropdown.\n"
+                                          "2. Verify identity details (type UAN, PPO, or Establishment ID and click Verify).\n"
+                                          "3. On success, the personal details section is auto-filled. Complete any remaining fields (gender, state, pincode, contact information).\n"
+                                          "4. Fill out the Grievance Category and description details.\n"
+                                          "5. Check 'Escalate directly to NMPA Chairman' if immediate oversight is required.\n"
+                                          "6. Complete the security CAPTCHA code check and click SUBMIT. Capture the reference code (e.g., NMPA-GRV-XXXX) for future status tracking.")
+                
+                add_styled_heading(doc, "6.2 Physical check / Inspection desk Manual", 2)
+                add_styled_paragraph(doc, "Physical checkers stationed at port entry/exit gates log physical checks:\n"
+                                          "1. Open the inspector dashboard and click 'Inspect' on the designated Bill of Lading record.\n"
+                                          "2. Record scale-verified weight, verify container seal integrity (intact/broken), note structural damage, and upload image links.\n"
+                                          "3. Submit parameters to automatically set the state to 'Inspected - Awaiting Authority Adjudication'. Offline cache adapters prevent data loss during signal dropouts by caching inputs to LocalStorage.")
+                
+                add_styled_heading(doc, "6.3 Port Authority Clearance Adjudication Manual", 2)
+                add_styled_paragraph(doc, "Port Authority officers log in to review inspected manifests and adjudicate clearances:\n"
+                                          "1. The dashboard highlights weight discrepancies exceeding the administrator's globally configured limit.\n"
+                                          "2. Inspect physical checker records and click 'Approve' (which generates exit passes with secure QR tokens), 'Reject' (blocking clear pass passes), or 'Re-Inspect' (which resets inputs and status to 'Pending' for re-checks).")
+                
+                add_styled_heading(doc, "6.4 System Admin Dashboard & Grievances Console Manual", 2)
+                add_styled_paragraph(doc, "System Administrators manage account approvals, system parameters, and support grievances:\n"
+                                          "1. User Identity Console: Approve or deny platform operator accounts.\n"
+                                          "2. Security Audit Ledger: View real-time security log files mapped to operator IPs.\n"
+                                          "3. Grievances Console:\n"
+                                          "   - Standard Queue: View tickets under 72-hour SLA timers. Structured tag layouts present parsed metadata cleanly, and descriptions are housed in scrollable boxes. Click 'Investigate' or 'Resolve' to modify status.\n"
+                                          "   - Secure Chairman's Office Inbox: View escalated grievances and tickets where the SLA has breached (highlighted in red). Click 'Resolve' to close.")
+                
+                # Shift Chapter numbers of outline Chapters
+                doc.add_page_break()
+                add_styled_heading(doc, "Chapter 7: Quality Assurance & Testing Matrix", 1)
+                add_styled_paragraph(doc, "This chapter specifies the Quality Assurance strategy and verification matrices applied to certify the NMPA-CIS platform implementation.")
+                
+                add_styled_heading(doc, "7.1 Testing Methodology & Verification Strategy", 2)
+                add_styled_paragraph(doc, "Unit tests verify low-level libraries, including password hashing, TOTP calculations, and validation helpers. Integration tests verify transaction updates and database locks under WAL simulation. End-to-end tests verify user registration pipelines and stepper state updates.")
+                
+                add_styled_heading(doc, "7.2 Representative Test Cases & Verification Matrix", 2)
+                add_schema_table(doc,
+                    ["Test ID", "Objective", "Role", "Input/Precondition", "Expected Outcome", "Status"],
+                    [
+                        ["TC-AUTH-01", "Validate registration block", "Operator", "Operator registers new account", "Login blocked until Admin approves status", "Pass"],
+                        ["TC-SLA-02", "Calculate 72-hour SLA deadline", "System", "Grievance submitted at timestamp X", "SLA deadline equals X + 72 hours", "Pass"],
+                        ["TC-SLA-03", "Direct Chairman escalation", "Shipping Agent", "Submit grievance with escalation checked", "Grievance routes directly to Chairman Inbox", "Pass"],
+                        ["TC-SLA-04", "SLA breach transition", "System", "SLA deadline timer expires", "Status automatically updates to SLA Breached and escalates", "Pass"],
+                        ["TC-SYNC-05", "Local Sync caching check", "Inspector", "Inspector offline during scale record", "Inputs cached to LocalStorage, syncs on restore", "Pass"]
+                    ]
+                )
+                continue
+                
+            if "Chapter 7:" in txt:
+                # Chapter 7 becomes Chapter 8
+                doc.add_page_break()
+                parts = txt.split(":", 1)
+                add_styled_heading(doc, "Chapter 8: " + parts[1].strip() if len(parts) > 1 else "Chapter 8: Project Conclusion & Future Scope", 1)
+                continue
+                
+            p_style = doc_outline.paragraphs[0].style # skip header print
+            continue
+            
+        if txt.startswith("1.") or txt.startswith("2.") or txt.startswith("3.") or txt.startswith("4.") or txt.startswith("5.") or txt.startswith("6.") or txt.startswith("7."):
+            # Map outline chapter numbers to correct shifted numbers
             parts = txt.split(" ", 1)
             num = parts[0].strip()
             title = parts[1].strip() if len(parts) > 1 else ""
-            dot_count = num.count(".")
             
+            # Map numbers: e.g. 6.X becomes 7.X, 7.X becomes 8.X
+            if num.startswith("6."):
+                num = "7." + num[2:]
+            elif num.startswith("7."):
+                num = "8." + num[2:]
+                
             heading_text = num + " " + title
+            dot_count = num.count(".")
             if dot_count == 1:
                 add_styled_heading(doc, heading_text, 2)
             elif dot_count == 2:
@@ -419,11 +491,10 @@ def generate_report_docx():
             else:
                 add_styled_paragraph(doc, txt)
                 
-            # Insert expanded details and embedded screenshots under matching heading topics
+            # Insert expanded details and embedded screenshots
             if heading_text in expansions:
                 add_styled_paragraph(doc, expansions[heading_text])
                 
-            # Embedded UI screen graphics under relevant headings
             if heading_text == "1.1 Introduction of the System":
                 img_path = os.path.join(brain_dir, "media__1784539036090.png")
                 add_ui_screenshot(doc, img_path, "Figure 1.1: Single-Window Clearance Portal Login & Welcome Interface")
@@ -444,7 +515,7 @@ def generate_report_docx():
         else:
             add_styled_paragraph(doc, txt)
             
-        # Chapter 4: Database Design expansions (Tables for Schemas)
+        # Chapter 4: Database Design tables
         if "4.3 Collection Definitions" in txt or "4.2 Collection Definitions" in txt:
             add_styled_heading(doc, "4.3.1 Users Collection Schema", 3)
             add_schema_table(doc, 
@@ -522,9 +593,9 @@ def generate_report_docx():
             chair_img = os.path.join(brain_dir, "final_chairman_inbox_verification_1784608606545.png")
             add_ui_screenshot(doc, chair_img, "Figure 5.5: Board Office Dashboard - Secure Chairman's Inbox with SLA Breach Routing")
             
-    # ------------------ 4. CODE APPENDIX (CHAPTER 8) ------------------
+    # ------------------ 4. CODE APPENDIX (CHAPTER 9) ------------------
     doc.add_page_break()
-    add_styled_heading(doc, "Chapter 8: Source Code Appendix (Comprehensive Code Archive)", 1)
+    add_styled_heading(doc, "Chapter 9: Source Code Appendix (Comprehensive Code Archive)", 1)
     add_styled_paragraph(doc, "This appendix contains the complete, production-ready source code files implementing the security verification rules, local storage synchronization layers, bilingual translation tables, and Flask backend endpoints. File paths correspond to the active workspace on the local platform.")
     
     code_files = [
@@ -540,19 +611,19 @@ def generate_report_docx():
         if not os.path.exists(filepath):
             continue
             
-        add_styled_heading(doc, "8.X File Source: " + label, 2)
+        add_styled_heading(doc, "9.X File Source: " + label, 2)
         
         with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
             lines = f.readlines()
             
         add_code_block(doc, label, lines)
         
-    # ------------------ 5. SIGN-OFF PAGE (CHAPTER 9) ------------------
+    # ------------------ 5. SIGN-OFF PAGE (CHAPTER 10) ------------------
     doc.add_page_break()
-    add_styled_heading(doc, "Chapter 9: System Sign-Off & Compliance Verification", 1)
+    add_styled_heading(doc, "Chapter 10: System Sign-Off & Compliance Verification", 1)
     add_styled_paragraph(doc, "This chapter serves as the administrative log certifying the complete integration, inspection testing, and final operations deployment of the New Mangalore Port Authority Cargo Inspection System (NMPA-CIS) v2.0.")
     
-    add_styled_heading(doc, "9.1 Operational Integration Checklist", 2)
+    add_styled_heading(doc, "10.1 Operational Integration Checklist", 2)
     add_styled_paragraph(doc, "[X] Port Authority Multi-Role RBAC desks operational and verified.")
     add_styled_paragraph(doc, "[X] Automatic 72-hour Service Level Agreement (SLA) countdown validation verified.")
     add_styled_paragraph(doc, "[X] Secure direct escalation pathway to Chairman's Office Office verified.")
@@ -561,7 +632,7 @@ def generate_report_docx():
     add_styled_paragraph(doc, "[X] Database WAL transactional logging and query timeouts certified.")
     
     doc.add_paragraph() # spacing
-    add_styled_heading(doc, "9.2 Execution Approval signatures", 2)
+    add_styled_heading(doc, "10.2 Execution Approval signatures", 2)
     
     # Signature Table (3 cols)
     table = doc.add_table(rows=3, cols=3)
@@ -576,6 +647,7 @@ def generate_report_docx():
         cell.paragraphs[0].runs[0].font.bold = True
         cell.paragraphs[0].runs[0].font.name = 'Arial'
         cell.paragraphs[0].runs[0].font.size = Pt(10)
+        cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(0, 0, 0)
         
     row_cells1 = table.rows[1].cells
     row_cells1[0].text = "\n\n\n______________________"
@@ -594,6 +666,7 @@ def generate_report_docx():
                 if p.runs:
                     p.runs[0].font.name = 'Times New Roman'
                     p.runs[0].font.size = Pt(9.5)
+                    p.runs[0].font.color.rgb = RGBColor(0, 0, 0)
                     
     # Save document
     output_path = os.path.abspath("NMPA_Project_Report_Final.docx")
