@@ -719,37 +719,22 @@ def review_inspection():
 
 @app.route('/api/public-metrics', methods=['GET'])
 def get_public_metrics():
-    total_inspections = inspections_col.count_documents({})
-    pending_inspections = inspections_col.count_documents({"status": {"$in": ["Pending", "Awaiting Physical Inspection"]}})
-    completed_inspections = inspections_col.count_documents({"status": {"$nin": ["Pending", "Awaiting Physical Inspection"]}})
-
-    pre_berthing = max(0.2, round(0.78 + (pending_inspections * 0.02), 2))
-    trt = max(10.0, round(43.23 + (pending_inspections * 0.15), 2))
-
-    cleared_tonnage = 0
-    for doc in inspections_col.find({"status": {"$in": ["Approved", "Port Clearance Granted"]}}):
-        cleared_tonnage += doc.get("gross_tonnage") or doc.get("weight") or 0
-    berth_output = int(19535 + (cleared_tonnage / 20))
-
-    operating_ratio = 38.61
-    if total_inspections > 0:
-        operating_ratio = round(38.61 + (completed_inspections - pending_inspections) * 0.1, 2)
-
-    import time
-    try:
-        start_time = time.mktime(time.strptime("2026-06-01 00:00:00", "%Y-%m-%d %H:%M:%S"))
-        current_time = time.time()
-        delta_seconds = max(0, current_time - start_time)
-        solar_generated = round(59.26 + (delta_seconds * 0.000002), 6)
-    except:
-        solar_generated = 59.26
-
+    manifests_processed = inspections_col.count_documents({"status": {"$in": ["Approved", "Port Clearance Granted"]}})
+    active_holds = inspections_col.count_documents({"status": {"$in": ["Clearance Denied - Detained for Physical Audit", "Rejected"]}})
+    total_grievances = grievances_col.count_documents({})
+    
+    escalated_grievances = grievances_col.count_documents({
+        "$or": [
+            {"sla_status": "SLA Breached"},
+            {"escalated_to_chairman": True}
+        ]
+    })
+    
     return jsonify({
-        "pre_berthing_detention": pre_berthing,
-        "average_trt": trt,
-        "output_per_berth_day": berth_output,
-        "operating_ratio": operating_ratio,
-        "solar_generated": solar_generated
+        "manifests_processed": manifests_processed,
+        "active_holds": active_holds,
+        "total_grievances": total_grievances,
+        "escalated_grievances": escalated_grievances
     }), 200
 
 @app.route('/api/logs', methods=['GET'])

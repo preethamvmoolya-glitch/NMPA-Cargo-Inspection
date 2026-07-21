@@ -28,11 +28,10 @@ const Login = () => {
   const { language, setLanguage, darkMode, toggleDarkMode, t } = useLanguage();
   
   const [metrics, setMetrics] = useState({
-    pre_berthing_detention: 0.78,
-    average_trt: 43.23,
-    output_per_berth_day: 19535,
-    operating_ratio: 38.61,
-    solar_generated: 59.26
+    manifests_processed: 24,
+    active_holds: 2,
+    total_grievances: 8,
+    escalated_grievances: 1
   });
 
   useEffect(() => {
@@ -423,13 +422,13 @@ const Login = () => {
               <div className="login-metric-card">
                 <div className="login-metric-icon">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
-                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
                   </svg>
                 </div>
                 <div className="login-metric-info">
-                  <div className="login-metric-value">{metrics.pre_berthing_detention} {language === 'en' ? 'days' : 'दिन'}</div>
-                  <div className="login-metric-label">{language === 'en' ? 'Average Pre-berthing detention' : 'औसत प्री-बर्थिंग डिटेंशन'}</div>
+                  <div className="login-metric-value">{metrics.manifests_processed}</div>
+                  <div className="login-metric-label">{language === 'en' ? 'Total Manifests Cleared' : 'कुल मैनिफ़ेस्ट स्वीकृत'}</div>
                 </div>
               </div>
 
@@ -437,13 +436,14 @@ const Login = () => {
               <div className="login-metric-card">
                 <div className="login-metric-icon">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
-                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
                   </svg>
                 </div>
                 <div className="login-metric-info">
-                  <div className="login-metric-value">{metrics.average_trt} {language === 'en' ? 'Hrs' : 'घंटे'}</div>
-                  <div className="login-metric-label">{language === 'en' ? 'Average TRT' : 'औसत टीआरटी'}</div>
+                  <div className="login-metric-value">{metrics.active_holds}</div>
+                  <div className="login-metric-label">{language === 'en' ? 'Detained / Cargo Under Hold' : 'निरुद्ध / होल्ड के तहत कार्गो'}</div>
                 </div>
               </div>
 
@@ -451,13 +451,12 @@ const Login = () => {
               <div className="login-metric-card">
                 <div className="login-metric-icon">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
-                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                   </svg>
                 </div>
                 <div className="login-metric-info">
-                  <div className="login-metric-value">{metrics.output_per_berth_day?.toLocaleString()} {language === 'en' ? 'Tonnes' : 'टन'}</div>
-                  <div className="login-metric-label">{language === 'en' ? 'Average Output per berth day' : 'प्रति बर्थ दिन औसत उत्पादन'}</div>
+                  <div className="login-metric-value">{metrics.total_grievances}</div>
+                  <div className="login-metric-label">{language === 'en' ? 'Submitted Grievances' : 'दर्ज शिकायतें'}</div>
                 </div>
               </div>
 
@@ -465,27 +464,14 @@ const Login = () => {
               <div className="login-metric-card">
                 <div className="login-metric-icon">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
-                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
                   </svg>
                 </div>
                 <div className="login-metric-info">
-                  <div className="login-metric-value">{metrics.operating_ratio}%</div>
-                  <div className="login-metric-label">{language === 'en' ? 'Operating Ratio' : 'ऑपरेटिंग अनुपात'}</div>
-                </div>
-              </div>
-
-              {/* Card 5 */}
-              <div className="login-metric-card">
-                <div className="login-metric-icon">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
-                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
-                  </svg>
-                </div>
-                <div className="login-metric-info">
-                  <div className="login-metric-value">{metrics.solar_generated?.toFixed(4)} MUs</div>
-                  <div className="login-metric-label">{language === 'en' ? 'Solar Power generated upto June 2026' : 'जून 2026 तक सौर ऊर्जा उत्पादन'}</div>
+                  <div className="login-metric-value">{metrics.escalated_grievances}</div>
+                  <div className="login-metric-label">{language === 'en' ? 'SLA Breaches & Board Escalations' : 'SLA उल्लंघन और बोर्ड एस्केलेशन'}</div>
                 </div>
               </div>
             </div>
