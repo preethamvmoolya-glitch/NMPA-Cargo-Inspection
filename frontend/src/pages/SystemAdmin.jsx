@@ -69,6 +69,129 @@ const SlaCountdown = ({ deadline, onExpired }) => {
   );
 };
 
+const GrievanceDetailsCell = ({ message, isConfidential = false }) => {
+  if (!message) return '—';
+
+  // Helper to parse key-value lines
+  const lines = message.split('\n');
+  const fields = {};
+  let detailsText = '';
+  let inDetails = false;
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed.includes('[Grievance details]:') || trimmed.includes('[Grievance Details]:') || trimmed.includes('Grievance details:')) {
+      inDetails = true;
+      return;
+    }
+    if (inDetails) {
+      detailsText += (detailsText ? '\n' : '') + line;
+    } else {
+      const match = trimmed.match(/^\[([^\]]+)\]:\s*(.*)$/);
+      if (match) {
+        fields[match[1]] = match[2];
+      }
+    }
+  });
+
+  const hasDetails = inDetails && detailsText.trim().length > 0;
+  const displayDetails = hasDetails ? detailsText.trim() : message;
+
+  // Let's filter out empty or N/A values for tags
+  const renderedTags = [];
+  
+  if (fields['Grievance Status/Role']) {
+    renderedTags.push(
+      <Tag key="role" color="cyan" style={{ fontSize: '0.72rem', borderRadius: '4px', margin: '2px' }}>
+        <strong>Role:</strong> {fields['Grievance Status/Role']}
+      </Tag>
+    );
+  }
+  if (fields['Name']) {
+    renderedTags.push(
+      <Tag key="name" color="blue" style={{ fontSize: '0.72rem', borderRadius: '4px', margin: '2px' }}>
+        <strong>Name:</strong> {fields['Name']}
+      </Tag>
+    );
+  }
+  if (fields['Gender']) {
+    renderedTags.push(
+      <Tag key="gender" color="purple" style={{ fontSize: '0.72rem', borderRadius: '4px', margin: '2px' }}>
+        <strong>Gender:</strong> {fields['Gender']}
+      </Tag>
+    );
+  }
+  if (fields['Contact'] && fields['Contact'] !== 'N/A') {
+    renderedTags.push(
+      <Tag key="contact" color="geekblue" style={{ fontSize: '0.72rem', borderRadius: '4px', margin: '2px' }}>
+        <strong>Contact:</strong> {fields['Contact']}
+      </Tag>
+    );
+  }
+  if (fields['State']) {
+    renderedTags.push(
+      <Tag key="state" color="gold" style={{ fontSize: '0.72rem', borderRadius: '4px', margin: '2px' }}>
+        <strong>State:</strong> {fields['State']}
+      </Tag>
+    );
+  }
+  if (fields['Pincode'] && fields['Pincode'] !== 'N/A') {
+    renderedTags.push(
+      <Tag key="pincode" color="orange" style={{ fontSize: '0.72rem', borderRadius: '4px', margin: '2px' }}>
+        <strong>Pin:</strong> {fields['Pincode']}
+      </Tag>
+    );
+  }
+  
+  // Render generic identifiers (UAN, PPO, etc.)
+  Object.keys(fields).forEach(key => {
+    if (key.includes('Identifier') || key.toLowerCase().includes('id')) {
+      renderedTags.push(
+        <Tag key={key} color="magenta" style={{ fontSize: '0.72rem', borderRadius: '4px', margin: '2px' }}>
+          <strong>ID:</strong> {fields[key]}
+        </Tag>
+      );
+    }
+  });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      {renderedTags.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '2px' }}>
+          {renderedTags}
+        </div>
+      )}
+      
+      {/* Mini Details Container Box */}
+      <div style={{ 
+        background: isConfidential ? 'rgba(217, 83, 79, 0.03)' : 'rgba(0, 0, 0, 0.02)', 
+        border: `1px solid ${isConfidential ? '#fcdede' : '#f0f0f0'}`, 
+        borderRadius: '4px', 
+        padding: '6px 10px',
+        fontSize: '0.82rem',
+        maxHeight: '100px',
+        overflowY: 'auto'
+      }}>
+        {hasDetails && (
+          <div style={{ 
+            fontWeight: 600, 
+            fontSize: '0.7rem', 
+            color: isConfidential ? '#d9534f' : '#8c8c8c', 
+            marginBottom: '3px', 
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em'
+          }}>
+            {isConfidential ? '🔒 Confidential Message Details:' : '📝 Message Details:'}
+          </div>
+        )}
+        <div style={{ whiteSpace: 'pre-wrap', color: '#434343', lineHeight: '1.4' }}>
+          {displayDetails}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const SystemAdmin = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') || '0';
@@ -675,7 +798,7 @@ const SystemAdmin = () => {
                                       title: t('complaintsTimestamp'),
                                       dataIndex: 'date',
                                       key: 'date',
-                                      width: '15%',
+                                      width: '12%',
                                       render: (date) => date ? new Date(date).toLocaleString() : '—'
                                     },
                                     {
@@ -696,8 +819,8 @@ const SystemAdmin = () => {
                                       title: t('complaintsMessage'),
                                       dataIndex: 'message',
                                       key: 'message',
-                                      width: '25%',
-                                      render: (message) => <Text type="secondary" style={{ whiteSpace: 'pre-wrap' }}>{message}</Text>
+                                      width: '35%',
+                                      render: (message) => <GrievanceDetailsCell message={message} />
                                     },
                                     {
                                       title: 'SLA Status',
@@ -786,47 +909,55 @@ const SystemAdmin = () => {
                               pagination={{ pageSize: 6 }}
                               bordered
                               columns={[
-                                {
-                                  title: 'Escalation Timestamp',
-                                  dataIndex: 'date',
-                                  key: 'date',
-                                  width: '20%',
-                                  render: (date) => date ? new Date(date).toLocaleString() : '—'
-                                },
-                                {
-                                  title: 'Complainant Email',
-                                  dataIndex: 'email',
-                                  key: 'email',
-                                  width: '20%',
-                                  render: (email) => <Text strong>{email}</Text>
-                                },
-                                {
-                                  title: 'Category',
-                                  dataIndex: 'subject',
-                                  key: 'subject',
-                                  width: '20%',
-                                  render: (subject) => <Tag color="red" style={{ fontWeight: 'bold' }}>{subject?.toUpperCase()}</Tag>
-                                },
-                                {
-                                  title: 'Severity',
-                                  dataIndex: 'severity_level',
-                                  key: 'severity_level',
-                                  width: '15%',
-                                  render: (severity) => {
-                                    let color = 'orange';
-                                    if (severity === 'Critical') color = 'red';
-                                    if (severity === 'High') color = 'volcano';
-                                    if (severity === 'Low') color = 'blue';
-                                    return <Tag color={color} style={{ fontWeight: 'bold' }}>{severity?.toUpperCase()}</Tag>;
-                                  }
-                                },
-                                {
-                                  title: 'Confidential Description',
-                                  dataIndex: 'message',
-                                  key: 'message',
-                                  width: '25%',
-                                  render: (message) => <Text type="danger" style={{ whiteSpace: 'pre-wrap' }}>{message}</Text>
-                                }
+                                 {
+                                   title: 'Escalation Timestamp',
+                                   dataIndex: 'date',
+                                   key: 'date',
+                                   width: '15%',
+                                   render: (date) => date ? new Date(date).toLocaleString() : '—'
+                                 },
+                                 {
+                                   title: 'Complainant Email',
+                                   dataIndex: 'email',
+                                   key: 'email',
+                                   width: '18%',
+                                   render: (email) => <Text strong>{email}</Text>
+                                 },
+                                 {
+                                   title: 'Category',
+                                   key: 'category_cell',
+                                   width: '18%',
+                                   render: (_, record) => {
+                                     const categoryText = record.category || record.subject;
+                                     return categoryText ? (
+                                       <Tag color="red" style={{ fontWeight: 'bold' }}>
+                                         {categoryText.toUpperCase()}
+                                       </Tag>
+                                     ) : '—';
+                                   }
+                                 },
+                                 {
+                                   title: 'Severity',
+                                   dataIndex: 'severity_level',
+                                   key: 'severity_level',
+                                   width: '14%',
+                                   render: (severity) => {
+                                     let color = 'orange';
+                                     if (severity === 'Critical') color = 'red';
+                                     if (severity === 'High') color = 'volcano';
+                                     if (severity === 'Low') color = 'blue';
+                                     return <Tag color={color} style={{ fontWeight: 'bold' }}>{severity?.toUpperCase()}</Tag>;
+                                   }
+                                 },
+                                 {
+                                   title: 'Confidential Description',
+                                   key: 'description_cell',
+                                   width: '35%',
+                                   render: (_, record) => {
+                                     const text = record.description || record.message;
+                                     return <GrievanceDetailsCell message={text} isConfidential={true} />;
+                                   }
+                                 }
                               ]}
                             />
                           </div>
