@@ -952,25 +952,85 @@ const PortAuthority = () => {
                   <Row gutter={24} style={{ marginBottom: '30px' }}>
                     {/* SVG Pie/Bar: Clearances to Detention Splits */}
                     <Col span={24}>
-                      <Card title={t('splitsTitle')} style={{ height: '300px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '200px', gap: '20px' }}>
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                              <Text>{t('splitsPcc')}</Text>
-                              <Text strong>{(clearedCount / (clearedCount + detainedCount || 1) * 100).toFixed(0)}%</Text>
-                            </div>
-                            <div style={{ width: '100%', height: '12px', background: '#f5f5f5', borderRadius: '6px', overflow: 'hidden' }}>
-                              <div style={{ width: `${(clearedCount / (clearedCount + detainedCount || 1) * 100)}%`, height: '100%', background: '#52c41a' }} />
+                      <Card title={t('splitsTitle')} style={{ height: '320px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', height: '220px' }}>
+                          {/* SVG Donut Chart */}
+                          <div style={{ position: 'relative', width: '160px', height: '160px' }}>
+                            <svg width="160" height="160" viewBox="0 0 120 120" style={{ transform: 'rotate(-90deg)' }}>
+                              <circle
+                                cx="60"
+                                cy="60"
+                                r="48"
+                                fill="transparent"
+                                stroke="#f5f5f5"
+                                strokeWidth="12"
+                              />
+                              {(clearedCount + detainedCount) > 0 ? (
+                                <>
+                                  <circle
+                                    cx="60"
+                                    cy="60"
+                                    r="48"
+                                    fill="transparent"
+                                    stroke="#52c41a"
+                                    strokeWidth="12"
+                                    strokeDasharray={`${(clearedCount / (clearedCount + detainedCount || 1)) * 301.59} 301.59`}
+                                    strokeLinecap="round"
+                                  />
+                                  <circle
+                                    cx="60"
+                                    cy="60"
+                                    r="48"
+                                    fill="transparent"
+                                    stroke="#ff4d4f"
+                                    strokeWidth="12"
+                                    strokeDasharray={`${(detainedCount / (clearedCount + detainedCount || 1)) * 301.59} 301.59`}
+                                    strokeDashoffset={-((clearedCount / (clearedCount + detainedCount || 1)) * 301.59)}
+                                    strokeLinecap="round"
+                                  />
+                                </>
+                              ) : null}
+                            </svg>
+                            <div style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '160px',
+                              height: '160px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <Text style={{ fontSize: '20px', fontWeight: 'bold', margin: 0, color: '#333' }}>
+                                {clearedCount + detainedCount}
+                              </Text>
+                              <Text style={{ fontSize: '10px', color: '#8c8c8c', margin: 0 }}>
+                                {language === 'en' ? 'Total Actions' : 'कुल गतिविधियां'}
+                              </Text>
                             </div>
                           </div>
 
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                              <Text>{t('splitsQdo')}</Text>
-                              <Text strong>{(detainedCount / (clearedCount + detainedCount || 1) * 100).toFixed(0)}%</Text>
+                          {/* Legend / Details */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', minWidth: '180px' }}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#52c41a' }} />
+                                <Text strong style={{ fontSize: '14px' }}>{t('splitsPcc')}</Text>
+                              </div>
+                              <Text type="secondary" style={{ marginLeft: '20px' }}>
+                                {clearedCount} {language === 'en' ? 'Certificates Issued' : 'प्रमाण पत्र जारी'}
+                              </Text>
                             </div>
-                            <div style={{ width: '100%', height: '12px', background: '#f5f5f5', borderRadius: '6px', overflow: 'hidden' }}>
-                              <div style={{ width: `${(detainedCount / (clearedCount + detainedCount || 1) * 100)}%`, height: '100%', background: '#ff4d4f' }} />
+
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ff4d4f' }} />
+                                <Text strong style={{ fontSize: '14px' }}>{t('splitsQdo')}</Text>
+                              </div>
+                              <Text type="secondary" style={{ marginLeft: '20px' }}>
+                                {detainedCount} {language === 'en' ? 'Orders Active' : 'सक्रिय आदेश'}
+                              </Text>
                             </div>
                           </div>
                         </div>
