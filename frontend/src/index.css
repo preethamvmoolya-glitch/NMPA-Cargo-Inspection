@@ -2001,22 +2001,24 @@ body.dark-theme .not-found-icon-wrap {
 }
 
 .login-metric-card {
-  background: rgba(12, 27, 48, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  padding: 8px 10px;
+  background: linear-gradient(135deg, rgba(20, 38, 66, 0.8) 0%, rgba(8, 18, 33, 0.95) 100%);
+  border: 1px solid rgba(255, 213, 79, 0.2);
+  border-radius: 12px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 48px;
+  gap: 12px;
+  min-height: 64px;
   box-sizing: border-box;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .login-metric-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 213, 79, 0.4);
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(255, 213, 79, 0.55);
+  box-shadow: 0 10px 25px rgba(255, 213, 79, 0.15);
 }
 
 .login-metric-icon {
@@ -2024,6 +2026,11 @@ body.dark-theme .not-found-icon-wrap {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(255, 213, 79, 0.1);
+  border: 1px solid rgba(255, 213, 79, 0.2);
 }
 
 .login-metric-info {
@@ -2034,18 +2041,21 @@ body.dark-theme .not-found-icon-wrap {
 }
 
 .login-metric-value {
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 0.90rem;
-  line-height: 1.15;
+  color: #ffd54f; /* Bright port gold */
+  font-weight: 800;
+  font-size: 1.35rem; /* Larger font size for prominence */
+  line-height: 1.1;
+  font-family: 'Outfit', 'Inter', sans-serif;
 }
 
 .login-metric-label {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.58rem;
-  font-weight: 500;
-  line-height: 1.15;
-  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+  margin-top: 3px;
+  text-transform: uppercase;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
