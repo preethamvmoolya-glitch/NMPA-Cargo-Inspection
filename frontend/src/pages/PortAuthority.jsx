@@ -744,13 +744,16 @@ const PortAuthority = () => {
                     </Col>
                   </Row>
                   <Title level={4} style={{ marginBottom: '15px' }}>{t('igmQueueHeader')}</Title>
-                  <Table
-                    dataSource={inspectedCargoList.filter(item => item.status === 'Inspected - Awaiting Authority Adjudication' || item.status === 'Awaiting Authority Adjudication' || item.status === 'Pending Approval')}
-                    columns={pendingApprovalsColumns}
-                    loading={loading}
-                    rowKey="id"
-                    pagination={{ pageSize: 8 }}
-                  />
+                  <div className="table-responsive-wrapper">
+                    <Table
+                      dataSource={inspectedCargoList.filter(item => item.status === 'Inspected - Awaiting Authority Adjudication' || item.status === 'Awaiting Authority Adjudication' || item.status === 'Pending Approval')}
+                      columns={pendingApprovalsColumns}
+                      loading={loading}
+                      rowKey="id"
+                      pagination={{ pageSize: 8 }}
+                      scroll={{ x: 'max-content' }}
+                    />
+                  </div>
                 </div>
               )
             },
@@ -774,70 +777,60 @@ const PortAuthority = () => {
                     </Col>
                   </Row>
                   <Title level={4} style={{ marginBottom: '15px' }}>{t('approvedVesselClearances')}</Title>
-                  <Table
-                    dataSource={inspectedCargoList.filter(item => item.status === 'Port Clearance Granted' || item.status === 'Approved')}
-                    columns={[
-                      {
-                        title: t('tblBlRef'),
-                        dataIndex: 'manifestId',
-                        key: 'manifestId',
-                        render: (text) => <Text strong>{text}</Text>
-                      },
-                      {
-                        title: t('tblVesselName'),
-                        dataIndex: 'vesselName',
-                        key: 'vesselName',
-                      },
-                      {
-                        title: t('tblCargoType'),
-                        dataIndex: 'cargoType',
-                        key: 'cargoType',
-                      },
-                      {
-                        title: t('tblGrossTonnage'),
-                        dataIndex: 'declaredWeight',
-                        key: 'declaredWeight',
-                        render: (val) => `${val} MT`
-                      },
-                      {
-                        title: t('tblRmsMemo'),
-                        dataIndex: 'rmsRiskLevel',
-                        key: 'rmsRiskLevel',
-                        render: (level) => {
-                          let color = 'green';
-                          let riskText = level || 'ROUTINE RISK';
-                          if (level === 'CRITICAL RISK') { color = 'red'; riskText = t('riskCritical'); }
-                          else if (level === 'ELEVATED RISK') { color = 'orange'; riskText = t('riskElevated'); }
-                          else if (level === 'ROUTINE RISK') { riskText = t('riskRoutine'); }
-                          return <Tag color={color}>{riskText}</Tag>;
+                  <div className="table-responsive-wrapper">
+                    <Table
+                      dataSource={inspectedCargoList.filter(item => item.status === 'Port Clearance Granted' || item.status === 'Approved')}
+                      columns={[
+                        {
+                          title: t('tblBlRef'),
+                          dataIndex: 'manifestId',
+                          key: 'manifestId',
+                          render: (text) => <Text strong>{text}</Text>
+                        },
+                        {
+                          title: t('tblVesselName'),
+                          dataIndex: 'vesselName',
+                          key: 'vesselName',
+                        },
+                        {
+                          title: t('tblCargoType'),
+                          dataIndex: 'cargoType',
+                          key: 'cargoType',
+                        },
+                        {
+                          title: t('tblGrossTonnage'),
+                          dataIndex: 'declaredWeight',
+                          key: 'declaredWeight',
+                          render: (val) => `${val} MT`
+                        },
+                        {
+                          title: t('clearanceCode'),
+                          dataIndex: 'qrToken',
+                          key: 'qrToken',
+                          render: (token) => <Text copyable style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{token || '—'}</Text>
+                        },
+                        {
+                          title: t('tblAction'),
+                          key: 'certificateAction',
+                          render: (_, record) => (
+                            <Button 
+                              type="primary" 
+                              icon={<PrinterOutlined />}
+                              size="small"
+                              onClick={() => printCertificate(record, record.qrToken, null, language, t)}
+                              style={{ backgroundColor: '#1890ff', borderColor: '#1890ff' }}
+                            >
+                              {t('viewCertificate')}
+                            </Button>
+                          )
                         }
-                      },
-                      {
-                        title: t('clearanceCode'),
-                        dataIndex: 'qrToken',
-                        key: 'qrToken',
-                        render: (token) => <Text copyable style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{token || '—'}</Text>
-                      },
-                      {
-                        title: t('tblAction'),
-                        key: 'certificateAction',
-                        render: (_, record) => (
-                          <Button 
-                            type="primary" 
-                            icon={<PrinterOutlined />}
-                            size="small"
-                            onClick={() => printCertificate(record, record.qrToken, null, language, t)}
-                            style={{ backgroundColor: '#1890ff', borderColor: '#1890ff' }}
-                          >
-                            {t('viewCertificate')}
-                          </Button>
-                        )
-                      }
-                    ]}
-                    loading={loading}
-                    rowKey="id"
-                    pagination={{ pageSize: 8 }}
-                  />
+                      ]}
+                      loading={loading}
+                      rowKey="id"
+                      pagination={{ pageSize: 8 }}
+                      scroll={{ x: 'max-content' }}
+                    />
+                  </div>
                 </div>
               )
             },
@@ -861,70 +854,73 @@ const PortAuthority = () => {
                     </Col>
                   </Row>
                   <Title level={4} style={{ marginBottom: '15px' }}>{t('quarantineLogHeader')}</Title>
-                  <Table
-                    dataSource={inspectedCargoList.filter(item => item.status === 'Clearance Denied - Detained for Physical Audit' || item.status === 'Rejected')}
-                    columns={[
-                      {
-                        title: t('tblBlRef'),
-                        dataIndex: 'manifestId',
-                        key: 'manifestId',
-                        render: (text) => <Text strong>{text}</Text>
-                      },
-                      {
-                        title: t('tblVesselName'),
-                        dataIndex: 'vesselName',
-                        key: 'vesselName',
-                      },
-                      {
-                        title: t('tblCargoType'),
-                        dataIndex: 'cargoType',
-                        key: 'cargoType',
-                      },
-                      {
-                        title: t('tblGrossTonnage'),
-                        dataIndex: 'declaredWeight',
-                        key: 'declaredWeight',
-                        render: (val) => `${val} MT`
-                      },
-                      {
-                        title: t('tblRmsMemo'),
-                        dataIndex: 'rmsRiskLevel',
-                        key: 'rmsRiskLevel',
-                        render: (level) => {
-                          let color = 'green';
-                          let riskText = level || 'ROUTINE RISK';
-                          if (level === 'CRITICAL RISK') { color = 'red'; riskText = t('riskCritical'); }
-                          else if (level === 'ELEVATED RISK') { color = 'orange'; riskText = t('riskElevated'); }
-                          else if (level === 'ROUTINE RISK') { riskText = t('riskRoutine'); }
-                          return <Tag color={color}>{riskText}</Tag>;
+                  <div className="table-responsive-wrapper">
+                    <Table
+                      dataSource={inspectedCargoList.filter(item => item.status === 'Clearance Denied - Detained for Physical Audit' || item.status === 'Rejected')}
+                      columns={[
+                        {
+                          title: t('tblBlRef'),
+                          dataIndex: 'manifestId',
+                          key: 'manifestId',
+                          render: (text) => <Text strong>{text}</Text>
+                        },
+                        {
+                          title: t('tblVesselName'),
+                          dataIndex: 'vesselName',
+                          key: 'vesselName',
+                        },
+                        {
+                          title: t('tblCargoType'),
+                          dataIndex: 'cargoType',
+                          key: 'cargoType',
+                        },
+                        {
+                          title: t('tblGrossTonnage'),
+                          dataIndex: 'declaredWeight',
+                          key: 'declaredWeight',
+                          render: (val) => `${val} MT`
+                        },
+                        {
+                          title: t('tblRmsMemo'),
+                          dataIndex: 'rmsRiskLevel',
+                          key: 'rmsRiskLevel',
+                          render: (level) => {
+                            let color = 'green';
+                            let riskText = level || 'ROUTINE RISK';
+                            if (level === 'CRITICAL RISK') { color = 'red'; riskText = t('riskCritical'); }
+                            else if (level === 'ELEVATED RISK') { color = 'orange'; riskText = t('riskElevated'); }
+                            else if (level === 'ROUTINE RISK') { riskText = t('riskRoutine'); }
+                            return <Tag color={color}>{riskText}</Tag>;
+                          }
+                        },
+                        {
+                          title: t('tblEnforcementAction'),
+                          dataIndex: 'status',
+                          key: 'status',
+                          render: (status) => <Tag color="red">{language === 'en' ? 'DETAINED (QDO)' : 'निरुद्ध (QDO)'}</Tag>
+                        },
+                        {
+                          title: t('tblAction'),
+                          key: 'action',
+                          render: (_, record) => (
+                            <Button 
+                              type="primary" 
+                              danger
+                              icon={<PrinterOutlined />}
+                              size="small"
+                              onClick={() => printCertificate(record, record.qrToken, null, language, t)}
+                            >
+                              {language === 'en' ? 'Print QDO' : 'क्यूडीओ प्रिंट करें'}
+                            </Button>
+                          )
                         }
-                      },
-                      {
-                        title: t('tblEnforcementAction'),
-                        dataIndex: 'status',
-                        key: 'status',
-                        render: (status) => <Tag color="red">{language === 'en' ? 'DETAINED (QDO)' : 'निरुद्ध (QDO)'}</Tag>
-                      },
-                      {
-                        title: t('tblAction'),
-                        key: 'action',
-                        render: (_, record) => (
-                          <Button 
-                            type="primary" 
-                            danger
-                            icon={<PrinterOutlined />}
-                            size="small"
-                            onClick={() => printCertificate(record, record.qrToken, null, language, t)}
-                          >
-                            {language === 'en' ? 'Print QDO' : 'क्यूडीओ प्रिंट करें'}
-                          </Button>
-                        )
-                      }
-                    ]}
-                    loading={loading}
-                    rowKey="id"
-                    pagination={{ pageSize: 8 }}
-                  />
+                      ]}
+                      loading={loading}
+                      rowKey="id"
+                      pagination={{ pageSize: 8 }}
+                      scroll={{ x: 'max-content' }}
+                    />
+                  </div>
                 </div>
               )
             },
@@ -1039,84 +1035,87 @@ const PortAuthority = () => {
                   </Row>
 
                   <Title level={4} style={{ marginBottom: '15px' }}>{t('allVesselLedgerTitle')}</Title>
-                  <Table
-                    dataSource={inspectedCargoList}
-                    columns={[
-                      {
-                        title: t('tblBlRef'),
-                        dataIndex: 'manifestId',
-                        key: 'manifestId',
-                        render: (text) => <Text strong>{text}</Text>
-                      },
-                      {
-                        title: t('tblVesselName'),
-                        dataIndex: 'vesselName',
-                        key: 'vesselName',
-                      },
-                      {
-                        title: t('tblCargoType'),
-                        dataIndex: 'cargoType',
-                        key: 'cargoType',
-                      },
-                      {
-                        title: t('tblRmsMemo'),
-                        dataIndex: 'rmsRiskLevel',
-                        key: 'rmsRiskLevel',
-                        render: (level) => {
-                          let color = 'green';
-                          let riskText = level || 'ROUTINE RISK';
-                          if (level === 'CRITICAL RISK') { color = 'red'; riskText = t('riskCritical'); }
-                          else if (level === 'ELEVATED RISK') { color = 'orange'; riskText = t('riskElevated'); }
-                          else if (level === 'ROUTINE RISK') { riskText = t('riskRoutine'); }
-                          return <Tag color={color}>{riskText}</Tag>;
-                        }
-                      },
-                      {
-                        title: t('tblStatus'),
-                        dataIndex: 'status',
-                        key: 'status',
-                        render: (status) => renderStatusTag(status)
-                      },
-                      {
-                        title: t('tblAction'),
-                        key: 'action',
-                        render: (_, record) => {
-                          const isCleared = record.status === 'Port Clearance Granted' || record.status === 'Approved';
-                          const isDetained = record.status === 'Clearance Denied - Detained for Physical Audit' || record.status === 'Rejected';
-                          
-                          if (isCleared) {
-                            return (
-                              <Button 
-                                type="primary" 
-                                icon={<PrinterOutlined />}
-                                size="small"
-                                onClick={() => printCertificate(record, record.qrToken, null, language, t)}
-                                style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
-                              >
-                                {language === 'en' ? 'Print PCC' : 'पीसीसी प्रिंट करें'}
-                              </Button>
-                            );
-                          } else if (isDetained) {
-                            return (
-                              <Button 
-                                type="primary" 
-                                danger
-                                icon={<PrinterOutlined />}
-                                size="small"
-                                onClick={() => printCertificate(record, record.qrToken, null, language, t)}
-                              >
-                                {language === 'en' ? 'Print QDO' : 'क्यूडीओ प्रिंट करें'}
-                              </Button>
-                            );
+                  <div className="table-responsive-wrapper">
+                    <Table
+                      dataSource={inspectedCargoList}
+                      columns={[
+                        {
+                          title: t('tblBlRef'),
+                          dataIndex: 'manifestId',
+                          key: 'manifestId',
+                          render: (text) => <Text strong>{text}</Text>
+                        },
+                        {
+                          title: t('tblVesselName'),
+                          dataIndex: 'vesselName',
+                          key: 'vesselName',
+                        },
+                        {
+                          title: t('tblCargoType'),
+                          dataIndex: 'cargoType',
+                          key: 'cargoType',
+                        },
+                        {
+                          title: t('tblRmsMemo'),
+                          dataIndex: 'rmsRiskLevel',
+                          key: 'rmsRiskLevel',
+                          render: (level) => {
+                            let color = 'green';
+                            let riskText = level || 'ROUTINE RISK';
+                            if (level === 'CRITICAL RISK') { color = 'red'; riskText = t('riskCritical'); }
+                            else if (level === 'ELEVATED RISK') { color = 'orange'; riskText = t('riskElevated'); }
+                            else if (level === 'ROUTINE RISK') { riskText = t('riskRoutine'); }
+                            return <Tag color={color}>{riskText}</Tag>;
                           }
-                          return <Text type="secondary">—</Text>;
+                        },
+                        {
+                          title: t('tblStatus'),
+                          dataIndex: 'status',
+                          key: 'status',
+                          render: (status) => renderStatusTag(status)
+                        },
+                        {
+                          title: t('tblAction'),
+                          key: 'action',
+                          render: (_, record) => {
+                            const isCleared = record.status === 'Port Clearance Granted' || record.status === 'Approved';
+                            const isDetained = record.status === 'Clearance Denied - Detained for Physical Audit' || record.status === 'Rejected';
+                            
+                            if (isCleared) {
+                              return (
+                                <Button 
+                                  type="primary" 
+                                  icon={<PrinterOutlined />}
+                                  size="small"
+                                  onClick={() => printCertificate(record, record.qrToken, null, language, t)}
+                                  style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+                                >
+                                  {language === 'en' ? 'Print PCC' : 'पीसीसी प्रिंट करें'}
+                                </Button>
+                              );
+                            } else if (isDetained) {
+                              return (
+                                <Button 
+                                  type="primary" 
+                                  danger
+                                  icon={<PrinterOutlined />}
+                                  size="small"
+                                  onClick={() => printCertificate(record, record.qrToken, null, language, t)}
+                                >
+                                  {language === 'en' ? 'Print QDO' : 'क्यूडीओ प्रिंट करें'}
+                                </Button>
+                              );
+                            }
+                            return <Text type="secondary">—</Text>;
+                          }
                         }
-                      }
-                    ]}
-                    loading={loading}
-                    rowKey="id"
-                    pagination={{ pageSize: 8 }}
-                  />
+                      ]}
+                      loading={loading}
+                      rowKey="id"
+                      pagination={{ pageSize: 8 }}
+                      scroll={{ x: 'max-content' }}
+                    />
+                  </div>
                 </div>
               )
             }

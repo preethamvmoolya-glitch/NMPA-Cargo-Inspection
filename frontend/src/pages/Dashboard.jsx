@@ -520,13 +520,16 @@ const Dashboard = () => {
             ),
             children: (
               /* 2. PENDING QUEUE TABLE */
-              <Table 
-                dataSource={pendingCargo} 
-                columns={tableColumns} 
-                loading={loading} 
-                rowKey="id" 
-                pagination={{ pageSize: 8 }}
-              />
+              <div className="table-responsive-wrapper">
+                <Table 
+                  dataSource={pendingCargo} 
+                  columns={tableColumns} 
+                  loading={loading} 
+                  rowKey="id" 
+                  pagination={{ pageSize: 8 }}
+                  scroll={{ x: 'max-content' }}
+                />
+              </div>
             )
           },
           {

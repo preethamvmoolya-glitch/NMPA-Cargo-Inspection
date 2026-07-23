@@ -475,12 +475,14 @@ const SystemAdmin = () => {
                   </div>
                   
                   <Form form={editForm} component={false}>
-                    <Table
-                      bordered
-                      dataSource={users}
-                      loading={loading}
-                      rowKey="id"
-                      pagination={{ pageSize: 6 }}
+                    <div className="table-responsive-wrapper">
+                      <Table
+                        bordered
+                        dataSource={users}
+                        loading={loading}
+                        rowKey="id"
+                        pagination={{ pageSize: 6 }}
+                        scroll={{ x: 'max-content' }}
                       columns={[
                         {
                           title: t('usernameLabel'),
@@ -599,8 +601,9 @@ const SystemAdmin = () => {
                         }
                       ]}
                     />
-                  </Form>
-                </div>
+                  </div>
+                </Form>
+              </div>
               )
             },
             
@@ -613,12 +616,14 @@ const SystemAdmin = () => {
                   <Title level={4} style={{ marginBottom: '20px' }}>{t('securityLogTitle')}</Title>
                   {/* Fixed-height scrolling container */}
                   <div style={{ height: '400px', overflowY: 'auto', border: '1px solid #f0f0f0', borderRadius: '4px' }}>
-                    <Table 
-                      dataSource={logs} 
-                      loading={loading}
-                      pagination={false} 
-                      sticky
-                      rowKey="id"
+                    <div className="table-responsive-wrapper">
+                      <Table 
+                        dataSource={logs} 
+                        loading={loading}
+                        pagination={false} 
+                        sticky
+                        rowKey="id"
+                        scroll={{ x: 'max-content' }}
                       columns={[
                         {
                           title: t('logTimestamp'),
@@ -658,6 +663,7 @@ const SystemAdmin = () => {
                     />
                   </div>
                 </div>
+              </div>
               )
             },
 
@@ -841,12 +847,14 @@ const SystemAdmin = () => {
                                 return new Date(b.date) - new Date(a.date);
                               });
                               return (
-                                <Table 
-                                  dataSource={sortedComplaints} 
-                                  loading={loading}
-                                  rowKey="id"
-                                  pagination={{ pageSize: 6 }}
-                                  bordered
+                                <div className="table-responsive-wrapper">
+                                  <Table 
+                                    dataSource={sortedComplaints} 
+                                    loading={loading}
+                                    rowKey="id"
+                                    pagination={{ pageSize: 6 }}
+                                    scroll={{ x: 'max-content' }}
+                                    bordered
                                   rowClassName={(record) => {
                                     if (record.sla_status === 'SLA Breached') {
                                       return 'sla-breached-row';
@@ -949,9 +957,10 @@ const SystemAdmin = () => {
                                     }
                                   ]}
                                 />
-                              );
-                            })()}
-                          </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
                         )
                       },
                       {
@@ -962,12 +971,14 @@ const SystemAdmin = () => {
                             <Title level={4} style={{ marginBottom: '20px', color: '#d9534f' }}>
                               ⚠️ Secure Chairman's Office Inbox (Direct Escalations)
                             </Title>
-                            <Table 
-                              dataSource={chairmanComplaints} 
-                              loading={loading}
-                              rowKey="id"
-                              pagination={{ pageSize: 6 }}
-                              bordered
+                            <div className="table-responsive-wrapper">
+                              <Table 
+                                dataSource={chairmanComplaints} 
+                                loading={loading}
+                                rowKey="id"
+                                pagination={{ pageSize: 6 }}
+                                bordered
+                                scroll={{ x: 'max-content' }}
                               columns={[
                                  {
                                    title: 'Escalation Timestamp',
@@ -1019,9 +1030,10 @@ const SystemAdmin = () => {
                                    }
                                  }
                               ]}
-                            />
-                          </div>
-                        )
+                             />
+                           </div>
+                         </div>
+                       )
                       }
                     ]}
                   />

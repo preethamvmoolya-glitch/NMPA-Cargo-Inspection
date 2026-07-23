@@ -416,7 +416,7 @@ const VerifyClearance = () => {
               </Tag>
             </div>
 
-            <Descriptions title={t('verifyCertTitle')} bordered column={2} size="small" style={{ marginBottom: '20px' }}>
+            <Descriptions title={t('verifyCertTitle')} bordered column={{ xs: 1, sm: 2, md: 2 }} size="small" style={{ marginBottom: '20px' }}>
               <Descriptions.Item label={t('clearanceCode')} span={2}>
                 <Text copyable strong style={{ fontFamily: 'monospace' }}>{token}</Text>
               </Descriptions.Item>
