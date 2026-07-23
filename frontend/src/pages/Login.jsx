@@ -917,7 +917,7 @@ const Login = () => {
       <Modal
         title={
           <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--nmpa-text)' }}>
-            {language === 'en' ? 'Request Access - Grievance Operation System' : 'पहुंच अनुरोध - शिकायत संचालन प्रणाली'}
+            {language === 'en' ? 'Request Access - Cargo Inspection System' : 'पहुंच अनुरोध - कार्गो निरीक्षण प्रणाली'}
           </div>
         }
         open={requestAccessModalVisible}

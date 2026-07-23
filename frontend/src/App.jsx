@@ -103,7 +103,7 @@ function App() {
             <div className="preloader-bar-fill"></div>
           </div>
           <h1 className="preloader-title">NEW MANGALORE PORT AUTHORITY</h1>
-          <p className="preloader-subtitle">Grievance Operation System</p>
+          <p className="preloader-subtitle">Cargo Inspection & Adjudication System</p>
           <p className="preloader-status">Initializing Secure Gate Access & RMS Engine...</p>
         </div>
       </div>

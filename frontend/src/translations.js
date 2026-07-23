@@ -25,7 +25,7 @@ export const translations = {
     tab_complaints: "Complaints",
 
     // Login page
-    loginTitle: "Grievance Operation System",
+    loginTitle: "Cargo Inspection System",
     username: "Username",
     password: "Password",
     enterCaptcha: "Enter Captcha",
@@ -391,7 +391,7 @@ export const translations = {
     tab_complaints: "शिकायतें",
 
     // Login page
-    loginTitle: "शिकायत संचालन प्रणाली",
+    loginTitle: "कार्गो निरीक्षण प्रणाली",
     username: "उपयोगकर्ता नाम",
     password: "पासवर्ड",
     enterCaptcha: "कैप्चा दर्ज करें",
