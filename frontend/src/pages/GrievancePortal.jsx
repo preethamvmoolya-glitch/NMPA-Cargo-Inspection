@@ -395,21 +395,23 @@ const GrievancePortal = () => {
         </div>
 
         {/* Language Toggle */}
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <div className="language-toggle" style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', fontWeight: 600 }}>
-            <span 
-              style={{ color: language === 'en' ? '#1A237E' : '#757575', cursor: 'pointer', borderBottom: language === 'en' ? '2px solid #1A237E' : 'none', paddingBottom: '2px' }}
+        <div className="grievance-header" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div className="nmpa-lang-toggle-pill">
+            <button 
+              type="button" 
+              className={`lang-btn ${language === 'en' ? 'active' : ''}`}
               onClick={() => setLanguage('en')}
             >
-              ENGLISH
-            </span>
-            <span style={{ color: '#757575' }}>|</span>
-            <span 
-              style={{ color: language === 'hi' ? '#1A237E' : '#757575', cursor: 'pointer', borderBottom: language === 'hi' ? '2px solid #1A237E' : 'none', paddingBottom: '2px' }}
+              EN
+            </button>
+            <span className="lang-sep">|</span>
+            <button 
+              type="button" 
+              className={`lang-btn ${language === 'hi' ? 'active' : ''}`}
               onClick={() => setLanguage('hi')}
             >
-              HINDI
-            </span>
+              हिं
+            </button>
           </div>
         </div>
       </div>

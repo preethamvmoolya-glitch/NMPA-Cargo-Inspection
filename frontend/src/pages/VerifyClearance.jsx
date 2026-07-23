@@ -350,20 +350,22 @@ const VerifyClearance = () => {
         justifyContent: 'flex-end',
         marginBottom: '12px'
       }}>
-        <div className="language-toggle" style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', fontWeight: 600 }}>
-          <span 
-            style={{ color: language === 'en' ? '#fff' : 'rgba(255,255,255,0.5)', cursor: 'pointer', borderBottom: language === 'en' ? '2px solid #fff' : 'none', paddingBottom: '2px' }}
+        <div className="nmpa-lang-toggle-pill">
+          <button 
+            type="button" 
+            className={`lang-btn ${language === 'en' ? 'active' : ''}`}
             onClick={() => setLanguage('en')}
           >
-            ENGLISH
-          </span>
-          <span style={{ color: 'rgba(255,255,255,0.5)' }}>|</span>
-          <span 
-            style={{ color: language === 'hi' ? '#fff' : 'rgba(255,255,255,0.5)', cursor: 'pointer', borderBottom: language === 'hi' ? '2px solid #fff' : 'none', paddingBottom: '2px' }}
+            EN
+          </button>
+          <span className="lang-sep">|</span>
+          <button 
+            type="button" 
+            className={`lang-btn ${language === 'hi' ? 'active' : ''}`}
             onClick={() => setLanguage('hi')}
           >
-            HINDI
-          </span>
+            हिं
+          </button>
         </div>
       </div>
 

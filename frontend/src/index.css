@@ -1592,39 +1592,78 @@ input::-webkit-credentials-auto-fill-button {
   background: #06173a;
 }
 
-/* Language Switcher */
+/* Language Switcher Pill */
+.nmpa-lang-toggle-pill,
 .sidebar-lang-toggle {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
-  padding: 0.35rem;
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 3px 5px;
+  box-sizing: border-box;
 }
 
-.lang-btn {
+.nmpa-lang-toggle-pill .lang-btn,
+.sidebar-lang-toggle .lang-btn {
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+  padding: 3px 8px;
+  border-radius: 5px;
   transition: all 0.2s ease;
   outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
-.lang-btn.active {
-  background: rgba(255, 255, 255, 0.12);
+.nmpa-lang-toggle-pill .lang-btn:hover,
+.sidebar-lang-toggle .lang-btn:hover {
   color: #ffffff;
 }
 
-.lang-sep {
-  color: rgba(255, 255, 255, 0.15);
+.nmpa-lang-toggle-pill .lang-btn.active,
+.sidebar-lang-toggle .lang-btn.active {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  font-weight: 800;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.nmpa-lang-toggle-pill .lang-sep,
+.sidebar-lang-toggle .lang-sep {
+  color: rgba(255, 255, 255, 0.3);
   font-size: 0.75rem;
+  user-select: none;
+}
+
+/* Light theme overrides */
+body:not(.dark-theme) .login-header .nmpa-lang-toggle-pill,
+body:not(.dark-theme) .grievance-header .nmpa-lang-toggle-pill {
+  background: rgba(21, 101, 192, 0.08);
+  border-color: rgba(21, 101, 192, 0.25);
+}
+
+body:not(.dark-theme) .login-header .nmpa-lang-toggle-pill .lang-btn,
+body:not(.dark-theme) .grievance-header .nmpa-lang-toggle-pill .lang-btn {
+  color: var(--nmpa-text-muted);
+}
+
+body:not(.dark-theme) .login-header .nmpa-lang-toggle-pill .lang-btn.active,
+body:not(.dark-theme) .grievance-header .nmpa-lang-toggle-pill .lang-btn.active {
+  background: var(--nmpa-blue);
+  color: #ffffff;
+}
+
+body:not(.dark-theme) .login-header .nmpa-lang-toggle-pill .lang-sep,
+body:not(.dark-theme) .grievance-header .nmpa-lang-toggle-pill .lang-sep {
+  color: rgba(21, 101, 192, 0.3);
 }
 
 /* User details chip */

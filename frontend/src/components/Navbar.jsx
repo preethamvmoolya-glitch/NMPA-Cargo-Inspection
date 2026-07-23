@@ -63,20 +63,22 @@ const Navbar = () => {
 
         <div className="nmpa-nav-right">
           {/* Language Toggle */}
-          <div className="language-toggle" style={{ display: 'flex', gap: '8px', fontSize: '0.8rem', fontWeight: 600, marginRight: '15px' }}>
-            <span 
-              style={{ color: language === 'en' ? '#fff' : 'rgba(255,255,255,0.5)', cursor: 'pointer', borderBottom: language === 'en' ? '2px solid #fff' : 'none', paddingBottom: '2px' }}
+          <div className="nmpa-lang-toggle-pill" style={{ marginRight: '10px' }}>
+            <button 
+              type="button" 
+              className={`lang-btn ${language === 'en' ? 'active' : ''}`}
               onClick={() => setLanguage('en')}
             >
-              ENGLISH
-            </span>
-            <span style={{ color: 'rgba(255,255,255,0.5)' }}>|</span>
-            <span 
-              style={{ color: language === 'hi' ? '#fff' : 'rgba(255,255,255,0.5)', cursor: 'pointer', borderBottom: language === 'hi' ? '2px solid #fff' : 'none', paddingBottom: '2px' }}
+              EN
+            </button>
+            <span className="lang-sep">|</span>
+            <button 
+              type="button" 
+              className={`lang-btn ${language === 'hi' ? 'active' : ''}`}
               onClick={() => setLanguage('hi')}
             >
-              HINDI
-            </span>
+              हिं
+            </button>
           </div>
 
           <div className="nmpa-user-chip">

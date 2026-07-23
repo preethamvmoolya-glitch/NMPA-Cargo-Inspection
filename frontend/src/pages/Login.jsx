@@ -299,20 +299,22 @@ const Login = () => {
         </div>
         <div className="header-actions">
           {/* Language Toggle */}
-          <div className="language-toggle">
-            <span 
-              className={language === 'en' ? 'active' : ''}
+          <div className="nmpa-lang-toggle-pill">
+            <button 
+              type="button"
+              className={`lang-btn ${language === 'en' ? 'active' : ''}`}
               onClick={() => setLanguage('en')}
             >
-              E
-            </span>
-            <span className="separator">|</span>
-            <span 
-              className={language === 'hi' ? 'active' : ''}
+              EN
+            </button>
+            <span className="lang-sep">|</span>
+            <button 
+              type="button"
+              className={`lang-btn ${language === 'hi' ? 'active' : ''}`}
               onClick={() => setLanguage('hi')}
             >
-              H
-            </span>
+              हिं
+            </button>
           </div>
           <span className="separator">|</span>
           {/* Dark Mode Toggle */}
