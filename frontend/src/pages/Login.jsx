@@ -457,19 +457,6 @@ const Login = () => {
                 </div>
               </div>
 
-              {/* Card 3 */}
-              <div className="login-metric-card">
-                <div className="login-metric-icon">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffd54f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                  </svg>
-                </div>
-                <div className="login-metric-info">
-                  <div className="login-metric-value">{metrics.total_grievances}</div>
-                  <div className="login-metric-label">{language === 'en' ? 'Submitted Grievances' : 'दर्ज शिकायतें'}</div>
-                </div>
-              </div>
-
               {/* Card 4 */}
               <div className="login-metric-card">
                 <div className="login-metric-icon">
