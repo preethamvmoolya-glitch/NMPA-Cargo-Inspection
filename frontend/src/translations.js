@@ -274,7 +274,7 @@ export const translations = {
     viewCertificate: "View Certificate",
     
     // Grievance Portal specific translations
-    nmpaGrmsTitle: "NMPA Grievance System",
+    nmpaGrmsTitle: "NMPA Grievance Operation System",
     nmpaGrmsSub: "New Mangalore Port Authority · Government of India",
     tabRegisterGrievance: "Register Grievance",
     tabSendReminder: "Send Reminder",
@@ -641,7 +641,7 @@ export const translations = {
     viewCertificate: "प्रमाणपत्र देखें",
     
     // Grievance Portal specific translations (Hindi)
-    nmpaGrmsTitle: "एनएमपीए शिकायत प्रणाली",
+    nmpaGrmsTitle: "एनएमपीए शिकायत संचालन प्रणाली",
     nmpaGrmsSub: "नूतन मंगलूर पत्तन प्राधिकरण · भारत सरकार",
     tabRegisterGrievance: "शिकायत दर्ज करें",
     tabSendReminder: "अनुस्मारक भेजें",
