@@ -824,44 +824,65 @@ button {
   width: 100%;
 }
 
-/* ─── BADGES & TAGS (GLOBAL STANDARD COMPACT BOXES) ─────────── */
-.ant-tag {
-  font-size: 0.70rem !important;
-  line-height: 1.35 !important;
-  padding: 1px 7px !important;
-  border-radius: 4px !important;
+/* ─── BADGES & TAGS (GLOBAL ULTRA-COMPACT STANDARD BOXES) ────── */
+.ant-tag,
+span.ant-tag,
+.ant-tag-has-color,
+.ant-tag-gold,
+.ant-tag-blue,
+.ant-tag-green,
+.ant-tag-red,
+.ant-tag-orange,
+.ant-tag-cyan,
+.ant-tag-purple,
+.ant-tag-geekblue,
+.ant-tag-magenta,
+.ant-tag-processing,
+.ant-tag-success,
+.ant-tag-warning,
+.ant-tag-error {
+  font-size: 10px !important;
+  line-height: 14px !important;
+  height: 18px !important;
+  padding: 1px 5px !important;
+  border-radius: 3px !important;
   font-weight: 600 !important;
-  letter-spacing: 0.02em !important;
-  margin-inline-end: 4px !important;
-  margin-block-end: 2px !important;
+  letter-spacing: 0.01em !important;
+  margin: 1px 2px !important;
   display: inline-flex !important;
   align-items: center !important;
-  white-space: normal !important;
-  text-align: center !important;
-  word-break: break-word !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
+  box-shadow: none !important;
+  text-transform: none !important;
 }
 
 .ant-table-cell {
-  padding: 8px 10px !important;
+  padding: 6px 8px !important;
 }
 
 .ant-table-cell .ant-tag {
-  display: inline-block !important;
-  white-space: normal !important;
+  display: inline-flex !important;
+  white-space: nowrap !important;
   text-align: center !important;
   margin: 1px 0 !important;
   max-width: 100% !important;
+  font-size: 10px !important;
+  height: 18px !important;
+  line-height: 14px !important;
+  padding: 1px 5px !important;
 }
 
 .badge {
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.70rem;
-  font-weight: 600;
+  padding: 1px 5px !important;
+  border-radius: 3px !important;
+  font-size: 10px !important;
+  line-height: 14px !important;
+  font-weight: 600 !important;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   display: inline-block;
 }
 
@@ -2623,4 +2644,92 @@ body.dark-theme .not-found-icon-wrap {
 }
 .sla-breached-row:hover > td {
   background-color: rgba(255, 77, 79, 0.15) !important;
+}
+
+/* ─── FULL MOBILE RESPONSIVENESS OVERRIDES ─────────────────────── */
+@media (max-width: 768px) {
+  /* Inner layout & page padding */
+  .page-content,
+  .inner-page-wrapper,
+  .dashboard-container {
+    padding: 0.5rem !important;
+  }
+
+  /* Grid & Columns full width on mobile */
+  .ant-row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .ant-col {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Card padding reduction */
+  .ant-card-body {
+    padding: 0.75rem !important;
+  }
+
+  .ant-card-head {
+    padding: 0.5rem 0.75rem !important;
+    min-height: 40px !important;
+  }
+
+  /* Tables horizontal scrolling & font sizing */
+  .ant-table-wrapper {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ant-table {
+    min-width: 550px !important;
+  }
+
+  .ant-table-cell {
+    padding: 6px 6px !important;
+    font-size: 11px !important;
+  }
+
+  /* Modals on Mobile */
+  .ant-modal {
+    max-width: 95vw !important;
+    margin: 8px auto !important;
+  }
+
+  .ant-modal-body {
+    padding: 0.75rem !important;
+    max-height: 75vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Buttons & Inputs */
+  .ant-btn {
+    font-size: 12px !important;
+    height: auto !important;
+    padding: 4px 10px !important;
+  }
+
+  .ant-input,
+  .ant-select-selector {
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .ant-table {
+    min-width: 480px !important;
+  }
+
+  .stats-strip {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ant-btn {
+    width: 100% !important;
+    margin-bottom: 4px;
+  }
 }
