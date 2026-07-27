@@ -25,7 +25,6 @@ const Login = () => {
   const [reqAccessCaptchaInput, setReqAccessCaptchaInput] = useState('');
   const [contactUsModalVisible, setContactUsModalVisible] = useState(false);
   const [termsModalVisible, setTermsModalVisible] = useState(false);
-  const [isTickerPaused, setIsTickerPaused] = useState(false);
   const { language, setLanguage, darkMode, toggleDarkMode, t } = useLanguage();
   
   const [metrics, setMetrics] = useState({
@@ -335,26 +334,12 @@ const Login = () => {
       </div>
 
       {/* Notice Ticker Bar */}
-      <div 
-        className="notice-ticker-container"
-        onMouseEnter={() => setIsTickerPaused(true)}
-        onMouseLeave={() => setIsTickerPaused(false)}
-        onTouchStart={(e) => {
-          e.preventDefault();
-          setIsTickerPaused(prev => !prev);
-        }}
-        onClick={() => setIsTickerPaused(prev => !prev)}
-        title="Touch, tap, or hover to pause/resume text"
-        style={{ cursor: 'pointer', touchAction: 'manipulation' }}
-      >
+      <div className="notice-ticker-container">
         <div className="notice-ticker-label">
-          {t('circularNotice')} {isTickerPaused && <span style={{ marginLeft: '6px', fontSize: '0.7rem', opacity: 0.9 }}>⏸️</span>}
+          {t('circularNotice')}
         </div>
         <div className="notice-ticker-track">
-          <div 
-            className={`notice-ticker-text ${isTickerPaused ? 'paused' : ''}`}
-            style={{ animationPlayState: isTickerPaused ? 'paused' : 'running' }}
-          >
+          <div className="notice-ticker-text">
             <span className="notice-ticker-item">
               <span className="notice-ticker-bullet">•</span>
               {t('noticeText1')}
@@ -371,7 +356,7 @@ const Login = () => {
               <span className="notice-ticker-bullet">•</span>
               {t('noticeText4')}
             </span>
-            {/* Duplicated for seamless looping */}
+            {/* Duplicated for continuous looping */}
             <span className="notice-ticker-item">
               <span className="notice-ticker-bullet">•</span>
               {t('noticeText1')}

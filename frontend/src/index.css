@@ -1133,18 +1133,13 @@ body.dark-theme .notice-ticker-container {
   animation: notice-scroll 32s linear infinite;
   font-size: 0.8rem;
   color: #b71c1c;
-  font-weight: 700;
+  font-weight: 500;
   align-items: center;
 }
 
 .notice-ticker-container:hover .notice-ticker-text,
-.notice-ticker-container:active .notice-ticker-text,
-.notice-ticker-container:focus .notice-ticker-text,
 .notice-ticker-track:hover .notice-ticker-text,
-.notice-ticker-track:active .notice-ticker-text,
-.notice-ticker-text:hover,
-.notice-ticker-text:active,
-.notice-ticker-text.paused {
+.notice-ticker-text:hover {
   animation-play-state: paused !important;
   cursor: pointer;
 }
