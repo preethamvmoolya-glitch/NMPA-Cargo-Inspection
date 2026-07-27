@@ -25,6 +25,7 @@ const Login = () => {
   const [reqAccessCaptchaInput, setReqAccessCaptchaInput] = useState('');
   const [contactUsModalVisible, setContactUsModalVisible] = useState(false);
   const [termsModalVisible, setTermsModalVisible] = useState(false);
+  const [isTickerPaused, setIsTickerPaused] = useState(false);
   const { language, setLanguage, darkMode, toggleDarkMode, t } = useLanguage();
   
   const [metrics, setMetrics] = useState({
@@ -334,12 +335,24 @@ const Login = () => {
       </div>
 
       {/* Notice Ticker Bar */}
-      <div className="notice-ticker-container">
+      <div 
+        className="notice-ticker-container"
+        onMouseEnter={() => setIsTickerPaused(true)}
+        onMouseLeave={() => setIsTickerPaused(false)}
+        onTouchStart={() => setIsTickerPaused(true)}
+        onTouchEnd={() => setIsTickerPaused(false)}
+        onClick={() => setIsTickerPaused(prev => !prev)}
+        title="Touch, click, or hover to pause running text"
+        style={{ cursor: 'pointer' }}
+      >
         <div className="notice-ticker-label">
           {t('circularNotice')}
         </div>
         <div className="notice-ticker-track">
-          <div className="notice-ticker-text">
+          <div 
+            className={`notice-ticker-text ${isTickerPaused ? 'paused' : ''}`}
+            style={{ animationPlayState: isTickerPaused ? 'paused' : 'running' }}
+          >
             <span className="notice-ticker-item">
               <span className="notice-ticker-bullet">•</span>
               {t('noticeText1')}

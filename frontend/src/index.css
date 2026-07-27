@@ -1137,6 +1137,18 @@ body.dark-theme .notice-ticker-container {
   align-items: center;
 }
 
+.notice-ticker-container:hover .notice-ticker-text,
+.notice-ticker-container:active .notice-ticker-text,
+.notice-ticker-container:focus .notice-ticker-text,
+.notice-ticker-track:hover .notice-ticker-text,
+.notice-ticker-track:active .notice-ticker-text,
+.notice-ticker-text:hover,
+.notice-ticker-text:active,
+.notice-ticker-text.paused {
+  animation-play-state: paused !important;
+  cursor: pointer;
+}
+
 body.dark-theme .notice-ticker-text {
   color: #ff8a80;
 }
