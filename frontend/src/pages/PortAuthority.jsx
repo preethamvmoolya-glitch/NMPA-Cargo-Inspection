@@ -593,7 +593,7 @@ const PortAuthority = () => {
       color = 'blue';
       statusKey = 'statusReinspect';
     }
-    return <Tag color={color}>{t(statusKey)?.toUpperCase()}</Tag>;
+    return <Tag color={color} style={{ margin: 0, fontSize: '0.70rem', padding: '1px 6px', fontWeight: 600 }}>{t(statusKey)?.toUpperCase()}</Tag>;
   };
 
   const pendingApprovalsColumns = [
@@ -1072,6 +1072,7 @@ const PortAuthority = () => {
                           title: t('tblStatus'),
                           dataIndex: 'status',
                           key: 'status',
+                          width: 195,
                           render: (status) => renderStatusTag(status)
                         },
                         {

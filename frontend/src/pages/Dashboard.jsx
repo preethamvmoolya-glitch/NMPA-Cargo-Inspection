@@ -309,7 +309,7 @@ const Dashboard = () => {
       color = 'blue';
       statusKey = 'statusReinspect';
     }
-    return <Tag color={color} style={{ margin: 0 }}>{t(statusKey)?.toUpperCase()}</Tag>;
+    return <Tag color={color} style={{ margin: 0, fontSize: '0.70rem', padding: '1px 6px', fontWeight: 600 }}>{t(statusKey)?.toUpperCase()}</Tag>;
   };
 
   // Table Columns Setup
@@ -393,7 +393,7 @@ const Dashboard = () => {
       title: t('tblStatus'),
       dataIndex: 'status',
       key: 'status',
-      width: 160,
+      width: 195,
       render: (status) => renderStatusTag(status)
     },
     {

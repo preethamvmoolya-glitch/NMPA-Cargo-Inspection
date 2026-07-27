@@ -221,10 +221,10 @@ export const translations = {
 
     // Newly added keys for full localization
     statusAwaitingPhysicalInspection: "Awaiting Physical Inspection",
-    statusInspectedAwaitingAdjudication: "Inspected - Awaiting Authority Adjudication",
-    statusAwaitingAdjudication: "Awaiting Authority Adjudication",
+    statusInspectedAwaitingAdjudication: "Inspected - Awaiting Auth",
+    statusAwaitingAdjudication: "Awaiting Auth Adjudication",
     statusClearanceGranted: "Port Clearance Granted",
-    statusClearanceDenied: "Clearance Denied - Detained for Physical Audit",
+    statusClearanceDenied: "Clearance Denied - Detained",
     statusInspected: "Inspected",
     statusPending: "Pending",
     statusApproved: "Approved",
@@ -588,10 +588,10 @@ export const translations = {
 
     // Newly added keys for full localization
     statusAwaitingPhysicalInspection: "भौतिक निरीक्षण की प्रतीक्षा",
-    statusInspectedAwaitingAdjudication: "निरीक्षित - प्राधिकरण निर्णय की प्रतीक्षा",
+    statusInspectedAwaitingAdjudication: "निरीक्षित - प्राधिकरण निर्णय",
     statusAwaitingAdjudication: "प्राधिकरण निर्णय की प्रतीक्षा",
     statusClearanceGranted: "पत्तन निकासी स्वीकृत",
-    statusClearanceDenied: "निकासी अस्वीकृत - भौतिक ऑडिट हेतु निरुद्ध",
+    statusClearanceDenied: "निकासी अस्वीकृत - निरुद्ध",
     statusInspected: "निरीक्षित",
     statusPending: "लंबित",
     statusApproved: "स्वीकृत",
