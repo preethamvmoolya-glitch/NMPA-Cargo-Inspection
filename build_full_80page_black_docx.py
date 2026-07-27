@@ -7,17 +7,15 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 
-def generate_full_80_page_black_report():
+def create_pure_black_80_page_docx():
     doc = docx.Document()
 
-    # Set 1-inch margins
     for section in doc.sections:
         section.top_margin = Inches(1.0)
         section.bottom_margin = Inches(1.0)
         section.left_margin = Inches(1.0)
         section.right_margin = Inches(1.0)
 
-    # XML Helper Functions
     def set_table_borders(table, color="000000", sz="4", val="single"):
         tblPr = table._tbl.tblPr
         borders = parse_xml(
@@ -74,7 +72,6 @@ def generate_full_80_page_black_report():
         text = text.encode('ascii', errors='replace').decode('ascii')
         return text
 
-    # PURE BLACK HEADING HELPER
     def add_heading(text, level):
         clean_txt = clean_text(text)
         p = doc.add_paragraph()
@@ -107,7 +104,6 @@ def generate_full_80_page_black_report():
             run.font.color.rgb = RGBColor(0, 0, 0) # PURE BLACK
         return p
 
-    # PURE BLACK PARAGRAPH HELPER
     def add_p(text, indent=False, space_after=6):
         clean_txt = clean_text(text)
         p = doc.add_paragraph()
@@ -122,7 +118,6 @@ def generate_full_80_page_black_report():
         run.font.color.rgb = RGBColor(0, 0, 0) # PURE BLACK
         return p
 
-    # PURE BLACK BULLET POINT HELPER
     def add_bullet(title, description):
         p = doc.add_paragraph(style='List Bullet')
         p.paragraph_format.space_after = Pt(4)
@@ -140,7 +135,6 @@ def generate_full_80_page_black_report():
         r_desc.font.color.rgb = RGBColor(0, 0, 0)
         return p
 
-    # PURE BLACK IMAGE / CAPTION HELPER
     def add_ui(img_path, caption_text):
         if os.path.exists(img_path):
             p = doc.add_paragraph()
@@ -173,7 +167,6 @@ def generate_full_80_page_black_report():
             run.bold = True
             run.font.color.rgb = RGBColor(0, 0, 0)
 
-    # PURE BLACK TABLE HELPER
     def add_tbl(col_widths, headers, rows_data):
         table = doc.add_table(rows=len(rows_data)+1, cols=len(headers))
         table.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -219,14 +212,14 @@ def generate_full_80_page_black_report():
             for idx, width in enumerate(col_widths):
                 row.cells[idx].width = Inches(width)
 
-    # Academic text expander helper
-    def add_deep_expanded_section(title, overview, bullet_items, paragraphs):
+    # Helper text multiplier for academic expansion to reach ~80 pages (~28,000 words)
+    def add_deep_black_section(title, overview_text, key_points, detailed_paragraphs):
         add_heading(title, 2 if len(title.split('.')) == 2 else 3)
-        add_p(overview)
-        for item in bullet_items:
-            add_bullet(item[0], item[1])
-        for p_text in paragraphs:
-            add_p(p_text, indent=True)
+        add_p(overview_text)
+        for point in key_points:
+            add_bullet(point[0], point[1])
+        for para in detailed_paragraphs:
+            add_p(para, indent=True)
 
     # ------------------ COVER PAGE ------------------
     p_title = doc.add_paragraph()
@@ -402,7 +395,7 @@ def generate_full_80_page_black_report():
     add_p("The maritime transport industry represents the economic lifeline of global commerce, facilitating the transit of more than 80% of world trade volume and over 70% of global trade value. Seaports serve as primary intermodal hubs where maritime shipping lanes converge with inland logistics networks, rail corridors, and highway infrastructure. In an era marked by expanding vessel capacities, containerization, and stringent international maritime security protocols, port administrative efficiency directly dictates regional trade competitiveness, supply chain resilience, and national economic productivity.")
     add_p("Despite rapid advancements in global logistics technologies, many seaport authorities across developing economies continue to operate within legacy administrative paradigms characterized by paper-intensive, fragmented clearance procedures. The vessel clearance process-a statutory prerequisite granting commercial ships legal permission to enter harbor waters, berth at designated quays, load or discharge cargo, and depart-has historically required multi-departmental physical document routing. Arriving merchant vessels must satisfy rigorous regulatory inspections enforced by distinct governmental bodies, including maritime health biosecurity, border control and customs tariffs, and harbor marine traffic navigation.")
 
-    add_deep_expanded_section(
+    add_deep_black_section(
         "1.1.1 Project Title",
         "The official institutional title of this engineering initiative is the 'New Mangalore Port Authority (NMPA) Cargo Inspection and AI Risk Management System' (designated internally in codebase repositories as NMPA-CIS / NexaPort).",
         [
@@ -416,7 +409,7 @@ def generate_full_80_page_black_report():
         ]
     )
 
-    add_deep_expanded_section(
+    add_deep_black_section(
         "1.1.2 Category",
         "NMPA-CIS is formally categorized under Enterprise Web Applications, Workflow Automation Systems, and Maritime Logistics Infrastructure.",
         [
@@ -430,7 +423,7 @@ def generate_full_80_page_black_report():
         ]
     )
 
-    add_deep_expanded_section(
+    add_deep_black_section(
         "1.1.3 Overview",
         "The system coordinates four primary stakeholder groups across five automated operational phases:",
         [
@@ -447,7 +440,7 @@ def generate_full_80_page_black_report():
         ]
     )
 
-    add_deep_expanded_section(
+    add_deep_black_section(
         "1.1.4 Comparable Port Systems Analysis",
         "To establish international software design standards, NMPA-CIS was benchmarked against existing maritime logistics platforms:",
         [
@@ -462,7 +455,7 @@ def generate_full_80_page_black_report():
         ]
     )
 
-    add_deep_expanded_section(
+    add_deep_black_section(
         "1.2 Background",
         "Historical vessel clearance procedures at Panambur harbor relied heavily on physical paper files and manual departmental approvals.",
         [
@@ -476,7 +469,7 @@ def generate_full_80_page_black_report():
         ]
     )
 
-    add_deep_expanded_section(
+    add_deep_black_section(
         "1.2.1 Introduction of New Mangalore Port Authority (NMPA)",
         "Declared as India's 9th major port in May 1974, NMPA operates as Karnataka's primary maritime trade hub.",
         [
@@ -490,7 +483,7 @@ def generate_full_80_page_black_report():
         ]
     )
 
-    add_deep_expanded_section(
+    add_deep_black_section(
         "1.2.2 Port Infrastructure & Cargo Operational Load",
         "NMPA manages extensive terminal infrastructure designed for diverse cargo handling:",
         [
@@ -504,7 +497,7 @@ def generate_full_80_page_black_report():
         ]
     )
 
-    add_deep_expanded_section(
+    add_deep_black_section(
         "1.2.3 Agile Development Approach",
         "The project was executed using an iterative Agile SDLC model across 5 focused sprint cycles:",
         [
@@ -981,4 +974,4 @@ def generate_full_80_page_black_report():
     print(f"Successfully generated pure black Word document: {out_file}")
 
 if __name__ == '__main__':
-    generate_full_80_page_black_report()
+    create_pure_black_80_page_docx()

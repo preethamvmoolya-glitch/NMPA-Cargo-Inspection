@@ -7,18 +7,16 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 
-def generate_full_80_page_black_report():
+def create_full_college_docx():
     doc = docx.Document()
 
-    # Set 1-inch margins
     for section in doc.sections:
         section.top_margin = Inches(1.0)
         section.bottom_margin = Inches(1.0)
         section.left_margin = Inches(1.0)
         section.right_margin = Inches(1.0)
 
-    # XML Helper Functions
-    def set_table_borders(table, color="000000", sz="4", val="single"):
+    def set_table_borders(table, color="CCCCCC", sz="4", val="single"):
         tblPr = table._tbl.tblPr
         borders = parse_xml(
             f'<w:tblBorders {nsdecls("w")}>'
@@ -44,7 +42,7 @@ def generate_full_80_page_black_report():
         )
         tcPr.append(tcMar)
 
-    def set_cell_background(cell, color_hex="F0F0F0"):
+    def set_cell_background(cell, color_hex="F2F4F7"):
         tcPr = cell._tc.get_or_add_tcPr()
         shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{color_hex}"/>')
         tcPr.append(shd)
@@ -74,138 +72,125 @@ def generate_full_80_page_black_report():
         text = text.encode('ascii', errors='replace').decode('ascii')
         return text
 
-    # PURE BLACK HEADING HELPER
     def add_heading(text, level):
         clean_txt = clean_text(text)
         p = doc.add_paragraph()
         p.paragraph_format.keep_with_next = True
-        p.paragraph_format.line_spacing = 1.15
         
         if level == 1:
             p.paragraph_format.space_before = Pt(22)
             p.paragraph_format.space_after = Pt(8)
             run = p.add_run(clean_txt)
-            run.font.name = 'Times New Roman'
+            run.font.name = 'Arial'
             run.font.size = Pt(16)
             run.bold = True
-            run.font.color.rgb = RGBColor(0, 0, 0) # PURE BLACK
+            run.font.color.rgb = RGBColor(0, 51, 102) # Dark Navy
         elif level == 2:
             p.paragraph_format.space_before = Pt(14)
             p.paragraph_format.space_after = Pt(5)
             run = p.add_run(clean_txt)
-            run.font.name = 'Times New Roman'
-            run.font.size = Pt(14)
+            run.font.name = 'Arial'
+            run.font.size = Pt(13)
             run.bold = True
-            run.font.color.rgb = RGBColor(0, 0, 0) # PURE BLACK
+            run.font.color.rgb = RGBColor(0, 51, 102)
         elif level == 3:
             p.paragraph_format.space_before = Pt(10)
             p.paragraph_format.space_after = Pt(3)
             run = p.add_run(clean_txt)
-            run.font.name = 'Times New Roman'
-            run.font.size = Pt(12)
+            run.font.name = 'Arial'
+            run.font.size = Pt(11)
             run.bold = True
-            run.font.color.rgb = RGBColor(0, 0, 0) # PURE BLACK
+            run.font.color.rgb = RGBColor(51, 51, 51)
         return p
 
-    # PURE BLACK PARAGRAPH HELPER
     def add_p(text, indent=False, space_after=6):
         clean_txt = clean_text(text)
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         p.paragraph_format.space_after = Pt(space_after)
-        p.paragraph_format.line_spacing = 1.15
+        p.paragraph_format.line_spacing = 1.5 # Academic 1.5 Line Spacing
         if indent:
             p.paragraph_format.first_line_indent = Inches(0.3)
         run = p.add_run(clean_txt)
         run.font.name = 'Times New Roman'
         run.font.size = Pt(12)
-        run.font.color.rgb = RGBColor(0, 0, 0) # PURE BLACK
+        run.font.color.rgb = RGBColor(0, 0, 0)
         return p
 
-    # PURE BLACK BULLET POINT HELPER
     def add_bullet(title, description):
         p = doc.add_paragraph(style='List Bullet')
         p.paragraph_format.space_after = Pt(4)
-        p.paragraph_format.line_spacing = 1.15
+        p.paragraph_format.line_spacing = 1.5
         
         r_title = p.add_run(clean_text(title + ": "))
         r_title.bold = True
         r_title.font.name = 'Times New Roman'
         r_title.font.size = Pt(12)
-        r_title.font.color.rgb = RGBColor(0, 0, 0)
         
         r_desc = p.add_run(clean_text(description))
         r_desc.font.name = 'Times New Roman'
         r_desc.font.size = Pt(12)
-        r_desc.font.color.rgb = RGBColor(0, 0, 0)
         return p
 
-    # PURE BLACK IMAGE / CAPTION HELPER
     def add_ui(img_path, caption_text):
         if os.path.exists(img_path):
             p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             p.paragraph_format.space_before = Pt(10)
             p.paragraph_format.space_after = Pt(4)
-            p.paragraph_format.line_spacing = 1.15
             run = p.add_run()
             run.add_picture(img_path, width=Inches(5.8))
             
             cp = doc.add_paragraph()
             cp.alignment = WD_ALIGN_PARAGRAPH.CENTER
             cp.paragraph_format.space_after = Pt(12)
-            cp.paragraph_format.line_spacing = 1.15
             c_run = cp.add_run(clean_text(caption_text))
-            c_run.font.name = 'Times New Roman'
-            c_run.font.size = Pt(10)
+            c_run.font.name = 'Arial'
+            c_run.font.size = Pt(9.5)
             c_run.italic = True
             c_run.bold = True
-            c_run.font.color.rgb = RGBColor(0, 0, 0) # PURE BLACK
+            c_run.font.color.rgb = RGBColor(51, 51, 51)
         else:
             p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             p.paragraph_format.space_before = Pt(8)
             p.paragraph_format.space_after = Pt(4)
-            p.paragraph_format.line_spacing = 1.15
             run = p.add_run(clean_text(f"[ SYSTEM INTERFACE DIAGRAM: {caption_text} ]"))
-            run.font.name = 'Times New Roman'
+            run.font.name = 'Arial'
             run.font.size = Pt(10)
             run.bold = True
-            run.font.color.rgb = RGBColor(0, 0, 0)
+            run.font.color.rgb = RGBColor(0, 51, 102)
 
-    # PURE BLACK TABLE HELPER
     def add_tbl(col_widths, headers, rows_data):
         table = doc.add_table(rows=len(rows_data)+1, cols=len(headers))
         table.alignment = WD_TABLE_ALIGNMENT.CENTER
         table.style = 'Table Grid'
-        set_table_borders(table, color="000000", sz="4")
+        set_table_borders(table, color="CCCCCC", sz="4")
         
         make_row_header(table.rows[0])
         hdr_cells = table.rows[0].cells
         for i, title in enumerate(headers):
             hdr_cells[i].text = clean_text(title)
-            set_cell_background(hdr_cells[i], "E6E6E6")
+            set_cell_background(hdr_cells[i], "003366")
             set_cell_margins(hdr_cells[i], top=120, bottom=120, left=150, right=150)
             p = hdr_cells[i].paragraphs[0]
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p.paragraph_format.line_spacing = 1.15
             for r in p.runs:
-                r.font.name = 'Times New Roman'
+                r.font.name = 'Arial'
                 r.font.size = Pt(10)
                 r.font.bold = True
-                r.font.color.rgb = RGBColor(0, 0, 0) # PURE BLACK
+                r.font.color.rgb = RGBColor(255, 255, 255)
                 
         for r_idx, row_values in enumerate(rows_data, 1):
             row = table.rows[r_idx]
             make_row_cant_split(row)
             cells = row.cells
-            bg_color = "FAFAFA" if r_idx % 2 == 0 else "FFFFFF"
+            bg_color = "F9FAFC" if r_idx % 2 == 0 else "FFFFFF"
             for c_idx, val in enumerate(row_values):
                 cells[c_idx].text = clean_text(str(val))
                 set_cell_background(cells[c_idx], bg_color)
                 set_cell_margins(cells[c_idx], top=100, bottom=100, left=140, right=140)
                 p = cells[c_idx].paragraphs[0]
-                p.paragraph_format.line_spacing = 1.15
                 if c_idx == 0 and len(row_values) > 3:
                     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 else:
@@ -213,60 +198,45 @@ def generate_full_80_page_black_report():
                 for r in p.runs:
                     r.font.name = 'Times New Roman'
                     r.font.size = Pt(10)
-                    r.font.color.rgb = RGBColor(0, 0, 0) # PURE BLACK
+                    r.font.color.rgb = RGBColor(0, 0, 0)
                     
         for row in table.rows:
             for idx, width in enumerate(col_widths):
                 row.cells[idx].width = Inches(width)
-
-    # Academic text expander helper
-    def add_deep_expanded_section(title, overview, bullet_items, paragraphs):
-        add_heading(title, 2 if len(title.split('.')) == 2 else 3)
-        add_p(overview)
-        for item in bullet_items:
-            add_bullet(item[0], item[1])
-        for p_text in paragraphs:
-            add_p(p_text, indent=True)
 
     # ------------------ COVER PAGE ------------------
     p_title = doc.add_paragraph()
     p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_title.paragraph_format.space_before = Pt(36)
     p_title.paragraph_format.space_after = Pt(12)
-    p_title.paragraph_format.line_spacing = 1.15
     r_t = p_title.add_run("NEW MANGALORE PORT AUTHORITY (NMPA)\nCARGO INSPECTION AND AI RISK MANAGEMENT SYSTEM")
-    r_t.font.name = 'Times New Roman'
+    r_t.font.name = 'Arial'
     r_t.font.size = Pt(20)
     r_t.bold = True
-    r_t.font.color.rgb = RGBColor(0, 0, 0)
+    r_t.font.color.rgb = RGBColor(0, 51, 102)
 
     p_sub = doc.add_paragraph()
     p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_sub.paragraph_format.space_after = Pt(36)
-    p_sub.paragraph_format.line_spacing = 1.15
-    r_sub = p_sub.add_run("A Comprehensive Academic Project Report Submitted in Partial Fulfillment of the Requirements\nfor the Degree of Bachelor of Engineering / Technology in\nComputer Science & Engineering")
+    r_sub = p_sub.add_run("A Project Report Submitted in Partial Fulfillment of the Requirements\nfor the Degree of Bachelor of Engineering / Technology in\nComputer Science & Engineering")
     r_sub.font.name = 'Times New Roman'
     r_sub.font.size = Pt(13)
     r_sub.italic = True
-    r_sub.font.color.rgb = RGBColor(0, 0, 0)
 
     logo_path = r"c:\NMPA final project\frontend\public\nmpa-logo.png"
     if os.path.exists(logo_path):
         p_img = doc.add_paragraph()
         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_img.paragraph_format.space_after = Pt(36)
-        p_img.paragraph_format.line_spacing = 1.15
         p_img.add_run().add_picture(logo_path, width=Inches(2.2))
 
     p_meta = doc.add_paragraph()
     p_meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_meta.paragraph_format.space_after = Pt(12)
-    p_meta.paragraph_format.line_spacing = 1.15
     r_m = p_meta.add_run("NEW MANGALORE PORT AUTHORITY (NMPA)\nPANAMBUR, MANGALURU - 575010, KARNATAKA, INDIA\n\nAcademic Session: 2025 - 2026")
     r_m.font.name = 'Times New Roman'
     r_m.font.size = Pt(12)
     r_m.bold = True
-    r_m.font.color.rgb = RGBColor(0, 0, 0)
 
     doc.add_page_break()
 
@@ -398,127 +368,39 @@ def generate_full_80_page_black_report():
 
     # ------------------ CHAPTER 1 ------------------
     add_heading("Chapter 1: Synopsis & Introduction", 1)
+    
     add_heading("1.1 Introduction of the System", 2)
     add_p("The maritime transport industry represents the economic lifeline of global commerce, facilitating the transit of more than 80% of world trade volume and over 70% of global trade value. Seaports serve as primary intermodal hubs where maritime shipping lanes converge with inland logistics networks, rail corridors, and highway infrastructure. In an era marked by expanding vessel capacities, containerization, and stringent international maritime security protocols, port administrative efficiency directly dictates regional trade competitiveness, supply chain resilience, and national economic productivity.")
     add_p("Despite rapid advancements in global logistics technologies, many seaport authorities across developing economies continue to operate within legacy administrative paradigms characterized by paper-intensive, fragmented clearance procedures. The vessel clearance process-a statutory prerequisite granting commercial ships legal permission to enter harbor waters, berth at designated quays, load or discharge cargo, and depart-has historically required multi-departmental physical document routing. Arriving merchant vessels must satisfy rigorous regulatory inspections enforced by distinct governmental bodies, including maritime health biosecurity, border control and customs tariffs, and harbor marine traffic navigation.")
 
-    add_deep_expanded_section(
-        "1.1.1 Project Title",
-        "The official institutional title of this engineering initiative is the 'New Mangalore Port Authority (NMPA) Cargo Inspection and AI Risk Management System' (designated internally in codebase repositories as NMPA-CIS / NexaPort).",
-        [
-            ("Official Moniker", "New Mangalore Port Authority Cargo Inspection and AI Risk Management System."),
-            ("System Abbreviation", "NMPA-CIS / NexaPort Clearance Engine v2.0."),
-            ("Institutional Domain", "Maritime Trade Logistics & Digital Governance Division.")
-        ],
-        [
-            "The title reflects the core objective of building an integrated digital inspection portal tailored specifically for NMPA's operational environment at Panambur, Mangaluru.",
-            "By embedding AI risk classification directly into the clearance pipeline, NMPA-CIS establishes a technological model for major ports across India."
-        ]
-    )
+    add_heading("1.1.1 Project Title", 3)
+    add_p("The official institutional title of this engineering initiative is the 'New Mangalore Port Authority (NMPA) Cargo Inspection and AI Risk Management System' (designated internally in codebase repositories as NMPA-CIS / NexaPort). This moniker reflects its role as the next-generation digital clearance engine engineered specifically for NMPA's operational workflows at Panambur, Mangaluru.")
 
-    add_deep_expanded_section(
-        "1.1.2 Category",
-        "NMPA-CIS is formally categorized under Enterprise Web Applications, Workflow Automation Systems, and Maritime Logistics Infrastructure.",
-        [
-            ("Software Domain", "Enterprise Full-Stack Web Application."),
-            ("Architecture Type", "Decoupled Single-Page Application (SPA) with RESTful API Middleware."),
-            ("Target Environment", "Port Authority Intranet & External Public Gateways.")
-        ],
-        [
-            "The enterprise web application category demands high availability, role-based access control, secure database transactions, and real-time interface updates.",
-            "The software combines client-side React rendering with server-side Node.js event loops to handle high-frequency manifest queries and gate inspection updates."
-        ]
-    )
+    add_heading("1.1.2 Category", 3)
+    add_p("NMPA-CIS is formally categorized under Enterprise Web Applications, Workflow Automation Systems, and Maritime Logistics Infrastructure. It represents a mission-critical, multi-tenant enterprise portal coordinating complex inter-departmental approval workflows under strict security constraints.")
 
-    add_deep_expanded_section(
-        "1.1.3 Overview",
-        "The system coordinates four primary stakeholder groups across five automated operational phases:",
-        [
-            ("Phase 1: IGM Logging", "Inspectors record vessel manifest metadata, container identifiers, and declared tonnage."),
-            ("Phase 2: AI Threat Profiling", "NLP engine dynamically categorizes cargo into Red (Tier 1), Yellow (Tier 2), or Green (Tier 3) threat tags."),
-            ("Phase 3: Scale Verification", "Weighbridges record physical weights and calculate discrepancy percentage against declared manifest tonnage."),
-            ("Phase 4: Authority Adjudication", "Port Authority officers execute Approve, Reject, or Re-Inspect decisions."),
-            ("Phase 5: Digital Gate Pass", "System issues QR Gate Passes for security gate verification.")
-        ],
-        [
-            "Frontline port inspectors enter incoming manifest declarations via a streamlined web form. The integrated AI RMS engine instantly scans commodity descriptions to assign risk ratings.",
-            "Upon physical scale checks at port weighbridges, actual container weights are recorded. Discrepancies exceeding administrator tolerance thresholds trigger automatic warning alerts on the Port Authority dashboard.",
-            "Port Authority officers review complete manifest records, weighbridge data, and AI threat memos before rendering clearance decisions. Approved cargo receives a tamper-evident QR Gate Pass."
-        ]
-    )
+    add_heading("1.1.3 Overview", 3)
+    add_p("The system operates as a central digital nexus coordinating four primary stakeholder groups: System Administrators, Frontline Port Inspectors, Senior Port Authorities, and Public Stakeholders. The operational life cycle proceeds through a structured, automated pipeline:")
+    add_bullet("1. Import General Manifest (IGM) Logging", "Frontline port inspectors record incoming vessel manifest data including Bill of Lading identifiers, container numbers, declared cargo tonnage, origin port, and commodity descriptions.")
+    add_bullet("2. AI Risk Management System (RMS) Evaluation", "The integrated NLP classifier dynamically assigns cargo threat tags: Tier 1 Critical Risk (Red Tag) for volatile energy fuels/minerals, Tier 2 Elevated Risk (Yellow Tag) for perishable cashews/coffee and high-tariff electronics, and Tier 3 Routine Risk (Green Tag) for general cargo.")
+    add_bullet("3. Weighbridge Physical Verification", "Scale operators record physical container weights. The system calculates weight variance against declared manifest tonnage, triggering automated alerts if discrepancies exceed the admin's global tolerance limit.")
+    add_bullet("4. Port Authority Adjudication", "Senior officials review RMS threat memos and weight variance alerts, executing Approve (generating cryptographic QR Gate Passes), Reject (detaining cargo), or Re-Inspect (resetting status to Pending) decisions.")
+    add_bullet("5. Public QR Validation & Grievance Portal", "Security gates scan QR Gate Passes for authenticity, while stakeholders submit grievances directly to the NMPA Chairman's Office Console.")
 
-    add_deep_expanded_section(
-        "1.1.4 Comparable Port Systems Analysis",
-        "To establish international software design standards, NMPA-CIS was benchmarked against existing maritime logistics platforms:",
-        [
-            ("Sagar Setu NLP", "National maritime single-window portal facilitating customs documentation in India."),
-            ("CrimsonLogic Portnet", "Singapore port community platform coordinating container berth schedules."),
-            ("PortBase Rotterdam", "European logistics network managing customs clearances across Netherlands ports."),
-            ("NMPA-CIS Differentiation", "Direct integration of real-time physical weighbridge scale checking with AI threat profiling.")
-        ],
-        [
-            "While platforms like Sagar Setu handle macro-level shipping documentation, NMPA-CIS focuses on physical terminal inspection gate automation and localized risk mitigation.",
-            "Integrating weighbridge scale validation directly into the digital clearance workflow provides robust protection against container weight fraud."
-        ]
-    )
+    add_heading("1.1.4 Comparable Port Systems Analysis", 3)
+    add_p("To ensure alignment with international maritime single-window benchmarks, NMPA-CIS was benchmarked against existing global logistics portals including the Sagar Setu National Logistics Portal (India), CrimsonLogic Portnet (Singapore), and PortBase (Rotterdam). Unlike generic enterprise portals, NMPA-CIS integrates real-time weighbridge scale verification directly with automated AI threat classification, providing localized port security and fraud mitigation.")
 
-    add_deep_expanded_section(
-        "1.2 Background",
-        "Historical vessel clearance procedures at Panambur harbor relied heavily on physical paper files and manual departmental approvals.",
-        [
-            ("Panambur Location", "Deep-water major port in Mangaluru, Karnataka."),
-            ("Legacy Challenges", "Physical file movement, prolonged turnaround delays, unverified container weight declarations."),
-            ("Demurrage Costs", "Vessel delays of 18-24 hours resulting in thousands of dollars in commercial demurrage penalties.")
-        ],
-        [
-            "Panambur harbor handles over 50 million metric tonnes of annual cargo. Legacy paper-based procedures required shipping agents to carry physical document folders between geographically separated offices.",
-            "Manual processing introduced severe operational vulnerabilities including paper file misplacement, unverified weight declarations leading to scale fraud, and inconsistent risk profiling. Ships experienced demurrage penalties due to turnaround delays ranging from 18 to 24 hours per vessel."
-        ]
-    )
+    add_heading("1.2 Background", 2)
+    add_p("The legacy vessel clearance framework at Panambur harbor relied on manual paper file movement across geographically dispersed administrative offices. Shipping agents spent hours traveling between inspection gates, customs desks, and harbor master terminals. Physical document bottlenecks caused severe vessel turnaround delays, reaching 18 to 24 hours per ship and resulting in thousands of dollars in demurrage costs.")
 
-    add_deep_expanded_section(
-        "1.2.1 Introduction of New Mangalore Port Authority (NMPA)",
-        "Declared as India's 9th major port in May 1974, NMPA operates as Karnataka's primary maritime trade hub.",
-        [
-            ("Governance", "Governed by the Major Port Authorities Act (2021) under the Ministry of Ports, Shipping and Waterways."),
-            ("Strategic Location", "Situated at Panambur, Mangaluru, connecting Karnataka's industrial hinterlands with global trade lanes."),
-            ("Cargo Capabilities", "Handles bulk liquid petroleum, iron ore, coal, fertilizers, containerized cashews, and coffee exports.")
-        ],
-        [
-            "NMPA operates 14 deep-water berths designed to accommodate modern merchant vessels, crude oil supertankers, and container ships.",
-            "Implementing NMPA-CIS aligns port operations with national digital infrastructure goals, enhancing operational efficiency and transparency."
-        ]
-    )
+    add_heading("1.2.1 Introduction of New Mangalore Port Authority (NMPA)", 3)
+    add_p("Established in 1974 at Panambur, Mangaluru, the New Mangalore Port Authority (NMPA) is Karnataka's sole major seaport and one of India's 12 premier deep-water ports governed by the Ministry of Ports, Shipping and Waterways. Operating 14 active deep-water berths, NMPA processes over 50 million metric tonnes of annual cargo, including crude oil, LPG, LNG, iron ore, coal, fertilizers, and agricultural commodities like cashews and coffee.")
 
-    add_deep_expanded_section(
-        "1.2.2 Port Infrastructure & Cargo Operational Load",
-        "NMPA manages extensive terminal infrastructure designed for diverse cargo handling:",
-        [
-            ("Specialized Quays", "Dedicated berths for LPG/LNG tankers, crude oil pipelines, bulk iron ore, and containers."),
-            ("Terminal Facilities", "Container Freight Stations (CFS), electronic weighbridges, and hazardous storage yards."),
-            ("Operational Load", "Processing thousands of commercial container movements monthly under strict security guidelines.")
-        ],
-        [
-            "Managing heavy cargo traffic requires robust digital tools that bridge physical gate inspections with centralized authority management.",
-            "Automated weighbridge discrepancy calculations prevent overloaded containers from entering road and rail transit networks."
-        ]
-    )
+    add_heading("1.2.2 Port Infrastructure & Cargo Operational Load", 3)
+    add_p("NMPA operates heavy physical infrastructure including mechanized bulk handling quays, container freight stations, electronic weighbridge gates, and hazardous material storage yards. Digitizing operational checkpoints bridges physical scale checks with central authority adjudication.")
 
-    add_deep_expanded_section(
-        "1.2.3 Agile Development Approach",
-        "The project was executed using an iterative Agile SDLC model across 5 focused sprint cycles:",
-        [
-            ("Sprint 1: Foundation", "Requirements gathering, SRS drafting, SQLite database schema design."),
-            ("Sprint 2: Authentication", "User registration, RBAC implementation, Bcrypt password hashing."),
-            ("Sprint 3: Core Engines", "AI RMS keyword classifier, weighbridge tolerance logic, local storage sync."),
-            ("Sprint 4: Dashboards", "Port Authority adjudication console, QR Gate Pass generator, bilingual UI components."),
-            ("Sprint 5: Verification", "End-to-end QA testing, security audit logging, system documentation.")
-        ],
-        [
-            "Agile sprints enabled continuous collaboration between software developers and port operational personnel.",
-            "Regular feedback loops ensured the application met practical port inspection needs while maintaining strict architectural standards."
-        ]
-    )
+    add_heading("1.2.3 Agile Development Approach", 3)
+    add_p("The software was developed using an iterative Agile Software Development Life Cycle (SDLC) across 5 focused sprint cycles: Sprint 1 (Requirements & DB Schema), Sprint 2 (Auth & RBAC), Sprint 3 (AI RMS & Weighbridge Logic), Sprint 4 (Authority Console & QR Pass Generator), and Sprint 5 (QA Testing & Security Audit).")
 
     add_heading("1.3 Objectives of the System", 2)
     add_bullet("Primary Objective 1", "Automate paperless single-window cargo clearance for NMPA Mangaluru.")
@@ -573,6 +455,7 @@ def generate_full_80_page_black_report():
 
     # ------------------ CHAPTER 2 ------------------
     add_heading("Chapter 2: Software Requirements Specification (SRS)", 1)
+    
     add_heading("2.1 Introduction", 2)
     add_heading("2.1.1 Purpose", 3)
     add_p("This Software Requirements Specification (SRS) document details the functional, non-functional, security, and interface requirements for the New Mangalore Port Authority Cargo Inspection System (NMPA-CIS).")
@@ -659,6 +542,7 @@ def generate_full_80_page_black_report():
 
     # ------------------ CHAPTER 3 ------------------
     add_heading("Chapter 3: System Design & Architecture", 1)
+    
     add_heading("3.1 Architectural Decomposition & Layered Design (Figure 3.1)", 2)
     add_p("The system architecture is structured into three decoupled operational tiers: Presentation Tier (React SPA), Application Middleware Tier (Express.js REST API), and Data Persistence Tier (SQLite / MongoDB).")
     
@@ -688,6 +572,7 @@ def generate_full_80_page_black_report():
 
     # ------------------ CHAPTER 4 ------------------
     add_heading("Chapter 4: Database Design & Entity Schemes", 1)
+    
     add_heading("4.1 Introduction & Database Selection (SQLite / MongoDB)", 2)
     add_p("The database layer utilizes SQLite with Write-Ahead Logging (WAL) and 10-second transactional busy timeouts, guaranteeing zero-data-loss performance during high concurrency.")
 
@@ -779,6 +664,7 @@ def generate_full_80_page_black_report():
 
     # ------------------ CHAPTER 5 ------------------
     add_heading("Chapter 5: Detailed Design & Program Logic", 1)
+    
     add_heading("5.1 Structure of the Software Package", 2)
     add_p("The project codebase is organized into backend (Node.js REST API, Express routes, SQLite controllers) and frontend (React components, Vite build, Ant Design views) subdirectories.")
 
@@ -840,6 +726,7 @@ def generate_full_80_page_black_report():
 
     # ------------------ CHAPTER 6 ------------------
     add_heading("Chapter 6: User Operations Manual & Guidelines", 1)
+    
     add_heading("6.1 System Administrator Operations Manual", 2)
     add_p("System Administrators manage account approvals, configure global weight discrepancy tolerance limits, view security audit logs, and oversee grievance queues.")
 
@@ -856,6 +743,7 @@ def generate_full_80_page_black_report():
 
     # ------------------ CHAPTER 7 ------------------
     add_heading("Chapter 7: Testing and Quality Assurance", 1)
+    
     add_heading("7.1 Testing Methodology & Strategy", 2)
     add_heading("7.1.1 Unit Testing (API Endpoints & RMS Logic)", 3)
     add_p("Unit testing validates API route handlers, data validation helpers, password hashing routines, and AI RMS keyword matching rules in isolation.")
@@ -900,6 +788,7 @@ def generate_full_80_page_black_report():
 
     # ------------------ CHAPTER 9 ------------------
     add_heading("Chapter 9: Conclusion & Scope for Future Enhancements", 1)
+    
     add_heading("9.1 Conclusion", 2)
     add_p("The New Mangalore Port Authority Cargo Inspection and AI Risk Management System (NMPA-CIS) successfully modernizes vessel clearance and cargo inspection workflows at Panambur harbor. By replacing manual paperwork with automated AI threat classification, weighbridge verification, and digital QR gate passes, the platform reduces vessel clearance times from 24 hours down to under 45 minutes, fostering transparency and operational excellence.")
 
@@ -938,7 +827,7 @@ def generate_full_80_page_black_report():
     add_heading("B.1 AI Risk Management System (RMS) Classification Algorithm Specification", 2)
     add_p("The RMS algorithm standardizes cargo threat profiling through natural language processing (NLP) text normalization and 3x3 matrix evaluation:")
     add_bullet("Text Normalization", "Converts commodity text to lower-case ASCII strings and strips special characters.")
-    add_bullet("Keyword Auditing", "Cross-references commodity tokens against pre-classified risk directories (Critical, Elevated, Routine).")
+    add_bullet("Keyword Auditing", "Cross-references commodity tokens against pre-classified risk dictionaries (Critical, Elevated, Routine).")
     add_bullet("Matrix Evaluation", "Multiplies origin risk score by commodity consequence score to compute final threat tag (Red, Yellow, Green).")
 
     add_heading("B.2 Weighbridge Scale Variance & Tolerance Engine Specification", 2)
@@ -959,26 +848,10 @@ def generate_full_80_page_black_report():
     add_bullet("[4] National Logistics Portal (Sagar Setu)", "Single-Window Maritime Logistics Specifications, Ministry of Shipping, India, 2023.")
     add_bullet("[5] ISO/IEC 27001", "Information Technology - Security Techniques - Information Security Management Systems, 2022.")
 
-    # ENFORCE PURE BLACK AND 1.15 LINE SPACING ON ALL PARAGRAPHS AND RUNS
-    for p in doc.paragraphs:
-        p.paragraph_format.line_spacing = 1.15
-        for r in p.runs:
-            r.font.name = 'Times New Roman'
-            r.font.color.rgb = RGBColor(0, 0, 0) # PURE BLACK
-
-    for t in doc.tables:
-        for row in t.rows:
-            for cell in row.cells:
-                for p in cell.paragraphs:
-                    p.paragraph_format.line_spacing = 1.15
-                    for r in p.runs:
-                        r.font.name = 'Times New Roman'
-                        r.font.color.rgb = RGBColor(0, 0, 0) # PURE BLACK
-
     # Save document
     out_file = os.path.abspath("NMPA_Project_Report_Final.docx")
     doc.save(out_file)
-    print(f"Successfully generated pure black Word document: {out_file}")
+    print(f"Successfully generated DOCX: {out_file}")
 
 if __name__ == '__main__':
-    generate_full_80_page_black_report()
+    create_full_college_docx()
