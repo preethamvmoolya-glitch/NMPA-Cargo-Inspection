@@ -1104,7 +1104,7 @@ body.dark-theme .notice-ticker-container {
 .notice-ticker-label {
   background: #b71c1c;
   color: #ffffff;
-  font-weight: 800;
+  font-weight: 600;
   font-size: 0.76rem;
   padding: 0 16px;
   height: 100%;
@@ -1131,9 +1131,9 @@ body.dark-theme .notice-ticker-container {
   position: absolute;
   will-change: transform;
   animation: notice-scroll 32s linear infinite;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: #b71c1c;
-  font-weight: 500;
+  font-weight: 400;
   align-items: center;
 }
 
