@@ -339,20 +339,39 @@ const Login = () => {
         className="notice-ticker-container"
         onMouseEnter={() => setIsTickerPaused(true)}
         onMouseLeave={() => setIsTickerPaused(false)}
-        onTouchStart={() => setIsTickerPaused(true)}
-        onTouchEnd={() => setIsTickerPaused(false)}
+        onTouchStart={(e) => {
+          e.preventDefault();
+          setIsTickerPaused(prev => !prev);
+        }}
         onClick={() => setIsTickerPaused(prev => !prev)}
-        title="Touch, click, or hover to pause running text"
-        style={{ cursor: 'pointer' }}
+        title="Touch, tap, or hover to pause/resume text"
+        style={{ cursor: 'pointer', touchAction: 'manipulation' }}
       >
         <div className="notice-ticker-label">
-          {t('circularNotice')}
+          {t('circularNotice')} {isTickerPaused && <span style={{ marginLeft: '6px', fontSize: '0.7rem', opacity: 0.9 }}>⏸️</span>}
         </div>
         <div className="notice-ticker-track">
           <div 
             className={`notice-ticker-text ${isTickerPaused ? 'paused' : ''}`}
             style={{ animationPlayState: isTickerPaused ? 'paused' : 'running' }}
           >
+            <span className="notice-ticker-item">
+              <span className="notice-ticker-bullet">•</span>
+              {t('noticeText1')}
+            </span>
+            <span className="notice-ticker-item">
+              <span className="notice-ticker-bullet">•</span>
+              {t('noticeText2')}
+            </span>
+            <span className="notice-ticker-item">
+              <span className="notice-ticker-bullet">•</span>
+              {t('noticeText3')}
+            </span>
+            <span className="notice-ticker-item">
+              <span className="notice-ticker-bullet">•</span>
+              {t('noticeText4')}
+            </span>
+            {/* Duplicated for seamless looping */}
             <span className="notice-ticker-item">
               <span className="notice-ticker-bullet">•</span>
               {t('noticeText1')}
