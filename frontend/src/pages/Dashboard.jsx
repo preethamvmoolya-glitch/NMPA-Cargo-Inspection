@@ -333,7 +333,7 @@ const Dashboard = () => {
         let color = 'blue';
         if (type === 'hazardous') color = 'volcano';
         if (type === 'perishable') color = 'orange';
-        return <Tag color={color}>{type?.toUpperCase()}</Tag>;
+        return <Tag color={color} style={{ margin: 0, fontSize: '10px', padding: '1px 5px', height: '18px', lineHeight: '14px', borderRadius: '3px', fontWeight: 600 }}>{type}</Tag>;
       }
     },
     {
@@ -416,7 +416,7 @@ const Dashboard = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
                 <div>
                   <span style={{ fontWeight: 'bold', fontSize: '0.75rem', color: '#096dd9' }}>TRIGGER: </span>
-                  <Tag color="cyan" style={{ fontSize: '0.7rem', padding: '0 4px', height: 'auto', lineHeight: '1.4' }}>{parsed.primary_trigger}</Tag>
+                  <Tag color="cyan" style={{ fontSize: '10px', padding: '1px 5px', height: '18px', lineHeight: '14px', borderRadius: '3px', fontWeight: 600 }}>{parsed.primary_trigger}</Tag>
                   <Text type="secondary" style={{ fontSize: '0.75rem' }}> ({Math.round((parsed.confidence_score || 0) * 100)}% conf)</Text>
                 </div>
                 <div style={{ fontSize: '0.78rem', color: '#666', lineHeight: '1.3' }}>
@@ -675,12 +675,12 @@ const Dashboard = () => {
 
           {/* Security Status Switches */}
           <Row gutter={16} style={{ marginBottom: '15px' }}>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="seal_intact" label={t('sealIntegrity')} valuePropName="checked" initialValue={true}>
                 <Switch checkedChildren={t('sealIntact')} unCheckedChildren={t('sealBroken')} style={{ backgroundColor: '#52c41a' }} />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item name="structural_damage" label={t('structuralDamage')} valuePropName="checked" initialValue={false}>
                 <Switch checkedChildren={t('damageDetected')} unCheckedChildren={t('damageNone')} style={{ backgroundColor: '#ff4d4f' }} />
               </Form.Item>

@@ -644,7 +644,7 @@ const PortAuthority = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <div>
                   <span style={{ fontWeight: 'bold', color: '#096dd9' }}>TRIGGER: </span>
-                  <Tag color="cyan" style={{ fontSize: '0.7rem', padding: '0 4px', height: 'auto', lineHeight: '1.4' }}>{parsed.primary_trigger}</Tag>
+                  <Tag color="cyan" style={{ fontSize: '10px', padding: '1px 5px', height: '18px', lineHeight: '14px', borderRadius: '3px', fontWeight: 600 }}>{parsed.primary_trigger}</Tag>
                   <span style={{ color: '#888', fontSize: '0.75rem' }}> ({Math.round((parsed.confidence_score || 0) * 100)}% conf)</span>
                 </div>
                 <div style={{ fontSize: '0.78rem', color: '#666', lineHeight: '1.3' }}>
@@ -1228,16 +1228,16 @@ const PortAuthority = () => {
                   </Descriptions.Item>
                   <Descriptions.Item label={t('sealIntegrityLabel')}>
                     {activeDossier.sealIntact ? (
-                      <Tag color="success">{t('sealIntact')?.toUpperCase()} ✓</Tag>
+                      <Tag color="success" style={{ margin: 0, fontSize: '10px', padding: '1px 5px', height: '18px', lineHeight: '14px', borderRadius: '3px', fontWeight: 600 }}>{t('sealIntact')} ✓</Tag>
                     ) : (
-                      <Tag color="error">{t('sealBroken')?.toUpperCase()} ✗</Tag>
+                      <Tag color="error" style={{ margin: 0, fontSize: '10px', padding: '1px 5px', height: '18px', lineHeight: '14px', borderRadius: '3px', fontWeight: 600 }}>{t('sealBroken')} ✗</Tag>
                     )}
                   </Descriptions.Item>
                   <Descriptions.Item label={t('structuralDamageLabel')}>
                     {activeDossier.structuralDamage ? (
-                      <Tag color="error">{t('damageDetected')?.toUpperCase()} ✗</Tag>
+                      <Tag color="error" style={{ margin: 0, fontSize: '10px', padding: '1px 5px', height: '18px', lineHeight: '14px', borderRadius: '3px', fontWeight: 600 }}>{t('damageDetected')} ✗</Tag>
                     ) : (
-                      <Tag color="success">{t('damageNone')?.toUpperCase()} ✓</Tag>
+                      <Tag color="success" style={{ margin: 0, fontSize: '10px', padding: '1px 5px', height: '18px', lineHeight: '14px', borderRadius: '3px', fontWeight: 600 }}>{t('damageNone')} ✓</Tag>
                     )}
                   </Descriptions.Item>
                 </Descriptions>
