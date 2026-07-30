@@ -682,9 +682,16 @@ def review_inspection():
     if row and row.get("status") in ['Approved', 'Port Clearance Granted']:
         return jsonify({"status": "error", "message": "This cargo/vessel manifest has already been cleared and approved. Decisions are final and cannot be modified."}), 400
         
-    qr_token = None
+    qr_token = row.get("qr_token") if row else None
     if status in ['Approved', 'Port Clearance Granted']:
-        qr_token = f"NMPA-PCC-{inspection_id}-{random.randint(100000, 999999)}"
+        qr_token = qr_token or f"NMPA-PCC-{inspection_id}-{random.randint(100000, 999999)}"
+        inspections_col.update_one({"_id": obj_id}, {"$set": {
+            "status": status,
+            "notes": notes,
+            "qr_token": qr_token
+        }})
+    elif status in ['Clearance Denied - Detained for Physical Audit', 'Rejected']:
+        qr_token = qr_token or f"NMPA-QDO-{inspection_id}-{random.randint(100000, 999999)}"
         inspections_col.update_one({"_id": obj_id}, {"$set": {
             "status": status,
             "notes": notes,

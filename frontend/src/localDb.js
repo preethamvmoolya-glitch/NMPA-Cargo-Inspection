@@ -170,7 +170,7 @@ const DEFAULT_INSPECTIONS = [
     actual_weight: 16010,
     seal_intact: true,
     structural_damage: true,
-    qr_token: null,
+    qr_token: "NMPA-QDO-9048372-402899",
     notes: "Container wall shows slight structural degradation. Detained in hazardous cargo bay B3 pending chemical sampling.",
     date: new Date(Date.now() - 3600000 * 48).toISOString()
   },
@@ -921,9 +921,12 @@ export function setupLocalDbFetch() {
           inspections[idx].status = status;
           inspections[idx].notes = notes;
           
-          let qrToken = null;
+          let qrToken = inspections[idx].qr_token;
           if (status === "Port Clearance Granted" || status === "Approved") {
-            qrToken = `NMPA-PCC-${id}-${Math.floor(100000 + Math.random() * 900000)}`;
+            qrToken = qrToken || `NMPA-PCC-${id}-${Math.floor(100000 + Math.random() * 900000)}`;
+            inspections[idx].qr_token = qrToken;
+          } else if (status === "Clearance Denied - Detained for Physical Audit" || status === "Rejected") {
+            qrToken = qrToken || `NMPA-QDO-${id}-${Math.floor(100000 + Math.random() * 900000)}`;
             inspections[idx].qr_token = qrToken;
           }
           

@@ -220,7 +220,7 @@ def seed():
             "actual_weight": 16010.0,
             "seal_intact": True,
             "structural_damage": True,
-            "qr_token": None,
+            "qr_token": "NMPA-QDO-9048372-402899",
             "notes": "Container wall shows slight structural degradation. Detained in hazardous cargo bay B3 pending chemical sampling."
         },
         {
