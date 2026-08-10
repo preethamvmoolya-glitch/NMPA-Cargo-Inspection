@@ -183,8 +183,8 @@ const GrievancePortal = () => {
       if (response.ok) {
         const data = await response.json();
         const routedQueue = data.routed_to === 'CHAIRMAN_OFFICE_INBOX' 
-          ? (language === 'en' ? "Chairman's Office Inbox" : "अध्यक्ष कार्यालय इनबॉक्स") 
-          : (language === 'en' ? "Standard Grievance Queue" : "मानक शिकायत कतार");
+          ? (language === 'en' ? "Chairman Office Inbox" : "अध्यक्ष कार्यालय इनबॉक्स") 
+          : (language === 'en' ? "Admin Grievance Queue" : "प्रशासक शिकायत कतार");
         ModalSuccess(routedQueue, data.id);
         resetRegisterForm();
       } else {

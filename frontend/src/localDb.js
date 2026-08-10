@@ -4,9 +4,9 @@
 const DEFAULT_USERS = [
   {
     id: 1,
-    username: "preethamvmoolya",
-    password: "Admin@123",
-    email: "preethamvmoolya@nmpa.gov",
+    username: "Admin123",
+    password: "Admin@nmpa",
+    email: "admin@nmpa.gov",
     role: "system_admin",
     is_approved: true,
     two_fa_enabled: true,
@@ -15,7 +15,7 @@ const DEFAULT_USERS = [
   {
     id: 2,
     username: "Auth99",
-    password: "Auth@123",
+    password: "Auth@nmpa",
     email: "auth99@nmpa.gov",
     role: "port_authority",
     is_approved: true,
@@ -25,7 +25,7 @@ const DEFAULT_USERS = [
   {
     id: 3,
     username: "Inspector99",
-    password: "Insp@123",
+    password: "Inspector@nmpa",
     email: "inspector99@nmpa.gov",
     role: "inspector",
     is_approved: true,
@@ -313,114 +313,27 @@ const DEFAULT_LOGS = [
     id: 5,
     action: "User Login",
     role: "system_admin",
-    details: "User preethamvmoolya logged in successfully from station terminal ADMIN-4.",
+    details: "User Admin123 logged in successfully from station terminal ADMIN-4.",
     date: new Date(Date.now() - 600000).toISOString()
   }
 ];
 
 const DEFAULT_COMPLAINTS = [
   {
-    id: 1,
-    email: "inspector99@nmpa.gov",
-    subject: "Weighbridge Calibration Variance",
-    message: "[Grievance Status/Role]: Others\n[Name]: Rajan Nair\n[Gender]: Male\n[Address]: Gate 7, South Berth Complex, Panambur\n[Pincode]: 575010\n[Country]: India\n[State]: Karnataka\n[Contact]: 9845012345\n\n[Grievance details]:\nWeighbridge #3 is showing a deviation of +5kg per Metric Ton compared to weighbridge #1. Needs urgent maintenance recalibration before the next cargo weighment cycle.",
-    date: new Date(Date.now() - 3600000 * 6).toISOString(),
-    is_escalated_to_chairman: false,
-    severity_level: "Medium",
-    sla_status: "Pending",
-    sla_deadline: new Date(Date.now() - 3600000 * 6 + 3600000 * 72).toISOString(),
-    escalated_to_chairman: false
-  },
-  {
-    id: 2,
-    email: "inspector99@nmpa.gov",
-    subject: "Late Port Gate Dues Discrepancy",
-    message: "[Grievance Status/Role]: Others\n[Name]: Sushila Hegde\n[Gender]: Female\n[Address]: Opposite NMPA Main Gate, Kulur\n[Pincode]: 575013\n[Country]: India\n[State]: Karnataka\n[Contact]: 9900112233\n\n[Grievance details]:\nSystem shows mismatch in payment log sync for container gate pass ID GATE-8812. The gate dues were credited but the system still shows outstanding balance. Please reconcile urgently.",
-    date: new Date(Date.now() - 3600000 * 80).toISOString(),
+    id: 101,
+    email: "ankush123@gmail.com",
+    subject: "OPERATIONAL BOTTLENECK",
+    message: "[Grievance Status/Role]: Port User\n[Name]: Ankush\n[Gender]: Male\n[Address]: Port Administrative Block, Panambur\n[Pincode]: 575010\n[Country]: India\n[State]: Karnataka\n[Contact]: 9876543210\n\n[Grievance details]:\nOperational bottleneck observed at container handling terminal Gate 4. Processing delay is causing truck queues.",
+    date: new Date().toISOString(),
     is_escalated_to_chairman: false,
     severity_level: "High",
     sla_status: "Pending",
-    sla_deadline: new Date(Date.now() - 3600000 * 80 + 3600000 * 72).toISOString(),
+    sla_deadline: new Date(Date.now() + 3600000 * 72).toISOString(),
     escalated_to_chairman: false
-  },
-  {
-    id: 3,
-    email: "portuser@nmpa.gov",
-    subject: "Operational Bottleneck",
-    message: "[Grievance Status/Role]: Employer\n[Name]: Mohammed Farooq\n[Gender]: Male\n[Address]: Berth 12, Container Terminal\n[Pincode]: 575010\n[Country]: India\n[State]: Karnataka\n[Contact]: 9876501234\n\n[Grievance details]:\nSignificant delay in container scanning at Gate-3 entry point due to non-functional X-ray scanner. Trucks have been waiting for over 4 hours causing severe congestion.",
-    date: new Date(Date.now() - 3600000 * 30).toISOString(),
-    is_escalated_to_chairman: false,
-    severity_level: "High",
-    sla_status: "Under Investigation",
-    sla_deadline: new Date(Date.now() - 3600000 * 30 + 3600000 * 72).toISOString(),
-    escalated_to_chairman: false
-  },
-  {
-    id: 4,
-    email: "cargo.agent@shippingco.in",
-    subject: "General Malpractice",
-    message: "[Grievance Status/Role]: Others\n[Name]: Priya Shetty\n[Gender]: Female\n[Address]: 45 Harbour View, Mangalore\n[Pincode]: 575001\n[Country]: India\n[State]: Karnataka\n[Contact]: 9741008899\n\n[Grievance details]:\nCargo documentation of B/L BOL-TEX-4455 was processed incorrectly — declared weight was entered as 1500 MT instead of 1050 MT. The error was discovered at final billing stage. Request correction and audit.",
-    date: new Date(Date.now() - 3600000 * 48).toISOString(),
-    is_escalated_to_chairman: false,
-    severity_level: "Medium",
-    sla_status: "Resolved",
-    sla_deadline: new Date(Date.now() - 3600000 * 48 + 3600000 * 72).toISOString(),
-    escalated_to_chairman: false
-  },
-  {
-    id: 5,
-    email: "whistleblower@secure.nmpa.gov",
-    subject: "Corruption/Bribery",
-    message: "[Grievance Status/Role]: Others\n[Name]: Anonymous\n[Gender]: Male\n[Address]: N/A\n[Pincode]: N/A\n[Country]: India\n[State]: Karnataka\n[Contact]: N/A\n\n[Grievance details]:\nA port officer at Gate-1 was seen accepting a cash payment from a truck driver in exchange for expedited clearance, bypassing standard inspection protocols. This was witnessed at approximately 11:30 AM on the reported date.",
-    date: new Date(Date.now() - 3600000 * 96).toISOString(),
-    is_escalated_to_chairman: false,
-    severity_level: "Critical",
-    sla_status: "SLA Breached",
-    sla_deadline: new Date(Date.now() - 3600000 * 96 + 3600000 * 72).toISOString(),
-    escalated_to_chairman: true,
-    is_escalated_to_chairman: true
   }
 ];
 
-const DEFAULT_CHAIRMAN_COMPLAINTS = [
-  {
-    id: 1,
-    email: "auth99@nmpa.gov",
-    category: "Unregistered Vessel In Anchorage Area",
-    description: "An unregistered merchant ship (without transponding AIS signals) was observed waiting outside the harbor limits. Local Port Security and Coast Guard have been alerted.",
-    severity_level: "High",
-    date: new Date(Date.now() - 3600000 * 3).toISOString(),
-    is_escalated_to_chairman: true,
-    sla_status: "Resolved",
-    sla_deadline: new Date(Date.now() - 3600000 * 3 + 3600000 * 72).toISOString(),
-    escalated_to_chairman: true
-  },
-  {
-    id: 2,
-    email: "whistleblower@secure.nmpa.gov",
-    category: "[SLA BREACH] Corruption/Bribery",
-    description: "[Grievance Status/Role]: Others\n[Name]: Anonymous\n[Contact]: N/A\n\n[Grievance details]:\nA port officer at Gate-1 was seen accepting a cash payment from a truck driver in exchange for expedited clearance, bypassing standard inspection protocols.",
-    severity_level: "Critical",
-    date: new Date(Date.now() - 3600000 * 24).toISOString(),
-    is_escalated_to_chairman: true,
-    sla_status: "Under Investigation",
-    sla_deadline: new Date(Date.now() - 3600000 * 96 + 3600000 * 72).toISOString(),
-    escalated_to_chairman: true,
-    origin_complaint_id: 5
-  },
-  {
-    id: 3,
-    email: "security@nmpa.gov",
-    category: "Severe Misconduct",
-    description: "Supervisor on Night Shift (Berth 4) was found sleeping on duty and did not conduct mandatory hourly rounds during the 0200–0400 window. Reported by CCTV review team.",
-    severity_level: "High",
-    date: new Date(Date.now() - 3600000 * 18).toISOString(),
-    is_escalated_to_chairman: true,
-    sla_status: "Pending",
-    sla_deadline: new Date(Date.now() - 3600000 * 18 + 3600000 * 72).toISOString(),
-    escalated_to_chairman: true
-  }
-];
+const DEFAULT_CHAIRMAN_COMPLAINTS = [];
 
 
 // AI RMS Assess logic in JS
@@ -646,9 +559,18 @@ export function initLocalDb() {
   let users = getStore("nmpa_users", DEFAULT_USERS);
   let usersUpdated = false;
   users = users.map(u => {
-    if (u.username === "Admin99") {
-      u.username = "preethamvmoolya";
-      u.email = "preethamvmoolya@nmpa.gov";
+    if (u.username === "Admin99" || u.username === "preethamvmoolya" || u.role === "system_admin") {
+      u.username = "Admin123";
+      u.email = "admin@nmpa.gov";
+      u.password = "Admin@nmpa";
+      usersUpdated = true;
+    }
+    if (u.role === "port_authority") {
+      u.password = "Auth@nmpa";
+      usersUpdated = true;
+    }
+    if (u.role === "inspector") {
+      u.password = "Inspector@nmpa";
       usersUpdated = true;
     }
     return u;
@@ -656,6 +578,10 @@ export function initLocalDb() {
   if (usersUpdated) {
     setStore("nmpa_users", users);
   }
+  
+  // Seed Ankush data to Admin Grievance Queue with 3-day SLA escalation deadline
+  setStore("nmpa_complaints", DEFAULT_COMPLAINTS);
+  setStore("nmpa_chairman_complaints", []);
   
   let inspections = getStore("nmpa_inspections", DEFAULT_INSPECTIONS);
   
@@ -746,7 +672,15 @@ export function setupLocalDbFetch() {
       if (pathname.endsWith("/api/login") && method === "POST") {
         const { username, password } = body;
         const users = getStore("nmpa_users", DEFAULT_USERS);
-        const user = users.find(u => u.username === username && u.password === password);
+        const user = users.find(u => 
+          (u.username === username || 
+           u.email === username || 
+           u.username.toLowerCase() === (username || "").toLowerCase() ||
+           (username === "Admin123" && u.role === "system_admin") ||
+           (username === "Auth123" && u.role === "port_authority") ||
+           (username === "Inspector123" && u.role === "inspector")
+          ) && u.password === password
+        );
 
         if (user) {
           if (!user.is_approved) {

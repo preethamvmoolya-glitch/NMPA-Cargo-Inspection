@@ -33,6 +33,7 @@ const printCertificate = (record, qrToken, qrDataUrl, language, t) => {
   const verifyUrl = `${window.location.origin}${import.meta.env.BASE_URL || '/'}verify-clearance?token=${encodeURIComponent(effectiveToken)}`;
   const qrImageUrl = qrDataUrl || `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}`;
   const logoUrl = `${window.location.origin}${import.meta.env.BASE_URL || '/'}nmpa-logo.png`;
+  const emblemUrl = `${window.location.origin}${import.meta.env.BASE_URL || '/'}emblem-of-india.png`;
   const timestamp = new Date().toLocaleString('en-GB').replace(',', '');
 
   const vesselName = (record.vesselName || 'N/A').toUpperCase();
@@ -249,7 +250,7 @@ const printCertificate = (record, qrToken, qrDataUrl, language, t) => {
             <img class="logo-img" src="${logoUrl}" alt="NMPA Logo" />
           </div>
           <div class="emblem-container">
-            <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iNTUwIiBoZWlnaHQ9Ijg3Ni41NSIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMTQ1LjUyIDIzMS45MiIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+RW1ibGVtIG9mIEluZGlhPC90aXRsZT48cGF0aCBkPSJtNTcuMjEzIDIxMy43NjMuNzIyIDEuOTE5aDEuNDA3Yy43MzMgMCAxLjM0Mi4xNTEgMS44MzcuNDVxLjc0My40NTQgMS41MzQgMS40ODFsMS4zMDIgMS42OTVIMjQuMzY5djEuNjQ2aDMuMTRjLjIzNS40OTQuMzcxLjk2LjM3MSAxLjM4NiAwIC43MjEtLjE1NCAxLjI1Ny0uNDA4IDEuNjY1LS40MDMtLjE3NS0uNzg2LS4zMDEtLjExMi0uMzA1LTAuMzA4IDAtLjYwMi4wOTMtLjc4Ny4yOTQtLjE4LjE5NS0uMjU4LjQ3OS0uMjU4LjgyNyAwIC42MTcuMzY1IDEuMzk2 IDEuMDY2IDIuMzc3cS41MjcuNzMxIDEuNDkzIDEuODQzYTkzIDkzIDAgMCAwIDIuMzc2IDIuNTg2bC4xMDguMTEyLjQ2MS0uNTQxLS4wODgtLjA5YTQzIDQzIDAgMCAxLTEuNS0xLjYzM3YtLjAwMmMtLjUxOC0uNi0xLjA4NC0xLjI3Ni0xLjY4Ny0yLjAxMy4zOC0uMzg4Ljc0Ny0uOTMzIDEuMTA2LTEuNjU0Ljg3OC4zMjYgMS42NzEuNTE1IDIuMzU2LjUxNS40OTQgMCAxLjE4LS4yNTQgMS45ODQtLjYzNnY0LjkxNWwxLjE1NSAxLjMyMmguNjM3di0xMC45NzJINDYuNjhjLjQwNC40LjYxNS44NjMuNjE1IDEuNDI0IDAgLjc0MS0uMjMyIDEuMjk2LS43MDMgMS43MDYtLjQ3LjQwNC0xLjE5NC42Ni0yLjE3OS43NDhsLS4xMjcuMDF2LjM3NWwuMDM3LjAzOGMxLjEzNSAxLjI3NyAyLjAzMyAyLjE0IDIuNzE2IDIuNTk4di4wMDJjLjY4NS40NTQgMS4zNjYuNjg7IDIuMDM0LjY4Ny44MTUgMCAxLjQ3Ny0uMjY0IDIuMDUtLjY2MXYyLjY1M2wxLjM5MiAxLjM5MmguNHYtMTAuOTcyaDUuMjI3djQuMTg1aC0xLjI1Yy0uMTY3IDAtLjMwNi4wMjUtLjQxNy4wOThhLjQuNCAwIDAgMC0uMTc1LjM0YzAgLjIyMS4xMjcuNDY0LjM1Ljc4N3EuMzM1LjQ4MS45OSAxLjE4OHYuMDAycS42NTYuNzAxIDEuMDg2IDEuMDU5LjIxNS4xOC4zOC4yNzZhLjYuNiAwIDAgMCAuMzEyLjEwNi40OC40OCAwIDAgMCAuNC0uMjA5Yy4wODUtLjEzMi4xMTYtLjMuMTE2LS41MDl2LTEuNWgzLjY4NHYzLjc5N2wxLjE1NCAxLjM1MmguNjM4di0xMC45NzNoOS44OTJ2Mi42NmMtLjgwMi0uNzMtMS42MTQtMS4xNTQtMi40MzUtMS4xNTQtLjQ5OCAwLTEuMDkuMTE2LTEuNzg3LjM4NC0uNjk4LjIyNC0xLjIzNy41NDQtMS42MDUuOTY3LS4zNjQuNDE4LS41NTUuODc0LS41NTUgMS4zNTQgMCAuNzI3LjQwNiAxLjQ4NSAxLjE3OCAyLjI3Ny43ODIuNzg4IDEuNTkxIDEuMTk5IDIuNDIxIDEuMTk5LjgyNSAw IDEuNzY3LS40MTUgMi43ODMtMS4wNzZ2My4wNTJsMS4xODYgMS4zMjJoLjYwNXYtMTAuOTQ0aDIuOTMzdi0xLjY4Nkg2NC45NzFsLTEuNzk3LTIuNDRjLS42NzgtLjkyNC0xLjIyNi0xLjU3Mi0xLjY1OS0xLjk1MWE0LjcgNC43IDAgMCAwLTMuMTA5LTEuMTUzem01NC4xNTQgMCAuNzIyIDEuOTE5aDEuNDA3Yy43MzIgMCAxLjM0LjE1MiAxLjgzNS40NXEuNzQzLjQ1NCAxLjUzNCAxLjQ4MWwxLjMwMyAxLjY5NUg4NC45NTR2MS42NDZoOS40MXYyLjAxN2gtNS44MjJsLjI0Mi4yMzhjMS4yMTIgMS4xOTMgMS45MjcgMi4wMDggMi4xMTQgMi4zNjZsLjAwMi4wMDJjLjIxMi4zODYuMzEuNzEuMzEuOTY1IDAgLjM1NS0uMTA2LjYyMi0uMzIzLjgzMy0uMjE3LjIwNi0uNDkuMzEtLjg0OC4zMS0uNDY1IDAtMS4wMzUtLjI5LTEuNjk3LS45MDctLjY0Mi0uNjA1LTEuMzQ0LTEuNzQ5LTIuMDgtMy40MjVsLS4wNjQtLjE0Ni0uNjIuMzcyLjA0LjEwOGMuNjI2IDEuNzU4IDIuMzQ3IDMuMTQzIDIuMTcxIDQuMTU3bC4wMDMuMDAyYy44MzEgMS4wMDggMS43MDEgMS41MzMgMi42MDQgMS41MzMuNzE3IDAgMS4zMjctLjIzNSAxLjc5Ni0uNzA0LjQ3NS0uNDc1LjcxNS0xLjA4LjcxNS0xLjc4NiAwLS43MTUtLjQyNi0xLjQ3OC0xLjE1Mi0yLjI4MWgyLjYwOXY2LjAxOGwxLjE5NiAxLjNoLjYwNHYtMTAuOTczaDUuNjA2Yy40MDMuNC42MTMuODY4LjYxMyAxLjQyNSAwIC43NC0uMjMgMS4yOTUtLjcwMiAxLjcwNS0uNDcuNDA4LTEuMTkzLjY2LTIuMTc4Ljc0OGwtLjEyNy4wMTF2LjM3NGwuMDM2LjAzOWMxLjEzNSAxLjI3NiAyLjAzNCAyLjE0IDIuNzE2IDIuNTk3di4wMDJjLjY4Ni40NTQgMS4zNjYuNjg4IDIuMDM1LjY4OC44MTQgMCAxLjQ3Ni0uMjY1IDIuMDUtLjY2MnYyLjY1M2wxLjM5MiAxLjM5M2guNHYtMTAuOTczaDkuNzY2djIuMDE3aC0zLjI5MmMtMS4wMSAwLTEuNzUyLjIyMi0yLjE5NS43LS40My40NjYtLjY0NSAxLjA4My0uNjQ1IDEuODI5IDAgLjg3Ni4yNjQgMS43NDkuNzgyIDIuNjA4LjUyMi44NjUgMS41OTMgMi4wODUgMy4yMjMgMy42ODNsLjA5NC4wOTIuNTMtLjQ5Ni0uMS0uMTAxcS0xLjc1MS0xLjgwMS0yLjUyLTIuOTA1Yy0uNTA0LS43My0uNzQ1LTEuMzk1LS43NDUtMS45OTQgMC0uNTY2LjE4Mi0uOTg1LjU1Ni0xLjMuMzYtLjMwMyAxLjA0Ny0uNDc5IDIuMDYtLjQ3OWgyLjI1MnY1Ljk5N2wxLjEzNyAxLjMyMWguNjU0di0xMC45NzJoMi45MzN2LTEuNjQ2aC0zLjM3bC0xLjc5Ny0yLjQ0Yy0uNjc3LS45MjQtMS4yMjUtMS41NzItMS42NTgtMS45NTFoLS4wMDJhNC43IDQuNyAwIDAgMC0zLjEwNy0xLjE1M3ptLTgyLjM1NiA3LjE5aDMuOTcxdjIuNzA1YzAgLjMzNy0uMTQ4LjYzNS0uNDczLjkxOC0uMzE4LjI3LS43NDcuNDEtMS4zMDkuNDEtLjUzMSAwLTEuMjU4LS4xNjMtMi4xMi0uNDUxLjE1LS42Ny4yNDUtMS4yNjguMjQ1LTEuNzUzIDAtLjY1LS4xMjQtMS4yNTItLjMxNC0xLjgyOG0xOC42NTUgMGgzLjQ2djMuMTk4YzAgLjgyOC0uMDcz IDEuMzg2LS4xODIgMS42My0uMTA3LjI0Mi0uNDIyLjU1OC0uOTUxLjkwNWgtLjAwMmMtLjUxMi4zNC0xLjA3LjUwNy0xLjY4Ny41MDctLjMyNiAwLS42ODQtLjA5NC0xLjA3NC0uMjkyLS4zMzMtLjE3Mi0uNzAyLS40NjEtMS4wODUtLjc5My44MTgtLjIyNiAxLjUxOS0uNTIzIDEuOTYxLS45ODQuNS0uNTIuNzUyLTEuMTg4Ljc1Mi0xLjk3NCAwLS44Ni0uNDQ4LTEuNTg2LTEuMTkyLTIuMTk2bTEyLjI3IDBoMy42ODR2NC4xODZoLTMuNjg0Wm00Mi44MTggMGgzLjQ2djMuMTk4YzAgLjgyOC0uMDczIDEuMzg2LS4xODIgMS42My0uMTA3LjI0Mi0uNDIyLjU1OC0uOTUxLjkwNWgtLjAwMmMtLjUxMi4zNC0xLjA3LjUwNy0xLjY4Ny41MDctLjMyNiAwLS42ODQtLjA5NC0xLjA3NC0uMjkyLS4zMzItLjE3Mi0uNzAyLS40NjEtMS4wODUtLjc5My44MTgtLjIyNiAxLjUyLS41MjMgMS45NjItLjk4NC40OTktLjUyLjc1Mi0xLjE4OC43NTItMS45NzQgMC0uODYtLjQ0OC0xLjU4Ny0xLjE5Mi0yLjE5NnptLTYxLjUxNiAyLjAxOGMtMS4wMSAwLTEuNzUyLjIyMi0yLjE5NS43LS40MzEuNDY2LS42NDUgMS4wODMtLjY0NSAxLjgyOSAwIC44NzYuMjY0IDEuNzQ5Ljc4MiAyLjYwOC41MjIuODY1IDEuNTkzIDIuMDg1IDMuMjIzIDMuNjgzbC4wOTYuMDkyLjUyOS0uNDk3LS4wOTktLjFxLTEuNzUyLTEuODAxLTIuNTIyLTIuOTA1Yy0uNTA4LS43My0uNzQ2LTEuMzk1LS43NDYtMS45OTQgMC0uNTY2LjE4Mi0uOTg1LjU1Ny0xLjMuMzYtLjMwMyAxLjA0Ny0uNDc5IDIuMDYtLjQ3OWgxLjk4di0xLjYzN3ptMzIuNTQ3IDEuMTA2Yy41IDAgMS4wMDUuMTk4IDEuNTIuNTYxdi4zN2MtLjAyLjEwOS0uMTQ3LjMwMi0uNDE4LjUzM3MtLjY2My41MDUtMS4xODUuODE4Yy0xLjA0Ny42MTMtMS43OTUuOTA3LTIuMTY2LjkwNy0uMzQ1IDAtLjYzNi0uMTE5LS44OTYtLjM2NmwtLjAwMi0uMDAyYTEuMjMgMS4yMyAwIDAgMS0uMzgtLjkzYzAtLjIyMi4wODUtLjQzMy4yNzktLjY0Ny4xOTMtLjIxMy40OTMtLjQyNy45MDQtLjYyN2guMDAycTEuMjQtLjYxMyAyLjMzOC0uNjEyeiIgc3R5bGU9Ii1pbmtzY2FwZS1zdHJva2U6bm9uZSIvPjwvc3ZnPg==" alt="National Emblem" class="emblem-img" />
+            <img src="${emblemUrl}" alt="National Emblem" class="emblem-img" />
           </div>
 
           <div class="qr-code-container">
@@ -689,23 +690,28 @@ const PortAuthority = () => {
       title: t('tblBlRef'),
       dataIndex: 'manifestId',
       key: 'manifestId',
-      render: (text) => <Text strong>{text}</Text>
+      width: 120,
+      render: (text) => <Text strong style={{ fontSize: '0.82rem' }}>{text}</Text>
     },
     {
       title: t('tblVesselName'),
       dataIndex: 'vesselName',
       key: 'vesselName',
-      render: (text) => text || '—'
+      width: 130,
+      render: (text) => <Text style={{ fontSize: '0.82rem' }}>{text || '—'}</Text>
     },
     {
       title: t('tblCommodity'),
       dataIndex: 'cargoType',
       key: 'cargoType',
+      width: 150,
+      render: (text) => <Text style={{ fontSize: '0.82rem' }}>{text}</Text>
     },
     {
-      title: t('tblRmsMemo') + ' (' + (language === 'en' ? 'Risk Level' : 'जोखिम स्तर') + ')',
+      title: language === 'en' ? 'RMS Risk Level' : 'आरएमएस जोखिम स्तर',
       dataIndex: 'rmsRiskLevel',
       key: 'rmsRiskLevel',
+      width: 120,
       render: (level) => {
         let color = 'green';
         let riskText = level || 'ROUTINE RISK';
@@ -713,29 +719,30 @@ const PortAuthority = () => {
         else if (level === 'ELEVATED RISK') { color = 'orange'; riskText = t('riskElevated'); }
         else if (level === 'ROUTINE RISK') { riskText = t('riskRoutine'); }
         return (
-          <Tag color={color} style={{ fontWeight: 'bold' }}>
+          <Tag color={color} style={{ fontWeight: 'bold', fontSize: '10px' }}>
             {riskText}
           </Tag>
         );
       }
     },
     {
-      title: t('tblRmsMemo') + ' (' + (language === 'en' ? 'Details' : 'विवरण') + ')',
+      title: language === 'en' ? 'RMS Details' : 'आरएमएस विवरण',
       dataIndex: 'rmsAnalysisMemo',
       key: 'rmsAnalysisMemo',
+      width: 250,
       render: (memo) => {
         let memoContent = memo || 'No RMS memo available';
         if (memo && memo.trim().startsWith('{')) {
           try {
             const parsed = JSON.parse(memo);
             memoContent = (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 <div>
-                  <span style={{ fontWeight: 'bold', color: '#096dd9' }}>TRIGGER: </span>
-                  <Tag color="cyan" style={{ fontSize: '10px', padding: '1px 5px', height: '18px', lineHeight: '14px', borderRadius: '3px', fontWeight: 600 }}>{parsed.primary_trigger}</Tag>
-                  <span style={{ color: '#888', fontSize: '0.75rem' }}> ({Math.round((parsed.confidence_score || 0) * 100)}% conf)</span>
+                  <span style={{ fontWeight: 'bold', color: '#096dd9', fontSize: '0.72rem' }}>TRIGGER: </span>
+                  <Tag color="cyan" style={{ fontSize: '9px', padding: '0 4px', height: '16px', lineHeight: '14px', borderRadius: '3px', fontWeight: 600 }}>{parsed.primary_trigger}</Tag>
+                  <span style={{ color: '#888', fontSize: '0.7rem' }}> ({Math.round((parsed.confidence_score || 0) * 100)}% conf)</span>
                 </div>
-                <div style={{ fontSize: '0.78rem', color: '#666', lineHeight: '1.3' }}>
+                <div style={{ fontSize: '0.75rem', color: '#666', lineHeight: '1.2' }}>
                   <span style={{ fontWeight: 'bold' }}>Focus:</span> {parsed.inspection_focus}
                 </div>
               </div>
@@ -744,17 +751,18 @@ const PortAuthority = () => {
             // fallback
           }
         }
-        return typeof memoContent === 'string' ? <Text style={{ fontSize: '0.82rem' }}>{memoContent}</Text> : memoContent;
+        return typeof memoContent === 'string' ? <Text style={{ fontSize: '0.78rem' }}>{memoContent}</Text> : memoContent;
       }
     },
     {
       title: t('tblAction'),
       key: 'action',
+      width: 170,
       render: (_, record) => (
-        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+        <Space direction="vertical" size={4} style={{ width: '100%' }}>
           <Button 
             type="default" 
-            style={{ fontSize: '0.8rem', height: 'auto', padding: '4px 8px' }}
+            style={{ fontSize: '0.72rem', height: '26px', padding: '2px 6px' }}
             onClick={() => handleReviewDossier(record)}
             block
           >
@@ -762,7 +770,7 @@ const PortAuthority = () => {
           </Button>
           <Button 
             type="primary" 
-            style={{ backgroundColor: '#52c41a', borderColor: '#52c41a', fontSize: '0.8rem', height: 'auto', padding: '4px 8px' }}
+            style={{ backgroundColor: '#52c41a', borderColor: '#52c41a', fontSize: '0.72rem', height: '26px', padding: '2px 6px' }}
             onClick={() => handleQuickAction(record.id, 'Port Clearance Granted')}
             block
           >
@@ -771,7 +779,7 @@ const PortAuthority = () => {
           <Button 
             type="primary" 
             danger 
-            style={{ fontSize: '0.8rem', height: 'auto', padding: '4px 8px' }}
+            style={{ fontSize: '0.72rem', height: '26px', padding: '2px 6px' }}
             onClick={() => handleQuickAction(record.id, 'Clearance Denied - Detained for Physical Audit')}
             block
           >
@@ -839,7 +847,7 @@ const PortAuthority = () => {
                       loading={loading}
                       rowKey="id"
                       pagination={{ pageSize: 8 }}
-                      scroll={{ x: 'max-content' }}
+                      scroll={{ x: '100%' }}
                     />
                   </div>
                 </div>
@@ -916,7 +924,7 @@ const PortAuthority = () => {
                       loading={loading}
                       rowKey="id"
                       pagination={{ pageSize: 8 }}
-                      scroll={{ x: 'max-content' }}
+                      scroll={{ x: '100%' }}
                     />
                   </div>
                 </div>
@@ -1006,7 +1014,7 @@ const PortAuthority = () => {
                       loading={loading}
                       rowKey="id"
                       pagination={{ pageSize: 8 }}
-                      scroll={{ x: 'max-content' }}
+                      scroll={{ x: '100%' }}
                     />
                   </div>
                 </div>
@@ -1125,7 +1133,13 @@ const PortAuthority = () => {
                   <Title level={4} style={{ marginBottom: '15px' }}>{t('allVesselLedgerTitle')}</Title>
                   <div className="table-responsive-wrapper">
                     <Table
-                      dataSource={inspectedCargoList}
+                      dataSource={inspectedCargoList.filter(record => 
+                        record.status === 'Port Clearance Granted' || 
+                        record.status === 'Approved' || 
+                        record.status === 'Clearance Denied - Detained for Physical Audit' || 
+                        record.status === 'Rejected' || 
+                        record.qrToken
+                      )}
                       columns={[
                         {
                           title: t('tblBlRef'),

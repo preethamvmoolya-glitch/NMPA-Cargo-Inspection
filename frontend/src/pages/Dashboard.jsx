@@ -312,6 +312,25 @@ const Dashboard = () => {
     return <Tag color={color} style={{ margin: 0, fontSize: '10px', padding: '1px 5px', height: '18px', lineHeight: '14px', borderRadius: '3px', fontWeight: 600 }}>{t(statusKey)}</Tag>;
   };
 
+  const formatDateTime = (val) => {
+    if (!val) return '—';
+    try {
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return String(val);
+      return d.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      }).toUpperCase();
+    } catch (e) {
+      return String(val);
+    }
+  };
+
   // Table Columns Setup
   const tableColumns = [
     {
@@ -340,7 +359,11 @@ const Dashboard = () => {
       title: t('tblArrivalTime'),
       dataIndex: 'arrivalTime',
       key: 'arrivalTime',
-      render: (time) => time ? new Date(time).toLocaleString() : '—'
+      render: (time) => (
+        <Text style={{ fontSize: '0.82rem', fontWeight: 500 }}>
+          {formatDateTime(time)}
+        </Text>
+      )
     },
     {
       title: t('tblAction'),
@@ -542,7 +565,7 @@ const Dashboard = () => {
             children: (
               <Row gutter={24}>
                 <Col xs={24} md={8}>
-                  <Card title={t('igmRegistry')} size="small" style={{ marginBottom: '20px' }}>
+                  <Card title={t('igmRegistry')} size="small" className="independent-scroll-card" style={{ marginBottom: '20px' }}>
                     <Form layout="vertical" form={newCargoForm} onFinish={handleCreateCargo} autoComplete="off">
                       <Form.Item name="vesselImo" label={t('vesselImo')} rules={[{ required: true, message: t('valImoRequired') }]}>
                         <Input placeholder="e.g. IMO 9497268" disabled={isSubmitting} autoComplete="off" />
@@ -581,7 +604,7 @@ const Dashboard = () => {
                   </Card>
                 </Col>
                 <Col xs={24} md={16}>
-                  <Card title={t('submissionLogsStatus')} size="small">
+                  <Card title={t('submissionLogsStatus')} size="small" className="independent-scroll-card">
                     <Table 
                       dataSource={allCargo} 
                       columns={historyColumns} 

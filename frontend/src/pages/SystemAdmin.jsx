@@ -210,6 +210,25 @@ const SystemAdmin = () => {
     setSearchParams({ tab: String(parseInt(key) - 1) });
   };
 
+  const formatDateTime = (val) => {
+    if (!val) return '—';
+    try {
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return String(val);
+      return d.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      }).toUpperCase();
+    } catch (e) {
+      return String(val);
+    }
+  };
+
   const [users, setUsers] = useState([]);
   const [logs, setLogs] = useState([]);
   const [inspections, setInspections] = useState([]);
@@ -614,22 +633,25 @@ const SystemAdmin = () => {
               children: (
                 <div>
                   <Title level={4} style={{ marginBottom: '20px' }}>{t('securityLogTitle')}</Title>
-                  {/* Fixed-height scrolling container */}
-                  <div style={{ height: '400px', overflowY: 'auto', border: '1px solid #f0f0f0', borderRadius: '4px' }}>
-                    <div className="table-responsive-wrapper">
-                      <Table 
-                        dataSource={logs} 
-                        loading={loading}
-                        pagination={false} 
-                        sticky
-                        rowKey="id"
-                        scroll={{ x: 'max-content' }}
+                  <div className="table-responsive-wrapper">
+                    <Table 
+                      dataSource={logs} 
+                      loading={loading}
+                      pagination={false} 
+                      rowKey="id"
+                      scroll={{ y: 420, x: '100%' }}
+                      bordered
                       columns={[
                         {
                           title: t('logTimestamp'),
                           dataIndex: 'timestamp',
                           key: 'timestamp',
-                          width: '20%'
+                          width: '22%',
+                          render: (val) => (
+                            <Text style={{ fontFamily: 'monospace', fontSize: '0.82rem', fontWeight: 600, color: 'var(--nmpa-text)' }}>
+                              {formatDateTime(val)}
+                            </Text>
+                          )
                         },
                         {
                           title: t('logActorRole'),
@@ -656,13 +678,12 @@ const SystemAdmin = () => {
                           title: t('logMetadata'),
                           dataIndex: 'details',
                           key: 'details',
-                          width: '30%',
+                          width: '28%',
                           render: (text) => <Text type="secondary">{text}</Text>
                         }
                       ]}
                     />
                   </div>
-                </div>
               </div>
               )
             },
@@ -834,10 +855,10 @@ const SystemAdmin = () => {
                     items={[
                       {
                         key: 'standard',
-                        label: 'Standard Grievance Queue',
+                        label: 'Admin Grievance Queue',
                         children: (
                           <div style={{ marginTop: '15px' }}>
-                            <Title level={4} style={{ marginBottom: '20px' }}>Standard Grievance Queue</Title>
+                            <Title level={4} style={{ marginBottom: '20px' }}>Admin Grievance Queue</Title>
                             {(() => {
                               const sortedComplaints = [...complaints].sort((a, b) => {
                                 const aBreached = a.sla_status === 'SLA Breached';
@@ -896,10 +917,10 @@ const SystemAdmin = () => {
                                       key: 'sla_status',
                                       width: '10%',
                                       render: (status) => {
-                                        if (status === 'SLA Breached') return <Tag color="red" style={{ fontWeight: 'bold' }}>🚨 BREACHED</Tag>;
-                                        if (status === 'Under Investigation') return <Tag color="orange" style={{ fontWeight: 'bold' }}>🔍 INVESTIGATING</Tag>;
-                                        if (status === 'Resolved') return <Tag color="green" style={{ fontWeight: 'bold' }}>✅ RESOLVED</Tag>;
-                                        return <Tag color="blue" style={{ fontWeight: 'bold' }}>⏳ PENDING</Tag>;
+                                        if (status === 'SLA Breached') return <Tag color="red" style={{ fontWeight: 'bold' }}>BREACHED</Tag>;
+                                        if (status === 'Under Investigation') return <Tag color="orange" style={{ fontWeight: 'bold' }}>INVESTIGATING</Tag>;
+                                        if (status === 'Resolved') return <Tag color="green" style={{ fontWeight: 'bold' }}>RESOLVED</Tag>;
+                                        return <Tag color="blue" style={{ fontWeight: 'bold' }}>PENDING</Tag>;
                                       }
                                     },
                                     {
@@ -965,11 +986,11 @@ const SystemAdmin = () => {
                       },
                       {
                         key: 'chairman',
-                        label: '⚠️ Secure Chairman\'s Office Inbox',
+                        label: 'Chairman Office Inbox',
                         children: (
                           <div style={{ marginTop: '15px' }}>
-                            <Title level={4} style={{ marginBottom: '20px', color: '#d9534f' }}>
-                              ⚠️ Secure Chairman's Office Inbox (Direct Escalations)
+                            <Title level={4} style={{ marginBottom: '20px', color: '#1565C0' }}>
+                              Chairman Office Inbox (Direct Escalations)
                             </Title>
                             <div className="table-responsive-wrapper">
                               <Table 

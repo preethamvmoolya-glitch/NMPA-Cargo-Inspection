@@ -498,18 +498,18 @@ const Login = () => {
         <div className="login-right animate-slide-in">
           {/* Form Brand Header */}
           <div className="login-logo-wrap" style={{ marginBottom: '1.25rem' }}>
-            <h1 className="login-brand-heading">
+            <h1 className="login-brand-heading" style={{ fontSize: '1.5rem' }}>
               {t('loginTitle').toUpperCase()}
             </h1>
           </div>
 
           {/* Error */}
-          {error && <div className="error-box">{error}</div>}
+          {error && <div className="error-box" style={{ marginBottom: '0.85rem', padding: '0.45rem 0.75rem', fontSize: '0.82rem' }}>{error}</div>}
 
           <form onSubmit={handleInitialLogin} style={{ width: '100%' }}>
             {/* Username */}
-            <div className="input-group">
-              <label>{t('username')}</label>
+            <div className="input-group" style={{ marginBottom: '0.95rem' }}>
+              <label style={{ fontSize: '0.75rem', marginBottom: '0.35rem', fontWeight: 700 }}>{t('username')}</label>
               <input
                 id="login-username"
                 type="text"
@@ -519,12 +519,13 @@ const Login = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="off"
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.88rem' }}
               />
             </div>
 
             {/* Password */}
-            <div className="input-group">
-              <label>{t('password')}</label>
+            <div className="input-group" style={{ marginBottom: '0.95rem' }}>
+              <label style={{ fontSize: '0.75rem', marginBottom: '0.35rem', fontWeight: 700 }}>{t('password')}</label>
               <div style={{ position: 'relative' }}>
                 <input
                   id="login-password"
@@ -534,7 +535,7 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="off"
-                  style={{ paddingRight: '2.5rem' }}
+                  style={{ padding: '0.5rem 2.5rem 0.5rem 0.75rem', fontSize: '0.88rem' }}
                 />
                 <button
                   type="button"
@@ -561,18 +562,18 @@ const Login = () => {
             </div>
 
             {/* Captcha */}
-            <div className="input-group" style={{ marginBottom: '1.25rem' }}>
-              <label>{t('enterCaptcha')}</label>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <div className="input-group" style={{ marginBottom: '1rem' }}>
+              <label style={{ fontSize: '0.75rem', marginBottom: '0.35rem', fontWeight: 700 }}>{t('enterCaptcha')}</label>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.45rem' }}>
                 <div style={{
                   background: 'repeating-linear-gradient(45deg, #f0f0f0, #e0e0e0 10px, #d0d0d0 10px, #d0d0d0 20px)',
                   color: '#0d2b5e',
                   fontFamily: 'monospace, Courier',
-                  fontSize: '1.3rem',
+                  fontSize: '1.25rem',
                   fontWeight: 'bold',
                   fontStyle: 'italic',
-                  letterSpacing: '0.3em',
-                  padding: '0.45rem 1rem',
+                  letterSpacing: '0.25em',
+                  padding: '0.4rem 0.85rem',
                   borderRadius: '0.25rem',
                   border: '1.5px solid var(--nmpa-border-dark)',
                   userSelect: 'none',
@@ -591,7 +592,7 @@ const Login = () => {
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  style={{ padding: '0.45rem 0.75rem', fontSize: '0.85rem' }}
+                  style={{ padding: '0.4rem 0.75rem', fontSize: '0.82rem' }}
                   onClick={refreshCaptcha}
                   title="Refresh Captcha"
                 >
@@ -606,80 +607,59 @@ const Login = () => {
                 value={captchaInput}
                 onChange={(e) => setCaptchaInput(e.target.value)}
                 autoComplete="off"
+                style={{ padding: '0.5rem 0.75rem', fontSize: '0.88rem' }}
               />
             </div>
 
+            {/* Login Button */}
             <button id="login-submit" type="submit" className="btn btn-primary btn-full"
-              style={{ fontSize: '0.9rem', padding: '0.55rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              style={{ fontSize: '0.9rem', padding: '0.55rem', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: '0.2rem' }}>
               {t('loginBtn')}
             </button>
 
-            {/* Quick Demo Accounts Selection */}
-            <div style={{
-              marginTop: '0.75rem',
-              padding: '0.6rem 0.75rem',
-              background: 'rgba(21, 101, 192, 0.04)',
-              border: '1.5px dashed var(--nmpa-border-dark)',
-              borderRadius: '0.35rem',
-              textAlign: 'left'
-            }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--nmpa-text)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                {t('demoCreds')}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.4rem' }}>
-                {[
-                  { label: t('demoAdmin'), user: 'preethamvmoolya', pass: 'Admin@123' },
-                  { label: t('demoAuthority'), user: 'Auth99', pass: 'Auth@123' },
-                  { label: t('demoInspector'), user: 'Inspector99', pass: 'Insp@123' }
-                ].map(cred => (
-                  <button
-                    key={cred.label}
-                    type="button"
-                    onClick={() => {
-                      setUsername(cred.user);
-                      setPassword(cred.pass);
-                      setCaptchaInput(captchaCode);
-                    }}
-                    style={{
-                      background: 'var(--nmpa-white)',
-                      border: '1px solid var(--nmpa-border)',
-                      borderRadius: '0.25rem',
-                      padding: '0.35rem 0.2rem',
-                      fontSize: '0.7rem',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      color: 'var(--nmpa-text-body)',
-                      transition: 'all 0.2s',
-                      textAlign: 'center'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = 'var(--nmpa-blue-pale)';
-                      e.target.style.color = 'var(--nmpa-blue)';
-                      e.target.style.borderColor = 'var(--nmpa-blue)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = 'var(--nmpa-white)';
-                      e.target.style.color = 'var(--nmpa-text-body)';
-                      e.target.style.borderColor = 'var(--nmpa-border)';
-                    }}
-                  >
-                    {cred.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Grievance Button */}
+            {/* Grievance Button (Styled Gradient Glass Pill) */}
             <button
               type="button"
-              className="btn btn-secondary btn-full"
-              style={{ marginTop: '0.75rem', fontSize: '0.82rem' }}
               onClick={() => navigate('/grievance')}
+              style={{
+                marginTop: '0.85rem',
+                width: '100%',
+                padding: '0.55rem 1rem',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                letterSpacing: '0.03em',
+                borderRadius: '0.35rem',
+                border: '1.5px solid #1565C0',
+                background: 'linear-gradient(135deg, rgba(21, 101, 192, 0.06) 0%, rgba(30, 136, 229, 0.12) 100%)',
+                color: '#1565C0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                cursor: 'pointer',
+                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0 2px 6px rgba(21, 101, 192, 0.08)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #1565C0 0%, #1976D2 100%)';
+                e.currentTarget.style.color = '#ffffff';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(21, 101, 192, 0.25)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(21, 101, 192, 0.06) 0%, rgba(30, 136, 229, 0.12) 100%)';
+                e.currentTarget.style.color = '#1565C0';
+                e.currentTarget.style.boxShadow = '0 2px 6px rgba(21, 101, 192, 0.08)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
               Grievance Portal
             </button>
 
-            <div style={{ marginTop: '0.85rem', borderTop: '1px solid var(--nmpa-border)', paddingTop: '0.6rem', textAlign: 'center' }}>
+            <div style={{ borderTop: '1px solid var(--nmpa-border)', paddingTop: '0.85rem', marginTop: '1.25rem', textAlign: 'center' }}>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
                 {[
                   { key: 'reqAccess', text: 'Request Access' },

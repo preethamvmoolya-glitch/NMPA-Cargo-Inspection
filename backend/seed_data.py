@@ -142,9 +142,9 @@ def seed():
     # Ensure users exist
     print("Seeding demo users...")
     for username, password, email, role in [
-        ("preethamvmoolya", "Admin@123", "preethamvmoolya@nmpa.gov", "system_admin"),
-        ("Auth99", "Auth@123", "auth99@nmpa.gov", "port_authority"),
-        ("Inspector99", "Insp@123", "inspector99@nmpa.gov", "inspector")
+        ("Admin123", "Admin@nmpa", "admin@nmpa.gov", "system_admin"),
+        ("Auth99", "Auth@nmpa", "auth99@nmpa.gov", "port_authority"),
+        ("Inspector99", "Inspector@nmpa", "inspector99@nmpa.gov", "inspector")
     ]:
         user = users_col.find_one({"username": username})
         if not user:
@@ -372,7 +372,7 @@ def seed():
         {
             "action": "User Login",
             "user_role": "system_admin",
-            "details": "User preethamvmoolya logged in successfully from station terminal ADMIN-4.",
+            "details": "User Admin123 logged in successfully from station terminal ADMIN-4.",
             "timestamp": (now - datetime.timedelta(minutes=30)).strftime("%Y-%m-%d %H:%M:%S")
         }
     ])

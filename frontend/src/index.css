@@ -1265,8 +1265,8 @@ body.dark-theme .notice-ticker-view-all a:hover {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* Center content vertically */
-  padding: 1.5rem 2.25rem 1.25rem;
+  /* Centered vertical flow */
+  padding: 2.25rem;
   /* Reduced padding */
   box-shadow: -4px 0 20px rgba(13, 43, 94, 0.1);
   overflow: hidden;
@@ -2740,3 +2740,39 @@ body.dark-theme .not-found-icon-wrap {
     margin-bottom: 4px;
   }
 }
+
+/* ─── INDEPENDENT SCROLL CONTAINERS FOR IGM REGISTRY & LOGS ─── */
+.independent-scroll-card {
+  height: calc(100vh - 230px);
+  min-height: 520px;
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.independent-scroll-card .ant-card-body {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: auto !important;
+  padding: 16px !important;
+}
+
+.independent-scroll-card .ant-card-body::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+.independent-scroll-card .ant-card-body::-webkit-scrollbar-track {
+  background: var(--nmpa-off-white);
+  border-radius: 4px;
+}
+
+.independent-scroll-card .ant-card-body::-webkit-scrollbar-thumb {
+  background: var(--nmpa-border-dark);
+  border-radius: 4px;
+}
+
+.independent-scroll-card .ant-card-body::-webkit-scrollbar-thumb:hover {
+  background: var(--nmpa-blue-mid);
+}

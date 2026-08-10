@@ -15,53 +15,90 @@ CORS(app)
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/nmpa_cargo")
 
-# Setup MongoDB Connection
+# Setup MongoDB Connection with Fallback
+class MockCollection:
+    def __init__(self, initial_data=None):
+        self.data = list(initial_data) if initial_data else []
+    def find_one(self, query=None):
+        if not query:
+            return self.data[0] if self.data else None
+        for item in self.data:
+            if isinstance(query, dict):
+                match = True
+                for k, v in query.items():
+                    if k.startswith('$') or (isinstance(v, dict) and any(str(subk).startswith('$') for subk in v.keys())):
+                        continue
+                    if item.get(k) != v:
+                        match = False
+                        break
+                if match:
+                    return item
+        return None
+    def find(self, query=None):
+        if not query:
+            return self.data
+        return self.data
+    def insert_one(self, doc):
+        if 'id' not in doc:
+            doc['id'] = len(self.data) + 1
+        self.data.append(doc)
+        return doc
+    def insert_many(self, docs):
+        for d in docs:
+            self.insert_one(d)
+    def update_one(self, query, update):
+        item = self.find_one(query)
+        if item and '$set' in update:
+            item.update(update['$set'])
+        return item
+    def delete_many(self, query=None):
+        count = len(self.data)
+        self.data = []
+        return count
+    def count_documents(self, query=None):
+        return len(self.data)
+
 try:
     if "<cluster-url>" in MONGO_URI or "<username>" in MONGO_URI:
         raise ValueError("Placeholder values found in MONGO_URI connection string.")
     
     # Try connecting with a timeout of 3 seconds
     client = pymongo.MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000)
-    # Trigger a connection check
     client.server_info()
     
     db = client.get_default_database()
     if db is None:
         db = client["nmpa_cargo"]
+    users_col = db["users"]
+    inspections_col = db["inspections"]
+    audit_logs_col = db["audit_logs"]
+    complaints_col = db["complaints"]
+    chairman_office_inbox_col = db["chairman_office_inbox"]
 except Exception as e:
     print("\n" + "="*80)
-    print(" CRITICAL ERROR: COULD NOT CONNECT TO MONGODB DATABASE")
-    print("="*80)
-    print(f"Error details: {e}")
-    print("\nTo resolve this issue:")
-    print("1. Open the backend/.env file.")
-    print("2. Replace the MONGO_URI placeholder with your actual MongoDB Atlas connection string.")
-    print("   Example: MONGO_URI=mongodb+srv://admin:secretPass@mycluster.mongodb.net/nmpa_cargo?...")
-    print("3. Restart the backend server.")
+    print(" WARNING: COULD NOT CONNECT TO MONGODB DATABASE - USING IN-MEMORY MOCK DB")
+    print(f" Error details: {e}")
+    print(" Backend server will continue running using in-memory data store.")
     print("="*80 + "\n")
-    import sys
-    sys.exit(1)
-
-# MongoDB Collections
-users_col = db["users"]
-inspections_col = db["inspections"]
-audit_logs_col = db["audit_logs"]
-complaints_col = db["complaints"]
-chairman_office_inbox_col = db["chairman_office_inbox"]
+    users_col = MockCollection()
+    inspections_col = MockCollection()
+    audit_logs_col = MockCollection()
+    complaints_col = MockCollection()
+    chairman_office_inbox_col = MockCollection()
 
 
 def init_db():
     # Seed/Reset default users to match requested credentials
     for username, password, email, role in [
-        ("preethamvmoolya", "Admin@123", "preethamvmoolya@nmpa.gov", "system_admin"),
-        ("Auth99", "Auth@123", "auth99@nmpa.gov", "port_authority"),
-        ("Inspector99", "Insp@123", "inspector99@nmpa.gov", "inspector")
+        ("Admin123", "Admin@nmpa", "admin@nmpa.gov", "system_admin"),
+        ("Auth99", "Auth@nmpa", "auth99@nmpa.gov", "port_authority"),
+        ("Inspector99", "Inspector@nmpa", "inspector99@nmpa.gov", "inspector")
     ]:
-        user = users_col.find_one({"username": username})
+        user = users_col.find_one({"role": role}) if role == "system_admin" else users_col.find_one({"username": username})
         if user:
             users_col.update_one(
                 {"_id": user["_id"]},
-                {"$set": {"password": password, "email": email, "role": role, "is_approved": True}}
+                {"$set": {"username": username, "password": password, "email": email, "role": role, "is_approved": True}}
             )
         else:
             users_col.insert_one({
@@ -74,8 +111,24 @@ def init_db():
                 "last_login": None
             })
             
-    # Clean up legacy default users
-    users_col.delete_many({"username": {"$in": ["sysadmin", "auth1", "inspector1"]}})
+    # Clean up legacy default users & reset complaints queues as requested
+    users_col.delete_many({"username": {"$in": ["sysadmin", "auth1", "inspector1", "preethamvmoolya"]}})
+    complaints_col.delete_many({})
+    chairman_office_inbox_col.delete_many({})
+    
+    # Seed Ankush data in Admin Grievance Queue with 3-day (72h) SLA deadline
+    now_dt = datetime.datetime.now()
+    complaints_col.insert_one({
+        "inspector_email": "ankush123@gmail.com",
+        "subject": "OPERATIONAL BOTTLENECK",
+        "message": "[Grievance Status/Role]: Port User\n[Name]: Ankush\n[Gender]: Male\n[Address]: Port Administrative Block, Panambur\n[Pincode]: 575010\n[Country]: India\n[State]: Karnataka\n[Contact]: 9876543210\n\n[Grievance details]:\nOperational bottleneck observed at container handling terminal Gate 4. Processing delay is causing truck queues.",
+        "is_escalated_to_chairman": False,
+        "severity_level": "High",
+        "timestamp": now_dt.strftime("%Y-%m-%d %H:%M:%S"),
+        "sla_status": "Pending",
+        "sla_deadline": (now_dt + datetime.timedelta(hours=72)).strftime("%Y-%m-%d %H:%M:%S"),
+        "escalated_to_chairman": False
+    })
     
     # Recalculate/migrate all existing inspections to use the new 3x3 risk matrix
     for doc in inspections_col.find():
