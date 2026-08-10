@@ -301,45 +301,18 @@ def seed():
     # Seed Complaints
     print("Seeding grievances...")
     
-    # 1. Standard Pending complaint within SLA
-    complaint_timestamp_1 = now - datetime.timedelta(hours=6)
+    # 1. Ankush Grievance in Admin Grievance Queue (within 72h SLA)
+    complaint_timestamp_1 = now
     complaints_col.insert_one({
-        "inspector_email": "inspector99@nmpa.gov",
-        "subject": "Weighbridge Calibration Variance",
-        "message": "Weighbridge #3 is showing a deviation of +5kg per Metric Ton compared to weighbridge #1. Needs urgent maintenance recalibration.",
+        "inspector_email": "ankush123@gmail.com",
+        "subject": "OPERATIONAL BOTTLENECK",
+        "message": "[Grievance Status/Role]: Port User\n[Name]: Ankush\n[Gender]: Male\n[Address]: Port Administrative Block, Panambur\n[Pincode]: 575010\n[Country]: India\n[State]: Karnataka\n[Contact]: 9876543210\n\n[Grievance details]:\nOperational bottleneck observed at container handling terminal Gate 4. Processing delay is causing truck queues.",
         "is_escalated_to_chairman": False,
-        "severity_level": "Medium",
+        "severity_level": "High",
         "timestamp": complaint_timestamp_1.strftime("%Y-%m-%d %H:%M:%S"),
         "sla_status": "Pending",
         "sla_deadline": (complaint_timestamp_1 + datetime.timedelta(hours=72)).strftime("%Y-%m-%d %H:%M:%S"),
         "escalated_to_chairman": False
-    })
-
-    # 2. Expired/Breached Pending complaint to verify automatic background escalation
-    complaint_timestamp_2 = now - datetime.timedelta(hours=80)
-    complaints_col.insert_one({
-        "inspector_email": "inspector99@nmpa.gov",
-        "subject": "Late Port Gate Dues Discrepancy",
-        "message": "System shows mismatch in payment log sync for container gate pass ID GATE-8812.",
-        "is_escalated_to_chairman": False,
-        "severity_level": "High",
-        "timestamp": complaint_timestamp_2.strftime("%Y-%m-%d %H:%M:%S"),
-        "sla_status": "Pending",
-        "sla_deadline": (complaint_timestamp_2 + datetime.timedelta(hours=72)).strftime("%Y-%m-%d %H:%M:%S"),
-        "escalated_to_chairman": False
-    })
-
-    # 3. Direct Chairman complaint
-    chairman_office_inbox_col.insert_one({
-        "email": "auth99@nmpa.gov",
-        "category": "Unregistered Vessel In Anchorage Area",
-        "description": "An unregistered merchant ship (without transponding AIS signals) was observed waiting outside the harbor limits. Local Port Security and Coast Guard have been alerted.",
-        "is_escalated_to_chairman": True,
-        "severity_level": "High",
-        "timestamp": (now - datetime.timedelta(hours=3)).strftime("%Y-%m-%d %H:%M:%S"),
-        "sla_status": "Resolved",
-        "sla_deadline": (now - datetime.timedelta(hours=3) + datetime.timedelta(hours=72)).strftime("%Y-%m-%d %H:%M:%S"),
-        "escalated_to_chairman": True
     })
 
     # Seed Audit Logs
